@@ -455,7 +455,12 @@ class Exchange:
         timeframes = self._api.options.get("timeframes", {}).get(market_type)
         if timeframes is None:
             timeframes = self._api.timeframes
-        return list((timeframes or {}).keys())
+        result = list((timeframes or {}).keys())
+        # Custom resampled timeframes (research patch)
+        for extra in ("20m",):
+            if extra not in result:
+                result.append(extra)
+        return result
 
     @property
     def markets(self) -> dict[str, Any]:
