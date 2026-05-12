@@ -23,13 +23,18 @@ async def bot_summary(rpc=Depends(get_rpc)):
     lines = []
     now = datetime.now(timezone.utc)
 
+    # Access config and state from RPC internals
+    config = rpc._config
+    stake_currency = config.get("stake_currency", "USDC")
+    fiat_currency = config.get("fiat_display_currency", "")
+
     # ── Config ──
     try:
-        cfg = rpc._rpc_show_config()
-        strategy = cfg.get("strategy", "?")
-        state = cfg.get("state", "?")
-        timeframe = cfg.get("timeframe", "?")
-        lines.append(f"Strategy: {strategy} | TF: {timeframe} | State: {state}")
+        from freqtrade.enums import State
+        state = rpc._freqtrade.state
+        strategy = config.get("strategy", "?")
+        timeframe = config.get("timeframe", "?")
+        lines.append(f"Strategy: {strategy} | TF: {timeframe} | State: {state.name}")
     except Exception as e:
         logger.warning("Summary: config error: %s", e)
         lines.append("Strategy: unknown")
@@ -38,10 +43,7 @@ async def bot_summary(rpc=Depends(get_rpc)):
 
     # ── Balance ──
     try:
-        bal = rpc._rpc_balance(
-            cfg.get("stake_currency", "USDC"),
-            cfg.get("fiat_display_currency", ""),
-        )
+        bal = rpc._rpc_balance(stake_currency, fiat_currency)
         total = bal.get("total", 0)
         starting = bal.get("starting_capital", total)
         pnl = total - starting
@@ -55,10 +57,11 @@ async def bot_summary(rpc=Depends(get_rpc)):
 
     # ── Open Trades ──
     try:
-        trades = rpc._rpc_trade_status()
+        try:
+            trades = rpc._rpc_trade_status()
+        except Exception:
+            trades = []
         if not trades:
-            lines.append("Open Trades: none")
-        else:
             lines.append(f"Open Trades: {len(trades)}")
             for t in trades:
                 pair = t.get("pair", "?").split("/")[0]
@@ -120,10 +123,7 @@ async def bot_summary(rpc=Depends(get_rpc)):
 
     # ── Profit Summary ──
     try:
-        profit = rpc._rpc_trade_statistics(
-            cfg.get("stake_currency", "USDC"),
-            cfg.get("fiat_display_currency", ""),
-        )
+        profit = rpc._rpc_trade_statistics(stake_currency, fiat_currency)
         total_trades = profit.get("trade_count", 0)
         win_trades = profit.get("winning_trades", 0)
         loss_trades = profit.get("losing_trades", 0)
@@ -139,11 +139,14 @@ async def bot_summary(rpc=Depends(get_rpc)):
     # ── What to expect ──
     lines.append("")
     try:
-        trades_open = rpc._rpc_trade_status()
+        try:
+            trades_open = rpc._rpc_trade_status()
+        except Exception:
+            trades_open = []
         if trades_open:
             lines.append("Watching: exit conditions on open positions")
         else:
-            lines.append("Watching: waiting for entry signals (spread_z crossing ±2.1)")
+            lines.append("Watching: waiting for entry signals")
     except Exception:
         pass
 
