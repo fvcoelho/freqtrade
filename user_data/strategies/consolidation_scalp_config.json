@@ -1,0 +1,68 @@
+{
+    "_comment": "Consolidation Scalp — BTC mean-reversion in range-bound markets",
+    "pair": "BTC/USDT:USDT",
+    "timeframe": "5m",
+    "startup_candle_count": 200,
+    "stake_per_position": 400.0,
+    "max_open_trades": 1,
+
+    "level_engine": "order_blocks",
+
+    "consolidation": {
+        "atr_period": 14,
+        "atr_zscore_window": 96,
+        "atr_zscore_max": 0.0,
+        "range_window": 96,
+        "range_pct_max": 0.035,
+        "momentum_window": 12,
+        "momentum_max": 0.012,
+        "volume_zscore_window": 96,
+        "volume_zscore_range": [-2.0, 2.0],
+        "breakout_atr_z": 1.5,
+        "breakout_momentum": 0.02
+    },
+
+    "order_blocks": {
+        "volume_mult": 1.5,
+        "volume_ma_window": 20,
+        "move_threshold": 0.003,
+        "move_candles": 3,
+        "expiry_candles": 48,
+        "max_touches": 2,
+        "wick_ratio": 0.6
+    },
+
+    "pivot_fractal": {
+        "fractal_window": 5,
+        "cluster_pct": 0.0015,
+        "min_touches": 2,
+        "proximity_pct": 0.001
+    },
+
+    "rolling_minmax": {
+        "base_window": 48,
+        "proximity_pct": 0.0015
+    },
+
+    "entries": {
+        "cooldown_candles": 6,
+        "require_confirmation": true
+    },
+
+    "exits": {
+        "stoploss": -0.005,
+        "tp_partial_pct": 0.003,
+        "tp_partial_ratio": 0.5,
+        "trailing_activate": 0.004,
+        "trailing_distance": 0.002,
+        "time_stop_candles": 36,
+        "breakout_atr_z": 1.5,
+        "breakout_momentum": 0.02
+    },
+
+    "leverage": {
+        "min_leverage": 2,
+        "max_leverage": 6,
+        "range_pct_max": 0.035
+    }
+}
