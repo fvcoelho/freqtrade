@@ -3,7 +3,7 @@
     "pair": "BTC/USDC:USDC",
     "timeframe": "5m",
     "startup_candle_count": 200,
-    "stake_per_position": 400.0,
+    "stake_per_position": 800,
     "max_open_trades": 1,
     "btc_ref": "BTC/USDC:USDC",
     "level_engine": "order_blocks",
@@ -56,7 +56,7 @@
         "require_confirmation": true,
         "rsi_oversold": 45,
         "rsi_overbought": 65,
-        "mode": "grid",
+        "mode": "ob",
         "grid": {
             "buy_zone_top": 0.25,
             "mid_zone_top": 0.5,
@@ -81,5 +81,10 @@
         "min_leverage": 3,
         "max_leverage": 5,
         "range_pct_max": 0.035
+    },
+    "partial_stop": {
+        "enabled": false,
+        "trigger": -0.05,
+        "sell_ratio": 0.5
     }
 }

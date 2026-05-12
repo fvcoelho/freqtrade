@@ -46,11 +46,11 @@ class ConsolidationScalpStrategy(IStrategy):
     process_only_new_candles = True
     timeframe = "5m"
     startup_candle_count = 200
-    stoploss = -0.05
+    stoploss = -0.07
     minimal_roi = {}
     trailing_stop = False
-    use_custom_stoploss = False
-    position_adjustment_enable = False
+    use_custom_stoploss = True
+    position_adjustment_enable = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -132,7 +132,45 @@ class ConsolidationScalpStrategy(IStrategy):
             self._cfg, self.dp, self.timeframe, self._peak_profit,
         )
 
-    # Stoploss handled by IStrategy.stoploss (-2%) — no custom_stoploss needed
+    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
+                        current_rate: float, current_profit: float, after_fill: bool,
+                        **kwargs) -> float | None:
+        """Safety stoploss — wide net, partial stop handles the rest."""
+        return -0.07
+
+    # =========================================================================
+    # POSITION ADJUSTMENT — Partial Stop
+    # =========================================================================
+
+    def adjust_trade_position(self, trade: Trade, current_time: datetime,
+                              current_rate: float, current_profit: float,
+                              min_stake: float | None, max_stake: float,
+                              current_entry_rate: float, current_exit_rate: float,
+                              current_entry_profit: float, current_exit_profit: float,
+                              **kwargs) -> float | None:
+        """Partial stop: sell portion of position at loss threshold."""
+        ps = self._cfg.get("partial_stop", {})
+        if not ps.get("enabled", False):
+            return None
+
+        trigger = ps.get("trigger", -0.03)
+        sell_ratio = ps.get("sell_ratio", 0.5)
+
+        # Only trigger once
+        if trade.nr_of_successful_exits > 0:
+            return None
+
+        if current_profit <= trigger:
+            sell_amount = trade.stake_amount * sell_ratio
+            if min_stake and sell_amount < min_stake:
+                sell_amount = min_stake
+            logger.info(
+                "PARTIAL STOP: %s %.1f%% — selling %.0f%% ($%.2f)",
+                trade.pair, current_profit * 100, sell_ratio * 100, sell_amount,
+            )
+            return -sell_amount
+
+        return None
 
     # =========================================================================
     # LEVERAGE
