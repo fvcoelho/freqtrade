@@ -123,18 +123,25 @@ def _grid_entries(dataframe: DataFrame, cfg: dict) -> DataFrame:
     # Detect when price CROSSES DOWN through a grid level (new touch)
     # This is the grid trigger — like a limit order being filled
     grid_cross = np.zeros(len(dataframe), dtype=bool)
+    grid_level_idx = np.zeros(len(dataframe), dtype=int)  # which level was crossed
     for lv in range(n_levels):
         level = (lv + 1) * level_size  # 0.167, 0.333, 0.500
         crossed_down = (pos_in_range.shift(1) > level) & (pos_in_range <= level)
-        grid_cross = grid_cross | crossed_down.values
+        mask = crossed_down.values
+        grid_cross = grid_cross | mask
+        grid_level_idx[mask] = lv + 1
 
     # Confirmations
     bullish_candle = close > dataframe["open"]
     at_ob_support = dataframe.get("at_support", False)
 
-    # Entry logic:
-    # Grid level touch: price crossed down through a grid line + bullish candle
-    grid_signal = consolidating & safe_long & grid_cross & bullish_candle
+    # RSI filter for grid levels (must show oversold momentum)
+    rsi = dataframe["rsi"]
+    rsi_grid_threshold = grid_cfg.get("rsi_grid_level", 45)
+    rsi_ok = rsi < rsi_grid_threshold
+
+    # Grid level touch: price crossed grid line + bullish + RSI confirmation
+    grid_signal = consolidating & safe_long & grid_cross & bullish_candle & rsi_ok
 
     # OB bonus: enter at OB support anywhere in bottom half (selective)
     ob_signal = consolidating & safe_long & (pos_in_range <= mid_zone_top) & at_ob_support & bullish_candle

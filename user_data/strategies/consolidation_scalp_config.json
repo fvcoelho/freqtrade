@@ -62,7 +62,8 @@
             "mid_zone_top": 0.5,
             "rsi_buy_zone": 40,
             "n_levels": 3,
-            "use_grid_levels": false
+            "use_grid_levels": true,
+            "rsi_grid_level": 50
         }
     },
     "exits": {
