@@ -55,7 +55,15 @@
         "cooldown_candles": 6,
         "require_confirmation": true,
         "rsi_oversold": 45,
-        "rsi_overbought": 65
+        "rsi_overbought": 65,
+        "mode": "grid",
+        "grid": {
+            "buy_zone_top": 0.25,
+            "mid_zone_top": 0.5,
+            "rsi_buy_zone": 40,
+            "n_levels": 3,
+            "use_grid_levels": false
+        }
     },
     "exits": {
         "breakout_stop_enabled": false,
