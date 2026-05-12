@@ -2,6 +2,7 @@
 Public (no-auth) summary endpoint for Hermes integration.
 Returns a plain-text overview of bot status, open trades, and recent history.
 """
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
@@ -9,11 +10,13 @@ from fastapi.responses import PlainTextResponse
 
 from freqtrade.rpc.api_server.deps import get_rpc, get_rpc_optional
 
+logger = logging.getLogger(__name__)
+
 router_summary = APIRouter()
 
 
 @router_summary.get("/summary", response_class=PlainTextResponse, tags=["Summary"])
-def bot_summary(rpc=Depends(get_rpc_optional)):
+async def bot_summary(rpc=Depends(get_rpc)):
     if rpc is None:
         return "Bot is not running."
 
@@ -27,7 +30,8 @@ def bot_summary(rpc=Depends(get_rpc_optional)):
         state = cfg.get("state", "?")
         timeframe = cfg.get("timeframe", "?")
         lines.append(f"Strategy: {strategy} | TF: {timeframe} | State: {state}")
-    except Exception:
+    except Exception as e:
+        logger.warning("Summary: config error: %s", e)
         lines.append("Strategy: unknown")
 
     lines.append("")
@@ -43,7 +47,8 @@ def bot_summary(rpc=Depends(get_rpc_optional)):
         pnl = total - starting
         pnl_pct = (pnl / starting * 100) if starting else 0
         lines.append(f"Balance: ${total:.2f} (start ${starting:.2f}, P&L {pnl_pct:+.1f}%)")
-    except Exception:
+    except Exception as e:
+        logger.warning("Summary: balance error: %s", e)
         lines.append("Balance: unavailable")
 
     lines.append("")
@@ -75,7 +80,8 @@ def bot_summary(rpc=Depends(get_rpc_optional)):
                 lines.append(
                     f"  {pair} {side} {lev}x | {pnl:+.2f}% | {dur} | {tag}"
                 )
-    except Exception:
+    except Exception as e:
+        logger.warning("Summary: open trades error: %s", e)
         lines.append("Open Trades: error reading")
 
     lines.append("")
@@ -126,7 +132,8 @@ def bot_summary(rpc=Depends(get_rpc_optional)):
         total_profit_pct = profit.get("profit_all_percent", 0)
         lines.append(f"All Time: {total_trades} trades | Win: {win_pct:.0f}% ({win_trades}W/{loss_trades}L)")
         lines.append(f"Total P&L: ${total_profit:.2f} ({total_profit_pct:+.1f}%)")
-    except Exception:
+    except Exception as e:
+        logger.warning("Summary: profit error: %s", e)
         lines.append("Profit: unavailable")
 
     # ── What to expect ──
