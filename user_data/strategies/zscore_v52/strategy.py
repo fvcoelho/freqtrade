@@ -1,24 +1,21 @@
 """
-ZScoreV53Strategy — Dual Independent Group Mean-Reversion Strategy
-===================================================================
+ZScoreV52Strategy — Modular Z-Score Pairs Trading Strategy
+===========================================================
 
-Two independent groups, each with own spread z-score signal.
-Max 2 concurrent trades (1 per group). Per-group cooldown.
-
-Group A: XRP vs (SOL+LINK) — LONG only
-Group B: (BTC+SOL) vs ETH — LONG + SHORT
-Leverage: Warmup 3→5x (streak-based, gap 12h reset)
+Identical behavior to ZScorePTV51_5m, refactored into modules.
+This file is a thin orchestrator (~200 lines) that delegates all logic.
 
 Modules:
-    lib/btc_trend.py, volume.py, regime.py — shared infrastructure
-    zscore_v53/groups.py   — group definitions, per-group state
-    zscore_v53/zscore.py   — z-score computation (per-pair + per-group spread)
-    zscore_v53/entries.py  — per-group entry signal generation
-    zscore_v53/exits.py    — exit logic + per-group cooldown
-    zscore_v53/leverage.py — warmup/volume/inverse/exp leverage modes
-    zscore_v53/state.py    — persistent state (streaks, trades, equity)
-    zscore_v53/risk.py     — pre-trade risk gates
-    zscore_v53/dca.py      — DCA on winning positions
+    lib/btc_trend.py   — BTC trend signals from 1h candles
+    lib/volume.py      — Volume ratio filter
+    lib/regime.py      — Correlation regime + spread vol filter
+    zscore_v52/config.py   — JSON config loader
+    zscore_v52/zscore.py   — Z-score computation + caching
+    zscore_v52/entries.py  — Entry signal generation
+    zscore_v52/exits.py    — Exit logic + confirm_trade_exit
+    zscore_v52/leverage.py — Leverage scaling + stake amount
+    zscore_v52/risk.py     — confirm_trade_entry gates
+    zscore_v52/dca.py      — Progressive position adds
 """
 import json
 import logging
@@ -27,6 +24,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
+# Ensure user_data/strategies is on sys.path for lib/ imports
 _STRATEGIES_DIR = str(Path(__file__).resolve().parent.parent)
 if _STRATEGIES_DIR not in sys.path:
     sys.path.insert(0, _STRATEGIES_DIR)
@@ -37,18 +35,16 @@ from freqtrade.persistence import Trade
 from freqtrade.strategy import IStrategy
 
 from lib import btc_trend, volume, regime
-from zscore_v53 import config as cfg_loader
-from zscore_v53 import groups as grp
-from zscore_v53.state import StrategyState
-from zscore_v53 import zscore, entries, exits, leverage as lev_mod, risk, dca
+from zscore_v52 import config as cfg_loader
+from zscore_v52 import zscore, entries, exits, leverage as lev_mod, risk, dca
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = Path(__file__).parent.parent / "v53_config.json"
+CONFIG_PATH = Path(__file__).parent.parent / "v52_config.json"
 
 
-class ZScoreV53Strategy(IStrategy):
-    """Dual-group orchestrator — runs two independent spread z-score signals."""
+class ZScoreV52Strategy(IStrategy):
+    """Thin orchestrator — delegates all logic to modules."""
 
     INTERFACE_VERSION = 3
     can_short = True
@@ -71,63 +67,149 @@ class ZScoreV53Strategy(IStrategy):
         c = cfg_loader.load(CONFIG_PATH)
         self._cfg = c
 
-        # Groups
-        self._groups = grp.load_groups(c)
-        self.BTC_REF: str = c["groups"]["btc_ref"]
+        # --- Pair groups ---
+        g = c["groups"]
+        self.group_a: list[str] = g["group_a"]
+        self.group_b: list[str] = g["group_b"]
+        self.BTC_REF: str = g["btc_ref"]
 
-        # Timeframe & stake
+        # --- Timeframe & stake ---
         self.timeframe = c.get("timeframe", "5m")
         self.startup_candle_count = c.get("startup_candle_count", 900)
 
-        # Risk (Freqtrade attributes)
+        # --- Risk (Freqtrade attributes) ---
         r = c["risk"]
         self.stoploss = r["stoploss"]
         self.minimal_roi = {str(k): v for k, v in r["minimal_roi"].items()}
         self.trailing_stop_positive = r["trailing_stop_positive"]
         self.trailing_stop_positive_offset = r["trailing_stop_positive_offset"]
 
+        # Dynamic stoploss
         ds = r.get("dynamic_stoploss", {})
         self._dynamic_sl_enabled = ds.get("enabled", False)
+        self._dynamic_sl_strong_z = ds.get("strong_z", 3.0)
+        self._dynamic_sl_strong_stop = ds.get("strong_stop", -0.10)
+        self._dynamic_sl_medium_z = ds.get("medium_z", 2.0)
+        self._dynamic_sl_medium_stop = ds.get("medium_stop", -0.05)
+        self._dynamic_sl_weak_stop = ds.get("weak_stop", -0.03)
+
+        # Progressive stop
+        ps = r.get("progressive_stop", {})
+        self._progressive_stop_enabled = ps.get("enabled", False)
+        if self._progressive_stop_enabled:
+            self.use_custom_stoploss = True
+            self.trailing_stop = False
         if self._dynamic_sl_enabled:
             self.use_custom_stoploss = True
 
-        # Enable custom stoploss for partial stop feature
-        ps = c.get("partial_stop", {})
-        if ps.get("enabled", False):
-            self.use_custom_stoploss = True
-
-        # DCA
+        # --- DCA ---
         dc = c["dca"]
         self.max_entry_position_adjustment = dc["max_adds"]
 
-        # Fast exit
+        # --- Fast exit ---
         fe = c.get("fast_exit", {})
         self._fast_exit_enabled = fe.get("enabled", False)
         self._fast_exit_tf = fe.get("timeframe", "5m")
 
-        # Internal state
+        # --- Combo config (hot-reload pair groups) ---
+        self.COMBO_CONFIG = Path(__file__).parent.parent.parent / "scanner" / "pair_combos.json"
+        self._combo_mtime: float = 0
+        self._groups_initialized = True
+        self._load_combo_config()
+
+        # --- Internal state ---
         self._pair_zscores: dict[str, DataFrame] = {}
         self._df_cache: dict[str, DataFrame] = {}
         self._df_cache_cycle: int = 0
         self._btc_trend: dict = {}
         self._trade_history: list[dict] = []
         self._pending_features: dict[str, list] = {}
+        self._loss_cooldown_until: Optional[datetime] = None
         self._peak_profit: dict[str, float] = {}
 
-        # Persistent state (survives backtest cycles)
-        run_id = f"v53_{c.get('timeframe', '5m')}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
-        self._state = StrategyState(run_id)
-        self._state.initial_balance = 100.0
-        self._state.balance = 100.0
-        self._state.metadata = {
-            "strategy": "ZScoreV53Strategy",
-            "leverage_mode": c.get("leverage", {}).get("mode", "volume"),
-            "groups": {g.name: {"sub1": g.sub1, "sub2": g.sub2} for g in self._groups},
-        }
+        self._state_recovered = False
 
-        group_names = [g.name for g in self._groups]
-        all_pairs = grp.all_tradable_pairs(self._groups)
-        logger.info(f"V53 loaded — groups={group_names} pairs={all_pairs} BTC={self.BTC_REF}")
+        logger.info(f"V52 loaded — A={self.group_a} B={self.group_b} BTC={self.BTC_REF}")
+
+    # =========================================================================
+    # STATE RECOVERY — survive server restarts with open trades
+    # =========================================================================
+
+    def _recover_state_from_db(self) -> None:
+        """Recover volatile state from SQLite after restart.
+
+        Only runs in live/dry_run mode — backtesting manages its own state.
+
+        Restores:
+        1. Loss cooldown: check recent closed trades for catastrophic losses
+        2. Pending features: already saved in trade custom_data (v26_features),
+           no action needed — custom_exit reads from trade directly.
+        """
+        try:
+            # Recover cooldown from recent closed trades
+            closed = Trade.get_trades_proxy(is_open=False)
+            if not closed:
+                return
+
+            catastrophic_loss = self._cfg["exits"]["catastrophic_loss_threshold"]
+            cooldown_hours = self._cfg["consolidation"]["loss_cooldown_hours"]
+            now = datetime.utcnow()
+
+            for trade in reversed(closed):  # Most recent first
+                if not trade.close_date:
+                    continue
+                hours_since = (now - trade.close_date_utc).total_seconds() / 3600
+                if hours_since > cooldown_hours:
+                    break  # No point checking older trades
+
+                profit = trade.close_profit or 0.0
+                exit_reason = trade.exit_reason or ""
+                if profit < catastrophic_loss or exit_reason in (
+                    "stop_loss", "mkt_stop_dump", "mkt_stop_pump"
+                ):
+                    cooldown_end = trade.close_date_utc + timedelta(hours=cooldown_hours)
+                    if cooldown_end > now:
+                        self._loss_cooldown_until = cooldown_end
+                        logger.info(
+                            "V52 RECOVERY: cooldown active until %s (from %s %.1f%%)",
+                            cooldown_end, trade.pair, profit * 100,
+                        )
+                    break
+        except Exception as e:
+            logger.warning("V52 RECOVERY: could not recover state: %s", e)
+
+    # =========================================================================
+    # COMBO CONFIG — hot-reload pair groups
+    # =========================================================================
+
+    def _load_combo_config(self) -> bool:
+        if not self.COMBO_CONFIG.is_file():
+            return False
+        mtime = self.COMBO_CONFIG.stat().st_mtime
+        if mtime == self._combo_mtime and self._groups_initialized:
+            return True
+        try:
+            with open(self.COMBO_CONFIG) as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return False
+        if config.get("auto_cluster", False):
+            self._combo_mtime = mtime
+            return False
+        active = config.get("active_combo", "")
+        combos = config.get("combos", {})
+        if active not in combos:
+            return False
+        combo = combos[active]
+        new_a = combo.get("group_a", [])
+        new_b = combo.get("group_b", [])
+        if new_a != self.group_a or new_b != self.group_b:
+            self.group_a = new_a
+            self.group_b = new_b
+            self._pair_zscores = {}
+            logger.info(f"V52 COMBO: '{active}' A={self.group_a} B={self.group_b}")
+        self._combo_mtime = mtime
+        return True
 
     # =========================================================================
     # DATAFRAME CACHE
@@ -158,11 +240,18 @@ class ZScoreV53Strategy(IStrategy):
         return inf
 
     # =========================================================================
-    # INDICATORS — per-pair + per-group spread z-scores
+    # INDICATORS
     # =========================================================================
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         pair = metadata["pair"]
+        self._load_combo_config()
+
+        # Recover state once on first run (live/dry_run only)
+        if not self._state_recovered:
+            self._state_recovered = True
+            if self.dp and self.dp.runmode.value in ("live", "dry_run"):
+                self._recover_state_from_db()
 
         # Invalidate cache each cycle
         cycle_id = id(dataframe)
@@ -179,75 +268,53 @@ class ZScoreV53Strategy(IStrategy):
         # Map BTC signals to pair timeframe
         dataframe = btc_trend.map_to_timeframe(self._btc_trend, dataframe)
 
-        # Per-pair z-score (once per pair — shared across groups)
-        zscore.compute(
+        # Z-score computation (pair + spread + cross signals)
+        dataframe = zscore.compute(
             dataframe, pair, self._cfg, self.dp,
             self._pair_zscores, self._df_cache,
-            # Use first group's sub1+sub2 for the shared pair z-score
-            self._groups[0].sub1, self._groups[0].sub2,
-        )
-
-        # Per-group spread z-score
-        for g in self._groups:
-            col = f"spread_z_{g.name.lower()}"
-            dataframe[col] = zscore.compute_group_spread_z(
-                dataframe, pair, self._cfg, self.dp,
-                self._df_cache, g.sub1, g.sub2,
-            )
-
-        # Regime filter (use first group's sub1[0] vs sub2[0] for correlation)
-        regime.compute(
-            dataframe, pair, self._cfg, self.dp,
-            self._df_cache, self.timeframe,
-            self._groups[0].sub1, self._groups[0].sub2,
+            self.group_a, self.group_b,
         )
 
         # Spread volatility filter
-        regime.compute_spread_vol(dataframe, self._cfg)
+        dataframe = regime.compute_spread_vol(dataframe, self._cfg)
+
+        # Regime filter
+        dataframe = regime.compute(
+            dataframe, pair, self._cfg, self.dp,
+            self._df_cache, self.timeframe,
+            self.group_a, self.group_b,
+        )
 
         # Volume filter
-        volume.compute(dataframe, self._cfg)
+        dataframe = volume.compute(dataframe, self._cfg)
 
-        # Export indicators for replay (backtest only)
+        # Export full indicator dataframe for replay (backtest only)
         if self.dp and self.dp.runmode.value in ("backtest", "hyperopt"):
             export_dir = Path(__file__).parent.parent.parent / "backtest_results" / "indicators"
             export_dir.mkdir(parents=True, exist_ok=True)
             coin = pair.split("/")[0]
-            cols = [c for c in dataframe.columns if c in [
+            cols = [c for c in [
                 "date", "open", "high", "low", "close", "volume",
-                "pair_zscore", "log_return",
+                "pair_zscore", "spread_zscore", "log_return",
                 "pair_z_cross_up", "pair_z_cross_down",
                 "vol_ratio", "vol_ok",
                 "regime_ok", "rolling_corr", "spread_vol_ok",
                 "btc_pump", "btc_dump", "btc_high_vol", "btc_vol_ended",
                 "btc_mom", "btc_atr_z",
-            ] + [f"spread_z_{g.name.lower()}" for g in self._groups]]
+            ] if c in dataframe.columns]
             dataframe[cols].to_feather(export_dir / f"{coin}_indicators.feather")
 
         return dataframe
 
     # =========================================================================
-    # ENTRY — iterate groups, generate per-group signals
+    # ENTRY
     # =========================================================================
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        pair = metadata["pair"]
-
-        # Initialize columns (first group call)
-        dataframe["enter_long"] = 0
-        dataframe["enter_short"] = 0
-        dataframe["enter_tag"] = ""
-
-        for g in self._groups:
-            if pair not in g.all_pairs:
-                continue
-            col = f"spread_z_{g.name.lower()}"
-            entries.generate(
-                dataframe, pair, self._cfg, self._btc_trend,
-                g.sub1, g.sub2, g.name, col,
-            )
-
-        return dataframe
+        return entries.generate(
+            dataframe, metadata["pair"], self._cfg,
+            self._btc_trend, self.group_a, self.group_b,
+        )
 
     # =========================================================================
     # EXIT
@@ -269,48 +336,24 @@ class ZScoreV53Strategy(IStrategy):
                            exit_reason: str, current_time: datetime, **kwargs) -> bool:
         allow, new_cooldown = exits.confirm_exit(
             pair, trade, exit_reason, current_time, rate,
-            self._cfg, self._pending_features, self._trade_history,
+            self._cfg, self._pending_features, self._loss_cooldown_until,
+            self._trade_history,
         )
-        # Apply cooldown to the group(s) this pair belongs to
-        if new_cooldown:
-            for g in self._groups:
-                if pair in g.unique_pairs:
-                    g.cooldown_until = new_cooldown
-                    logger.info(f"V53 COOLDOWN: group {g.name} until {new_cooldown}")
-
-        # Record trade in persistent state
-        profit = trade.calc_profit_ratio(rate)
-        self._state.record_trade(
-            pair=pair, profit_ratio=profit, profit_abs=trade.calc_profit_ratio(rate) * trade.stake_amount,
-            leverage=trade.leverage, entry_tag=trade.enter_tag or "",
-            exit_reason=exit_reason, open_date=trade.open_date_utc,
-            close_date=current_time, open_rate=trade.open_rate,
-            close_rate=rate, is_short=trade.is_short,
-        )
-        self._state.save()
-
+        self._loss_cooldown_until = new_cooldown
         return allow
 
     # =========================================================================
-    # CONFIRM ENTRY — per-group limits
+    # CONFIRM ENTRY
     # =========================================================================
 
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
         open_trades = Trade.get_trades_proxy(is_open=True)
-
-        # Max total trades
-        max_total = self._cfg.get("max_total_trades", 2)
-        if len(open_trades) >= max_total:
-            return False
-
-        # Check per-group: at least one group must allow
-        for g in self._groups:
-            if pair in g.all_pairs:
-                if risk.confirm_entry(pair, self._cfg, current_time, g, self._groups, open_trades):
-                    return True
-        return False
+        return risk.confirm_entry(
+            pair, self._cfg, current_time, self._loss_cooldown_until,
+            self.group_a, self.group_b, open_trades,
+        )
 
     # =========================================================================
     # CUSTOM STOPLOSS
@@ -319,17 +362,6 @@ class ZScoreV53Strategy(IStrategy):
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, after_fill: bool,
                         **kwargs) -> float | None:
-        """Partial Stoploss — tighter stop to reduce max loss per trade.
-
-        Freqtrade requires this method name (IStrategy interface).
-        When partial_stop is enabled, replaces the fixed -7% with a
-        tighter level (e.g., -4%) to cut losses earlier.
-        """
-        ps = self._cfg.get("partial_stop", {})
-        if ps.get("enabled", False):
-            return ps.get("trigger", -0.04)
-
-        # ── Dynamic Stoploss (z-score based) ──
         if not self._dynamic_sl_enabled:
             return None
         features = trade.get_custom_data("v26_features")
@@ -338,13 +370,12 @@ class ZScoreV53Strategy(IStrategy):
         if not features:
             return None
         entry_z = abs(features[0])
-        ds = self._cfg["risk"].get("dynamic_stoploss", {})
-        if entry_z >= ds.get("strong_z", 3.0):
-            return ds.get("strong_stop", -0.10)
-        elif entry_z >= ds.get("medium_z", 2.0):
-            return ds.get("medium_stop", -0.05)
+        if entry_z >= self._dynamic_sl_strong_z:
+            return self._dynamic_sl_strong_stop
+        elif entry_z >= self._dynamic_sl_medium_z:
+            return self._dynamic_sl_medium_stop
         else:
-            return ds.get("weak_stop", -0.03)
+            return self._dynamic_sl_weak_stop
 
     # =========================================================================
     # LEVERAGE
@@ -353,8 +384,6 @@ class ZScoreV53Strategy(IStrategy):
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
-        # Pass strategy state for warmup leverage mode
-        self._pending_features["_strategy_state"] = self._state
         lev, features = lev_mod.compute(
             pair, self._cfg, self.dp, self.timeframe,
             entry_tag, side, max_leverage, self._pending_features,
@@ -371,11 +400,6 @@ class ZScoreV53Strategy(IStrategy):
                               current_entry_rate: float, current_exit_rate: float,
                               current_entry_profit: float, current_exit_profit: float,
                               **kwargs) -> Optional[float]:
-        # Log all calls to debug partial stop
-        if current_profit < -0.02:
-            logger.warning("ADJUST_POS CALLED: %s profit=%.2f%% stake=$%.2f exits=%d entries=%d",
-                         trade.pair, current_profit * 100, trade.stake_amount,
-                         trade.nr_of_successful_exits, trade.nr_of_successful_entries)
         return dca.adjust_position(trade, current_profit, self._cfg, min_stake, max_stake)
 
     # =========================================================================

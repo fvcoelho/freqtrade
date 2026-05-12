@@ -1,15 +1,23 @@
+"""Pre-trade risk gates for ZScore V53 -- per-group cooldown."""
+from __future__ import annotations
 
-# Unsupported bytecode in file __pycache__/risk.cpython-313.pyc
-# Unsupported Python version, 3.13.0, for decompilation
+from datetime import datetime
+from typing import Optional
 
-# Unsupported Python version, 3.13.0, for decompilation
-# Can't uncompile __pycache__/risk.cpython-313.pyc
-# uncompyle6 version 3.9.3
-# Python bytecode version base 3.13.0 (3571)
-# Decompiled from: Python 3.13.4 (main, Jun  3 2025, 15:34:24) [Clang 17.0.0 (clang-1700.0.13.3)]
-# Embedded file name: /Users/fvcoelho/Working/freqtrade/user_data/strategies/zscore_v53/risk.py
-# Compiled at: 2026-05-10 11:05:37
-# Size of source mod 2**32: 655 bytes
+from zscore_v53.groups import GroupState, can_open_trade
 
-Unsupported Python version, 3.13.0, for decompilation
 
+def confirm_entry(
+    pair: str,
+    cfg: dict,
+    current_time: datetime,
+    group: GroupState,
+    all_groups: list["GroupState"],
+    open_trades: list,
+) -> bool:
+    """Return True if the trade is allowed to open.
+
+    Delegates to groups.can_open_trade which checks per-group cooldown,
+    per-group trade count, and total trade count.
+    """
+    return can_open_trade(group, pair, cfg, current_time, open_trades, all_groups)

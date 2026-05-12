@@ -1,4 +1,4 @@
-"""Configuration loader for ZScore V53 strategy."""
+"""Configuration loader for ZScore V52 strategy."""
 from __future__ import annotations
 
 import json

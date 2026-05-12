@@ -1,0 +1,37 @@
+{
+  "strategy_name": "LeveragedScalper",
+  "params": {
+    "roi": {
+      "0": 0.012,
+      "15": 0.008,
+      "30": 0.005,
+      "60": 0.003
+    },
+    "stoploss": {
+      "stoploss": -0.015
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "bb_squeeze": 1.9,
+      "ema_fast": 7,
+      "ema_slow": 31,
+      "leverage_normal": 2.4,
+      "leverage_strong": 4.2,
+      "rsi_buy": 16,
+      "vol_multiplier": 3.1
+    },
+    "sell": {
+      "rsi_sell": 79
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-04-25 17:55:01.958784+00:00"
+}

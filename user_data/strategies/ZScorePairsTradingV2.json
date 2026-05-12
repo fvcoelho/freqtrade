@@ -1,0 +1,35 @@
+{
+  "strategy_name": "ZScorePairsTradingV2",
+  "params": {
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "cum_return_window": 16,
+      "regime_corr_min": 0.3,
+      "regime_window": 97,
+      "zscore_entry_threshold": 2.2,
+      "zscore_window": 261
+    },
+    "sell": {
+      "zscore_exit_threshold": 0.2
+    },
+    "roi": {
+      "0": 0.324,
+      "147": 0.151,
+      "501": 0.09,
+      "1657": 0
+    },
+    "stoploss": {
+      "stoploss": -0.343
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-04-25 18:27:45.958678+00:00"
+}

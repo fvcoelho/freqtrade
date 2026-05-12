@@ -1,0 +1,157 @@
+{
+    "_comment": "ZScorePTV50Combined \u2014 all configurable parameters",
+    "groups": {
+        "group_a": [
+            "XRP/USDC:USDC",
+            "ADA/USDC:USDC"
+        ],
+        "group_b": [
+            "SOL/USDC:USDC",
+            "LINK/USDC:USDC"
+        ],
+        "btc_ref": "BTC/USDC:USDC"
+    },
+    "timeframe": "15m",
+    "startup_candle_count": 300,
+    "stake_per_position": 400.0,
+    "risk": {
+        "stoploss": -0.1,
+        "dynamic_stoploss": {
+            "enabled": false,
+            "strong_z": 3.0,
+            "strong_stop": -0.1,
+            "medium_z": 2.0,
+            "medium_stop": -0.05,
+            "weak_stop": -0.03
+        },
+        "minimal_roi": {
+            "0": 0.03,
+            "15": 0.02,
+            "45": 0.012,
+            "90": 0.005
+        },
+        "trailing_stop_positive": 0.008,
+        "trailing_stop_positive_offset": 0.016,
+        "progressive_stop": {
+            "enabled": false,
+            "levels": [
+                {
+                    "profit": 0.005,
+                    "stop": 0.0
+                },
+                {
+                    "profit": 0.01,
+                    "stop": 0.005
+                },
+                {
+                    "profit": 0.02,
+                    "stop": 0.01
+                },
+                {
+                    "profit": 0.03,
+                    "stop": 0.02
+                }
+            ]
+        }
+    },
+    "zscore": {
+        "zscore_window": 96,
+        "cum_return_window": 8,
+        "zscore_entry": 1.8,
+        "pair_z_entry": 1.0,
+        "zscore_scalp_min_profit": 0.012,
+        "zscore_scalp_exit_threshold": 0.2
+    },
+    "regime": {
+        "regime_window": 96,
+        "regime_corr_min": 0.4,
+        "use_ewm_corr": true,
+        "ewm_span": 96,
+        "consolidation_atr_z": -0.5,
+        "consolidation_spread_max": 1.5,
+        "consolidation_btc_mom_max": 0.8,
+        "trending_btc_mom": 1.5,
+        "trending_atr_z": 1.5,
+        "spread_vol_filter": true,
+        "spread_vol_window": 48,
+        "spread_vol_max_z": 2.5
+    },
+    "consolidation": {
+        "consol_zscore_entry": 1.2,
+        "consol_pair_z_entry": 0.5,
+        "consol_time_stop_candles": 16,
+        "loss_cooldown_hours": 24
+    },
+    "btc_trend": {
+        "pump_threshold": 1.5,
+        "dump_threshold": -1.5,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "vol_bounce_spread_min": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 48
+    },
+    "volume": {
+        "vol_ma_window": 48,
+        "vol_ok_threshold": 1.0
+    },
+    "leverage": {
+        "base_multiplier": 3.0,
+        "signal_aggression": 1.5,
+        "signal_divisor": 10.0,
+        "min": 3.0,
+        "max": 5.0,
+        "consol_max": 3.0,
+        "btc_high_vol_max": 2.0,
+        "btc_pump_dump_multiplier": 0.6,
+        "floor": 2.0
+    },
+    "entry_modes": {
+        "group_a_long": true,
+        "group_a_short": false,
+        "group_b_long": true,
+        "group_b_short": true,
+        "hedge_pairs": false
+    },
+    "balance": {
+        "max_group_imbalance": 2,
+        "wait_all_closed": true
+    },
+    "dca": {
+        "max_adds": 3,
+        "thresholds": [
+            0.003,
+            0.006,
+            0.01
+        ],
+        "multipliers": [
+            1.0,
+            2.0,
+            3.0
+        ]
+    },
+    "fast_exit": {
+        "enabled": true,
+        "timeframe": "5m",
+        "profit_lock_pct": 0.5,
+        "profit_lock_activation": 0.008,
+        "rapid_loss_threshold": -0.03,
+        "rapid_loss_candles": 3
+    },
+    "exits": {
+        "mkt_stop_loss_threshold": -0.005,
+        "mkt_stop_regime_loss": -0.015,
+        "catastrophic_loss_threshold": -0.05,
+        "dyn_roi_high_z_min": 3.0,
+        "dyn_roi_high_z_profit": 0.015,
+        "dyn_roi_high_z_minutes": 90,
+        "dyn_roi_mid_z_min": 2.7,
+        "dyn_roi_mid_z_profit": 0.013,
+        "dyn_roi_mid_z_minutes": 60,
+        "roi_gate_high_z_minutes": 60,
+        "roi_gate_high_z_profit": 0.015,
+        "roi_gate_mid_z_minutes": 45,
+        "roi_gate_mid_z_profit": 0.013
+    }
+}

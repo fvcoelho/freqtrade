@@ -1,11 +1,10 @@
-"""Z-score computation for ZScore V53 strategy.
+"""Z-score computation for ZScore V52 strategy.
 
-Extends V52 z-score module with per-group spread computation:
+Exact behavioural clone of ZScorePTV51_5m z-score logic:
 - Per-pair z-score (log-price based)
 - Spread z-score (Log Spread method: mean(log A) - mean(log B))
 - Z-score zero-cross signals
 - Caching helpers for cross-pair lookups
-- NEW: compute_group_spread_z() for independent group spread z-scores
 """
 from __future__ import annotations
 
@@ -178,21 +177,6 @@ def _compute_log_spread(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-
-def compute_group_spread_z(
-    dataframe: DataFrame,
-    pair: str,
-    cfg: dict,
-    dp,
-    df_cache: dict,
-    sub1: list[str],
-    sub2: list[str],
-) -> pd.Series:
-    """Compute spread z-score for a specific group. Returns Series, does not modify dataframe."""
-    zscore_window = cfg["zscore"]["zscore_window"]
-    timeframe = cfg["timeframe"]
-    return _compute_log_spread(pair, dataframe, zscore_window, timeframe, dp, df_cache, sub1, sub2)
-
 
 def compute(
     dataframe: DataFrame,

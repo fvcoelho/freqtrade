@@ -1,0 +1,151 @@
+{
+    "_comment": "ZScoreV53 \u2014 Dual Independent Groups",
+    "groups": {
+        "group_a": {
+            "name": "A",
+            "sub1": [
+                "XRP/USDT:USDT",
+                "ADA/USDT:USDT"
+            ],
+            "sub2": [
+                "SOL/USDT:USDT",
+                "LINK/USDT:USDT"
+            ]
+        },
+        "group_b": {
+            "name": "B",
+            "sub1": [
+                "BTC/USDT:USDT",
+                "SOL/USDT:USDT"
+            ],
+            "sub2": [
+                "ETH/USDT:USDT"
+            ]
+        },
+        "btc_ref": "BTC/USDT:USDT"
+    },
+    "max_trades_per_group": 1,
+    "max_total_trades": 2,
+    "cooldown_scope": "per_group",
+    "timeframe": "5m",
+    "startup_candle_count": 900,
+    "stake_per_position": 400.0,
+    "risk": {
+        "stoploss": -0.07,
+        "dynamic_stoploss": {
+            "enabled": false
+        },
+        "minimal_roi": {
+            "0": 0.025,
+            "3": 0.015,
+            "10": 0.01,
+            "20": 0.005
+        },
+        "trailing_stop_positive": 0.006,
+        "trailing_stop_positive_offset": 0.012,
+        "progressive_stop": {
+            "enabled": false
+        }
+    },
+    "zscore": {
+        "zscore_window": 288,
+        "cum_return_window": 24,
+        "zscore_entry": 2.1,
+        "pair_z_entry": 1.2,
+        "zscore_scalp_min_profit": 0.012,
+        "zscore_scalp_exit_threshold": 0.2
+    },
+    "regime": {
+        "regime_window": 288,
+        "regime_corr_min": 0.4,
+        "use_ewm_corr": true,
+        "ewm_span": 288,
+        "consolidation_atr_z": -0.5,
+        "consolidation_spread_max": 1.5,
+        "consolidation_btc_mom_max": 0.8,
+        "trending_btc_mom": 1.5,
+        "trending_atr_z": 1.5,
+        "spread_vol_filter": false,
+        "spread_vol_window": 144,
+        "spread_vol_max_z": 2.5
+    },
+    "consolidation": {
+        "consol_zscore_entry": 99.0,
+        "consol_pair_z_entry": 99.0,
+        "consol_time_stop_candles": 12,
+        "loss_cooldown_hours": 24
+    },
+    "btc_trend": {
+        "pump_threshold": 1.5,
+        "dump_threshold": -1.5,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "vol_bounce_spread_min": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 144
+    },
+    "volume": {
+        "vol_ma_window": 144,
+        "vol_ok_threshold": 1.0
+    },
+    "leverage": {
+        "base_multiplier": 3.0,
+        "signal_aggression": 1.5,
+        "signal_divisor": 10.0,
+        "min": 3.0,
+        "max": 4.0,
+        "consol_max": 3.0,
+        "btc_high_vol_max": 2.0,
+        "btc_pump_dump_multiplier": 0.6,
+        "floor": 2.0
+    },
+    "entry_modes": {
+        "group_a_long": true,
+        "group_a_short": false,
+        "group_b_long": true,
+        "group_b_short": true,
+        "hedge_pairs": false
+    },
+    "balance": {
+        "max_group_imbalance": 2,
+        "wait_all_closed": false
+    },
+    "dca": {
+        "max_adds": 3,
+        "thresholds": [
+            0.003,
+            0.006,
+            0.01
+        ],
+        "multipliers": [
+            1.0,
+            2.0,
+            3.0
+        ]
+    },
+    "fast_exit": {
+        "enabled": false
+    },
+    "no_reversion_exit": {
+        "enabled": false,
+        "check_after_candles": 6,
+        "z_diverge_threshold": 0.8,
+        "max_loss_pct": -0.02
+    },
+    "exits": {
+        "mkt_stop_loss_threshold": -0.003,
+        "mkt_stop_regime_loss": -0.008,
+        "catastrophic_loss_threshold": -0.05,
+        "dyn_roi_high_z_min": 3.0,
+        "dyn_roi_high_z_profit": 0.015,
+        "dyn_roi_high_z_minutes": 30,
+        "dyn_roi_mid_z_min": 2.7,
+        "dyn_roi_mid_z_profit": 0.013,
+        "dyn_roi_mid_z_minutes": 20,
+        "roi_gate_high_z_minutes": 20,
+        "roi_gate_high_z_profit": 0.015,
+        "roi_gate_mid_z_minutes": 15,
+        "roi_gate_mid_z_profit": 0.013
+    }
+}

@@ -1,7 +1,7 @@
-"""Exit logic for ZScore V53.
+"""Exit logic for ZScore V52.
 
-Adapted from V52 exits.py. The confirm_exit function no longer accepts
-cooldown_until -- the strategy manages per-group cooldown externally.
+Pure-function extraction of V51 custom_exit + confirm_trade_exit.
+Identical logic — no behavioral changes.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def _get_pair_df(pair: str, timeframe: str, dp, df_cache: dict):
     """Cached wrapper around dp.get_pair_dataframe.
 
-    Mirrors V51 _get_pair_df -- cache is valid for one cycle.
+    Mirrors V51 _get_pair_df — cache is valid for one cycle.
     """
     key = f"{pair}__{timeframe}"
     if key in df_cache:
@@ -147,6 +147,11 @@ def check_exit(
         return "time_stop"
 
     # --- 2c. NO REVERSION EXIT ---
+    # If pair_z diverged further after entry (no mean-reversion happening),
+    # exit early to avoid stop_loss. Checks after N candles.
+    # Evidence: all 8 historical stop_losses showed divergence from candle 1.
+    # Logic: long entered because pz < -1.2 (oversold). If after 15min pz is
+    # even MORE negative → reversion not happening → exit early.
     nr_cfg = cfg.get("no_reversion_exit", {})
     if nr_cfg.get("enabled", False) and dp:
         nr_candles = nr_cfg.get("check_after_candles", 3)
@@ -155,14 +160,18 @@ def check_exit(
 
         if trade_minutes >= nr_candles * 5 and current_profit < nr_max_loss:
             dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
-            if dataframe is not None and len(dataframe) > nr_candles + 1:
+            if dataframe is not None and len(dataframe) > nr_candles:
                 current_pz = float(dataframe.iloc[-1].get("pair_zscore", 0.0))
                 entry_pz = float(dataframe.iloc[-(nr_candles + 1)].get("pair_zscore", 0.0))
                 is_long = trade.is_short is False
 
                 if is_long:
+                    # Long expects pz to rise (revert towards 0)
+                    # Diverging = pz dropped further negative
                     diverging = current_pz < entry_pz - nr_z_threshold
                 else:
+                    # Short expects pz to fall (revert towards 0)
+                    # Diverging = pz rose further positive
                     diverging = current_pz > entry_pz + nr_z_threshold
 
                 if diverging:
@@ -194,23 +203,6 @@ def check_exit(
             if not is_long and pz < -zt:
                 return "zscore_scalp"
 
-    # --- 4b. BTC FAST MOVE EXIT ---
-    btc_fast = cfg.get("btc_fast_exit", {})
-    if btc_fast.get("enabled", False) and dp and current_profit < 0:
-        btc_ref = cfg["groups"].get("btc_ref", "BTC/USDC:USDC")
-        btc_df, _ = dp.get_analyzed_dataframe(btc_ref, timeframe)
-        if btc_df is not None and len(btc_df) >= btc_fast["lookback_candles"] + 1:
-            n = btc_fast["lookback_candles"]
-            btc_now = float(btc_df.iloc[-1]["close"])
-            btc_prev = float(btc_df.iloc[-(n + 1)]["close"])
-            btc_move = (btc_now - btc_prev) / btc_prev
-            threshold = btc_fast["btc_move_pct"] / 100.0
-            is_long = trade.is_short is False
-            if is_long and btc_move < -threshold:
-                return "btc_fast_dump"
-            if not is_long and btc_move > threshold:
-                return "btc_fast_pump"
-
     # --- 5. MARKET-AWARE STOPS ---
     if current_profit < exit_cfg["mkt_stop_loss_threshold"]:
         dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
@@ -238,13 +230,13 @@ def confirm_exit(
     rate: float,
     cfg: dict,
     pending_features: dict,
+    cooldown_until: Optional[datetime],
     trade_history: list,
 ) -> tuple[bool, Optional[datetime]]:
     """Post-exit processing. Returns (allow_exit, new_cooldown_until).
 
-    The caller (strategy.py) decides which group to apply the cooldown to.
-    This function no longer accepts cooldown_until -- per-group cooldown
-    is managed externally by the strategy orchestrator.
+    Mirrors V51 confirm_trade_exit. The caller (strategy.py) manages
+    the cooldown_until state variable.
 
     Parameters
     ----------
@@ -262,6 +254,8 @@ def confirm_exit(
         Full strategy config with section: exits.
     pending_features : dict
         Mutable dict of pending entry features keyed by pair.
+    cooldown_until : Optional[datetime]
+        Current cooldown deadline (may be None).
     trade_history : list
         Mutable list for recording trade outcomes.
 
@@ -269,14 +263,13 @@ def confirm_exit(
     -------
     tuple[bool, Optional[datetime]]
         (allow_exit, new_cooldown_until). If allow_exit is False, the exit
-        is blocked. new_cooldown_until is set when a cooldown should be
-        activated -- the caller decides which group to apply it to.
+        is blocked. new_cooldown_until replaces the caller's state.
     """
     exit_cfg = cfg["exits"]
     consol_cfg = cfg["consolidation"]
 
     profit = trade.calc_profit_ratio(rate)
-    new_cooldown: Optional[datetime] = None
+    new_cooldown = cooldown_until
 
     # Activate cooldown after catastrophic loss or stop events
     catastrophic_loss = exit_cfg["catastrophic_loss_threshold"]
@@ -286,7 +279,7 @@ def confirm_exit(
         cooldown_hours = consol_cfg["loss_cooldown_hours"]
         new_cooldown = current_time + timedelta(hours=cooldown_hours)
         logger.info(
-            "V53 LOSS: %s %.1f%% (%s) — cooldown %dh",
+            "V52 LOSS: %s %.1f%% (%s) — cooldown %dh",
             pair, profit * 100, exit_reason, cooldown_hours,
         )
 
