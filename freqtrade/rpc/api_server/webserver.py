@@ -213,9 +213,11 @@ class ApiServer(RPCHandler):
         from freqtrade.rpc.api_server.api_ws import router as ws_router
         from freqtrade.rpc.api_server.deps import is_trading_mode, is_webserver_mode
         from freqtrade.rpc.api_server.api_leaderboard import router as api_leaderboard
+        from freqtrade.rpc.api_server.api_summary import router_summary
         from freqtrade.rpc.api_server.web_ui import router_ui
 
         app.include_router(api_v1_public, prefix="/api/v1")
+        app.include_router(router_summary, prefix="/api/v1", tags=["Summary"])
 
         app.include_router(router_login, prefix="/api/v1", tags=["Auth"])
         app.include_router(
