@@ -31,6 +31,7 @@ from freqtrade.strategy import IStrategy
 from consolidation_scalp import config as cfg_loader
 from consolidation_scalp import consolidation, levels, entries, exits
 from consolidation_scalp import leverage as lev_mod
+from consolidation_scalp import btc_trend
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +61,14 @@ class ConsolidationScalpStrategy(IStrategy):
         self.timeframe = c.get("timeframe", "5m")
         self.startup_candle_count = c.get("startup_candle_count", 200)
 
+        # BTC reference pair for regime filter
+        self._btc_ref = c.get("btc_ref", "BTC/USDC:USDC")
+        self._btc_trend: dict = {}
+
         # Exit tracking
         self._peak_profit: dict[str, float] = {}
+        self._df_cache: dict = {}
+        self._df_cache_cycle: int = 0
 
         engine = c["level_engine"]
         logger.info(
@@ -70,10 +77,31 @@ class ConsolidationScalpStrategy(IStrategy):
         )
 
     # =========================================================================
+    # INFORMATIVE PAIRS
+    # =========================================================================
+
+    def informative_pairs(self):
+        return [(self._btc_ref, "1h")]
+
+    # =========================================================================
     # INDICATORS
     # =========================================================================
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        # Cache invalidation per cycle
+        cycle_id = id(dataframe)
+        if cycle_id != self._df_cache_cycle:
+            self._df_cache.clear()
+            self._df_cache_cycle = cycle_id
+            self._btc_trend = {}
+
+        # 0. BTC regime filter (1h data)
+        if not self._btc_trend and self.dp:
+            btc_1h = self.dp.get_pair_dataframe(pair=self._btc_ref, timeframe="1h")
+            if btc_1h is not None and len(btc_1h) >= 50:
+                self._btc_trend = btc_trend.compute(btc_1h, self._cfg)
+        dataframe = btc_trend.map_to_timeframe(self._btc_trend, dataframe)
+
         # 1. Consolidation filter (ATR, range, momentum, volume)
         dataframe = consolidation.compute(dataframe, self._cfg)
 

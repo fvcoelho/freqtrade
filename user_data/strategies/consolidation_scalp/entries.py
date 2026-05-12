@@ -32,11 +32,16 @@ def generate(dataframe: DataFrame, cfg: dict) -> DataFrame:
         bullish_confirm = True
         bearish_confirm = True
 
+    # BTC regime filter — no entries during pump/dump/high vol
+    no_chaos = ~dataframe["btc_high_vol"]
+    safe_long = ~dataframe["btc_dump"] & no_chaos
+    safe_short = ~dataframe["btc_pump"] & no_chaos
+
     # Long at support
-    long_signal = consolidating & at_sup & bullish_confirm
+    long_signal = consolidating & at_sup & bullish_confirm & safe_long
 
     # Short at resistance
-    short_signal = consolidating & at_res & bearish_confirm
+    short_signal = consolidating & at_res & bearish_confirm & safe_short
 
     # Apply cooldown: suppress signals within N candles of previous signal
     long_arr = long_signal.values.copy().astype(bool)

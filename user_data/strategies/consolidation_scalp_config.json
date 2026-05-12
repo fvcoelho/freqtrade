@@ -6,7 +6,18 @@
     "stake_per_position": 400.0,
     "max_open_trades": 1,
 
+    "btc_ref": "BTC/USDC:USDC",
     "level_engine": "order_blocks",
+
+    "btc_trend": {
+        "pump_threshold": 1.5,
+        "dump_threshold": -1.5,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 144
+    },
 
     "consolidation": {
         "atr_period": 14,
