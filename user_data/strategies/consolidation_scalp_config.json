@@ -19,11 +19,11 @@
     "consolidation": {
         "atr_period": 14,
         "atr_zscore_window": 96,
-        "atr_zscore_max": 0.3,
+        "atr_zscore_max": 0.0,
         "range_window": 96,
-        "range_pct_max": 0.045,
+        "range_pct_max": 0.035,
         "momentum_window": 12,
-        "momentum_max": 0.015,
+        "momentum_max": 0.012,
         "volume_zscore_window": 96,
         "volume_zscore_range": [
             -2.0,
@@ -33,11 +33,11 @@
         "breakout_momentum": 0.02
     },
     "order_blocks": {
-        "volume_mult": 1.2,
+        "volume_mult": 1.5,
         "volume_ma_window": 20,
         "move_threshold": 0.003,
         "move_candles": 3,
-        "expiry_candles": 96,
+        "expiry_candles": 48,
         "max_touches": 2,
         "wick_ratio": 0.6
     },
