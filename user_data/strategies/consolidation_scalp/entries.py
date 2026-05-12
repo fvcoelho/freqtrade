@@ -37,11 +37,20 @@ def generate(dataframe: DataFrame, cfg: dict) -> DataFrame:
     safe_long = ~dataframe["btc_dump"] & no_chaos
     safe_short = ~dataframe["btc_pump"] & no_chaos
 
-    # Long at support
-    long_signal = consolidating & at_sup & bullish_confirm & safe_long
+    # Combined engine: OB signals skip confirmation, rolling signals require it
+    if engine == "combined":
+        ob_sup = dataframe.get("at_support_ob", at_sup)
+        rm_sup = dataframe.get("at_support_rm", False)
+        ob_res = dataframe.get("at_resistance_ob", at_res)
+        rm_res = dataframe.get("at_resistance_rm", False)
 
-    # Short at resistance
-    short_signal = consolidating & at_res & bearish_confirm & safe_short
+        # OB: no confirmation needed. Rolling: needs confirmation
+        long_signal = consolidating & safe_long & (ob_sup | (rm_sup & bullish_confirm))
+        short_signal = consolidating & safe_short & (ob_res | (rm_res & bearish_confirm))
+    else:
+        # Single engine: use confirmation setting
+        long_signal = consolidating & at_sup & bullish_confirm & safe_long
+        short_signal = consolidating & at_res & bearish_confirm & safe_short
 
     # Apply cooldown: suppress signals within N candles of previous signal
     long_arr = long_signal.values.copy().astype(bool)

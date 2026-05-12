@@ -1,14 +1,12 @@
 {
-    "_comment": "Consolidation Scalp — BTC mean-reversion in range-bound markets",
+    "_comment": "Consolidation Scalp \u2014 BTC mean-reversion in range-bound markets",
     "pair": "BTC/USDC:USDC",
     "timeframe": "5m",
     "startup_candle_count": 200,
     "stake_per_position": 400.0,
     "max_open_trades": 1,
-
     "btc_ref": "BTC/USDC:USDC",
     "level_engine": "order_blocks",
-
     "btc_trend": {
         "pump_threshold": 1.5,
         "dump_threshold": -1.5,
@@ -18,50 +16,47 @@
         "atr_period": 14,
         "atr_z_window": 144
     },
-
     "consolidation": {
         "atr_period": 14,
         "atr_zscore_window": 96,
-        "atr_zscore_max": 0.0,
+        "atr_zscore_max": 0.3,
         "range_window": 96,
-        "range_pct_max": 0.035,
+        "range_pct_max": 0.045,
         "momentum_window": 12,
-        "momentum_max": 0.012,
+        "momentum_max": 0.015,
         "volume_zscore_window": 96,
-        "volume_zscore_range": [-2.0, 2.0],
+        "volume_zscore_range": [
+            -2.0,
+            2.0
+        ],
         "breakout_atr_z": 1.5,
         "breakout_momentum": 0.02
     },
-
     "order_blocks": {
-        "volume_mult": 1.5,
+        "volume_mult": 1.2,
         "volume_ma_window": 20,
         "move_threshold": 0.003,
         "move_candles": 3,
-        "expiry_candles": 48,
+        "expiry_candles": 96,
         "max_touches": 2,
         "wick_ratio": 0.6
     },
-
     "pivot_fractal": {
         "fractal_window": 5,
         "cluster_pct": 0.0015,
         "min_touches": 2,
         "proximity_pct": 0.001
     },
-
     "rolling_minmax": {
         "base_window": 48,
         "proximity_pct": 0.0015
     },
-
     "entries": {
         "cooldown_candles": 6,
         "require_confirmation": true,
         "rsi_oversold": 45,
         "rsi_overbought": 65
     },
-
     "exits": {
         "breakout_stop_enabled": false,
         "stoploss": -0.005,
@@ -73,7 +68,6 @@
         "breakout_atr_z": 1.5,
         "breakout_momentum": 0.02
     },
-
     "leverage": {
         "min_leverage": 2,
         "max_leverage": 3,

@@ -75,7 +75,16 @@ def check_exit(
             peak_profit.pop(trade_key, None)
             return "trailing"
 
-    # --- 4. TIME STOP ---
+    # --- 4. EARLY LOSS EXIT ---
+    # If still losing after N candles, exit early to limit damage
+    early_candles = exit_cfg.get("early_loss_candles", 0)
+    if early_candles > 0:
+        early_threshold = exit_cfg.get("early_loss_threshold", -0.005)
+        if trade_candles >= early_candles and current_profit < early_threshold:
+            peak_profit.pop(trade_key, None)
+            return "early_loss"
+
+    # --- 5. TIME STOP ---
     if trade_candles >= exit_cfg["time_stop_candles"]:
         peak_profit.pop(trade_key, None)
         return "time_stop"

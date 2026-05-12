@@ -6,7 +6,7 @@ All engines add these columns to the dataframe:
     - at_support: bool — price within proximity of support
     - at_resistance: bool — price within proximity of resistance
 
-Engine selection via cfg["level_engine"]: "order_blocks" | "pivot_fractal" | "rolling_minmax"
+Engine selection via cfg["level_engine"]: "order_blocks" | "pivot_fractal" | "rolling_minmax" | "combined"
 """
 from __future__ import annotations
 
@@ -23,6 +23,8 @@ def compute(dataframe: DataFrame, cfg: dict) -> DataFrame:
         return _pivot_fractal(dataframe, cfg["pivot_fractal"])
     elif engine == "rolling_minmax":
         return _rolling_minmax(dataframe, cfg["rolling_minmax"], cfg["consolidation"])
+    elif engine == "combined":
+        return _combined(dataframe, cfg)
     else:
         raise ValueError(f"Unknown level engine: {engine}")
 
@@ -263,5 +265,49 @@ def _rolling_minmax(dataframe: DataFrame, cfg: dict, consol_cfg: dict) -> DataFr
     dataframe["at_resistance"] = (
         ((close - resistance_vals).abs() / close) <= proximity_pct
     )
+
+    return dataframe
+
+
+# =============================================================================
+# Engine 4: Combined (Order Blocks + Rolling MinMax)
+# =============================================================================
+
+def _combined(dataframe: DataFrame, cfg: dict) -> DataFrame:
+    """Union of order_blocks and rolling_minmax signals.
+
+    Runs both engines, takes the OR of at_support/at_resistance.
+    Support/resistance columns use OB level when available, else rolling.
+    """
+    df_copy = dataframe.copy()
+
+    # Run order blocks
+    _order_blocks(dataframe, cfg["order_blocks"])
+    ob_sup = dataframe["at_support"].copy()
+    ob_res = dataframe["at_resistance"].copy()
+    ob_sup_level = dataframe["support"].copy()
+    ob_res_level = dataframe["resistance"].copy()
+
+    # Run rolling minmax on copy
+    _rolling_minmax(df_copy, cfg["rolling_minmax"], cfg["consolidation"])
+    rm_sup = df_copy["at_support"]
+    rm_res = df_copy["at_resistance"]
+    rm_sup_level = df_copy["support"]
+    rm_res_level = df_copy["resistance"]
+
+    # Tag source for entry confirmation logic:
+    # OB signals don't need confirmation, rolling signals do
+    dataframe["at_support_ob"] = ob_sup
+    dataframe["at_support_rm"] = rm_sup & ~ob_sup  # only rolling if OB didn't fire
+    dataframe["at_resistance_ob"] = ob_res
+    dataframe["at_resistance_rm"] = rm_res & ~ob_res
+
+    # Union: at_support if either engine says so
+    dataframe["at_support"] = ob_sup | rm_sup
+    dataframe["at_resistance"] = ob_res | rm_res
+
+    # Prefer OB levels (more precise), fallback to rolling
+    dataframe["support"] = ob_sup_level.where(ob_sup_level.notna(), rm_sup_level)
+    dataframe["resistance"] = ob_res_level.where(ob_res_level.notna(), rm_res_level)
 
     return dataframe
