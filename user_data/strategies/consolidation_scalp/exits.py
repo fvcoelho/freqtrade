@@ -29,7 +29,10 @@ def check_exit(
     """Check exit conditions in priority order. Returns exit reason or None."""
     exit_cfg = cfg["exits"]
     trade_minutes = (current_time - trade.open_date_utc).total_seconds() / 60
-    trade_candles = trade_minutes / 5  # 5m timeframe
+    # Convert minutes to candles based on configured timeframe
+    tf_minutes = {"1m": 1, "5m": 5, "15m": 15, "1h": 60}
+    candle_minutes = tf_minutes.get(cfg.get("timeframe", "5m"), 5)
+    trade_candles = trade_minutes / candle_minutes
 
     # Track peak profit for trailing
     trade_key = f"{pair}_{trade.open_date_utc}"
