@@ -39,7 +39,7 @@ def check_exit(
     peak = peak_profit[trade_key]
 
     # --- 1. BREAKOUT KILL SWITCH ---
-    if dp:
+    if exit_cfg.get("breakout_stop_enabled", True) and dp:
         dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
         if dataframe is not None and not dataframe.empty:
             last = dataframe.iloc[-1]

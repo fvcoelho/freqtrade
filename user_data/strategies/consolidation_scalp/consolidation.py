@@ -68,6 +68,14 @@ def compute(dataframe: DataFrame, cfg: dict) -> DataFrame:
         & (dataframe["vol_zscore"] <= vz_max)
     )
 
+    # RSI (for entry confirmation filter)
+    delta = close.diff()
+    gain = delta.where(delta > 0, 0.0).rolling(14).mean()
+    loss = (-delta.where(delta < 0, 0.0)).rolling(14).mean()
+    rs = gain / loss.replace(0, np.nan)
+    dataframe["rsi"] = 100 - (100 / (1 + rs))
+    dataframe["rsi"] = dataframe["rsi"].fillna(50)
+
     # Breakout kill switch
     dataframe["is_breakout"] = (
         (dataframe["atr_zscore"] > c["breakout_atr_z"])

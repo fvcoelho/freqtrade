@@ -1,6 +1,6 @@
 {
     "_comment": "Consolidation Scalp — BTC mean-reversion in range-bound markets",
-    "pair": "BTC/USDT:USDT",
+    "pair": "BTC/USDC:USDC",
     "timeframe": "5m",
     "startup_candle_count": 200,
     "stake_per_position": 400.0,
@@ -46,15 +46,18 @@
 
     "entries": {
         "cooldown_candles": 6,
-        "require_confirmation": true
+        "require_confirmation": true,
+        "rsi_oversold": 45,
+        "rsi_overbought": 65
     },
 
     "exits": {
+        "breakout_stop_enabled": false,
         "stoploss": -0.005,
         "tp_partial_pct": 0.003,
         "tp_partial_ratio": 0.5,
-        "trailing_activate": 0.004,
-        "trailing_distance": 0.002,
+        "trailing_activate": 0.002,
+        "trailing_distance": 0.001,
         "time_stop_candles": 36,
         "breakout_atr_z": 1.5,
         "breakout_momentum": 0.02
@@ -62,7 +65,7 @@
 
     "leverage": {
         "min_leverage": 2,
-        "max_leverage": 6,
+        "max_leverage": 3,
         "range_pct_max": 0.035
     }
 }

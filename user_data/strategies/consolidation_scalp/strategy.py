@@ -41,14 +41,14 @@ class ConsolidationScalpStrategy(IStrategy):
     """BTC consolidation scalper — mean-reversion off S/R levels."""
 
     INTERFACE_VERSION = 3
-    can_short = True
+    can_short = False
     process_only_new_candles = True
     timeframe = "5m"
     startup_candle_count = 200
     stoploss = -0.05
     minimal_roi = {}
     trailing_stop = False
-    use_custom_stoploss = True
+    use_custom_stoploss = False
     position_adjustment_enable = False
 
     def __init__(self, *args, **kwargs):
@@ -104,11 +104,7 @@ class ConsolidationScalpStrategy(IStrategy):
             self._cfg, self.dp, self.timeframe, self._peak_profit,
         )
 
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> float | None:
-        """Fixed tight stoploss for scalping."""
-        return self._cfg["exits"]["stoploss"]
+    # Stoploss handled by IStrategy.stoploss (-2%) — no custom_stoploss needed
 
     # =========================================================================
     # LEVERAGE
