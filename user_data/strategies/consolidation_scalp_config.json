@@ -69,8 +69,8 @@
         "breakout_momentum": 0.02
     },
     "leverage": {
-        "min_leverage": 2,
-        "max_leverage": 3,
+        "min_leverage": 3,
+        "max_leverage": 5,
         "range_pct_max": 0.035
     }
 }
