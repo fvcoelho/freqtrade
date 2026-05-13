@@ -101,16 +101,17 @@ def generate(
     pos = dataframe["grid_pos"]
     pos_prev = pos.shift(1)
 
-    buy_zone = 1 / n_levels          # 0.2 for 5 levels
-    sell_zone = 1 - (1 / n_levels)   # 0.8 for 5 levels
-
-    # Crossing into buy/sell zone
-    entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
-    entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
-
     # Bullish/bearish confirmation
     bullish = dataframe["close"] > dataframe["open"]
     bearish = dataframe["close"] < dataframe["open"]
+
+    # Zone thresholds
+    buy_zone = 1 / n_levels          # 0.2 for 5 levels
+    sell_zone = 1 - (1 / n_levels)   # 0.8 for 5 levels
+
+    # Enter when price CROSSES into the zone
+    entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
+    entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
 
     long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
     short_signal = consolidating & no_chaos & entering_sell & bearish & no_short

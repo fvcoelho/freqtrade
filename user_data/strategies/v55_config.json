@@ -78,7 +78,7 @@
     "grid": {
         "enabled": true,
         "n_levels": 5,
-        "cooldown_candles": 2,
+        "cooldown_candles": 1,
         "range_window": 48,
         "atr_period": 14,
         "atr_z_window": 48,
