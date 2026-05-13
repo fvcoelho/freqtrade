@@ -79,17 +79,16 @@
         "enabled": false,
         "long_enabled": true,
         "short_enabled": true,
-        "cooldown_candles": 6,
-        "rsi_period": 14,
-        "rsi_rolling_window": 8,
-        "rsi_oversold": 35,
-        "rsi_overbought": 65,
+        "cooldown_candles": 3,
+        "bb_window": 20,
+        "bb_std": 2.0,
         "atr_period": 14,
         "atr_z_window": 48,
         "atr_z_max": 0.0,
         "mom_window": 12,
         "mom_max": 0.008,
-        "leverage": 5.0
+        "leverage": 5.0,
+        "bb_stoploss": -0.03
     },
     "btc_trend": {
         "pump_threshold": 1.5,

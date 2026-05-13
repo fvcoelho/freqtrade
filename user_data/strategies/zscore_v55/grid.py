@@ -1,8 +1,8 @@
-"""BTC MACD Recovery scalp for V55 — consolidation regime.
+"""BTC BB Bounce scalp for V55 — consolidation regime.
 
-Enters when RSI was recently oversold and MACD crosses above signal
-(recovery pattern). Only during BTC consolidation.
-Inspired by macd_recovery strategy by Robert Roman.
+Simple mean-reversion: buy when price drops below BB lower band,
+TP at BB middle band. No time stop — lets trade run.
+Inspired by mark_strat strategy.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pandas import DataFrame
 
 
 def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
-    """Compute MACD, RSI, and consolidation flag for BTC."""
+    """Compute Bollinger Bands and consolidation flag for BTC."""
     grid_cfg = cfg["grid"]
     btc_pair = cfg["groups"]["btc_ref"]
 
@@ -22,25 +22,21 @@ def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
     high = dataframe["high"]
     low = dataframe["low"]
 
-    # MACD (12, 26, 9)
-    ema12 = close.ewm(span=12).mean()
-    ema26 = close.ewm(span=26).mean()
-    dataframe["macd"] = ema12 - ema26
-    dataframe["macdsignal"] = dataframe["macd"].ewm(span=9).mean()
-    dataframe["macdhist"] = dataframe["macd"] - dataframe["macdsignal"]
+    # Bollinger Bands
+    bb_window = grid_cfg.get("bb_window", 20)
+    bb_std = grid_cfg.get("bb_std", 2.0)
+    sma = close.rolling(bb_window).mean()
+    std = close.rolling(bb_window).std()
+    dataframe["bb_upper"] = sma + bb_std * std
+    dataframe["bb_lower"] = sma - bb_std * std
+    dataframe["bb_mid"] = sma
 
     # RSI
-    rsi_period = grid_cfg.get("rsi_period", 14)
     delta = close.diff()
-    gain = delta.where(delta > 0, 0.0).rolling(rsi_period).mean()
-    loss_s = (-delta.where(delta < 0, 0.0)).rolling(rsi_period).mean()
+    gain = delta.where(delta > 0, 0.0).rolling(14).mean()
+    loss_s = (-delta.where(delta < 0, 0.0)).rolling(14).mean()
     rs = gain / loss_s.replace(0, np.nan)
     dataframe["rsi"] = (100 - (100 / (1 + rs))).fillna(50)
-
-    # RSI rolling min/max (recovery detection)
-    rsi_window = grid_cfg.get("rsi_rolling_window", 8)
-    dataframe["rsi_min8"] = dataframe["rsi"].rolling(rsi_window).min()
-    dataframe["rsi_max8"] = dataframe["rsi"].rolling(rsi_window).max()
 
     # BTC consolidation detection
     atr_period = grid_cfg.get("atr_period", 14)
@@ -66,10 +62,11 @@ def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
 
 
 def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
-    """Generate MACD recovery signals for BTC during consolidation.
+    """Generate BB bounce signals for BTC during consolidation.
 
-    Long: RSI was recently oversold + MACD crosses above signal
-    Short: RSI was recently overbought + MACD crosses below signal
+    Long: price < BB lower (oversold bounce)
+    Short: price > BB upper (overbought rejection)
+    No time stop — exits via ROI, trailing, or BB mid TP.
     """
     btc_pair = cfg["groups"]["btc_ref"]
     if pair != btc_pair:
@@ -79,9 +76,7 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
         return dataframe
 
     grid_cfg = cfg["grid"]
-    cooldown = grid_cfg.get("cooldown_candles", 2)
-    rsi_oversold = grid_cfg.get("rsi_oversold", 35)
-    rsi_overbought = grid_cfg.get("rsi_overbought", 65)
+    cooldown = grid_cfg.get("cooldown_candles", 3)
     long_enabled = grid_cfg.get("long_enabled", True)
     short_enabled = grid_cfg.get("short_enabled", True)
 
@@ -91,34 +86,17 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
     no_long = dataframe["enter_long"] == 0
     no_short = dataframe["enter_short"] == 0
 
-    macd = dataframe["macd"]
-    signal = dataframe["macdsignal"]
-    macd_prev = macd.shift(1)
-    signal_prev = signal.shift(1)
+    close = dataframe["close"]
 
-    # MACD crosses
-    macd_cross_up = (macd_prev <= signal_prev) & (macd > signal)
-    macd_cross_down = (macd_prev >= signal_prev) & (macd < signal)
-
-    # RSI recovery: was recently oversold/overbought
-    rsi_was_oversold = dataframe["rsi_min8"] < rsi_oversold
-    rsi_was_overbought = dataframe["rsi_max8"] > rsi_overbought
-
-    # Long: RSI was oversold recently + MACD crosses up (recovery)
+    # Long: price below BB lower band (mark_strat style — simple)
     if long_enabled:
-        long_signal = (
-            consolidating & no_chaos & no_long
-            & rsi_was_oversold & macd_cross_up
-        )
+        long_signal = consolidating & no_chaos & no_long & (close < dataframe["bb_lower"])
     else:
         long_signal = dataframe["close"] < 0
 
-    # Short: RSI was overbought recently + MACD crosses down
+    # Short: price above BB upper band
     if short_enabled:
-        short_signal = (
-            consolidating & no_chaos & no_short
-            & rsi_was_overbought & macd_cross_down
-        )
+        short_signal = consolidating & no_chaos & no_short & (close > dataframe["bb_upper"])
     else:
         short_signal = dataframe["close"] < 0
 
@@ -131,9 +109,9 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
 
     for i in range(len(dataframe)):
         if long_arr[i]:
-            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "macd_rec_long"
+            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "bb_bounce_long"
         elif short_arr[i]:
-            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "macd_rec_short"
+            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "bb_bounce_short"
 
     return dataframe
 
