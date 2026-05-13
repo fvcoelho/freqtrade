@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from zscore_v54.groups import GroupState, can_open_trade
+from zscore_v55.groups import GroupState, can_open_trade
 
 
 def confirm_entry(
