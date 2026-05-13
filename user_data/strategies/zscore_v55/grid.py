@@ -114,11 +114,11 @@ def generate(
     gn = group_name
 
     long_signal = (
-        consolidating & vol & safe_long & bullish & rsi_long_ok
+        consolidating & safe_long & bullish & rsi_long_ok
         & long_cross & no_long
     )
     short_signal = (
-        consolidating & vol & safe_short & bearish & rsi_short_ok
+        consolidating & safe_short & bearish & rsi_short_ok
         & short_cross & no_short
     )
 

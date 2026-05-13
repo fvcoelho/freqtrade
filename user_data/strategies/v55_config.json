@@ -79,7 +79,7 @@
         "n_levels": 5,
         "cooldown_candles": 4,
         "require_confirmation": true,
-        "rsi_filter": true,
+        "rsi_filter": false,
         "rsi_oversold": 40,
         "rsi_overbought": 60
     },
