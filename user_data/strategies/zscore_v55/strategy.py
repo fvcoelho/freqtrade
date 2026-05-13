@@ -40,7 +40,7 @@ from lib import btc_trend, volume, regime
 from zscore_v55 import config as cfg_loader
 from zscore_v55 import groups as grp
 from zscore_v55.state import StrategyState
-from zscore_v55 import zscore, entries, exits, leverage as lev_mod, risk, dca
+from zscore_v55 import zscore, entries, exits, leverage as lev_mod, risk, dca, grid
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +208,25 @@ class ZScoreV55Strategy(IStrategy):
         # Volume filter
         volume.compute(dataframe, self._cfg)
 
+        # Consolidation regime flag (for grid module)
+        regime_cfg = self._cfg["regime"]
+        is_consolidating = (
+            (dataframe["btc_atr_z"] < regime_cfg["consolidation_atr_z"])
+            & (dataframe["btc_mom"].abs() < regime_cfg["consolidation_btc_mom_max"])
+        )
+        # Also check spread is small (using first group's spread)
+        if self._groups:
+            spread_col = f"spread_z_{self._groups[0].name.lower()}"
+            if spread_col in dataframe.columns:
+                is_consolidating = is_consolidating & (
+                    dataframe[spread_col].abs() < regime_cfg["consolidation_spread_max"]
+                )
+        dataframe["is_consolidating"] = is_consolidating
+
+        # Grid levels (for consolidation regime)
+        if self._cfg.get("grid", {}).get("enabled", False):
+            grid.compute_levels(dataframe, self._cfg)
+
         # Export indicators for replay (backtest only)
         if self.dp and self.dp.runmode.value in ("backtest", "hyperopt"):
             export_dir = Path(__file__).parent.parent.parent / "backtest_results" / "indicators"
@@ -233,15 +252,27 @@ class ZScoreV55Strategy(IStrategy):
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         pair = metadata["pair"]
 
-        # Initialize columns (first group call)
+        # Initialize columns
         dataframe["enter_long"] = 0
         dataframe["enter_short"] = 0
         dataframe["enter_tag"] = ""
+
+        grid_enabled = self._cfg.get("grid", {}).get("enabled", False)
 
         for g in self._groups:
             if pair not in g.all_pairs:
                 continue
             col = f"spread_z_{g.name.lower()}"
+
+            if grid_enabled:
+                # Consolidation → grid signals
+                grid.generate(
+                    dataframe, pair, self._cfg,
+                    g.sub1, g.sub2, g.name,
+                )
+
+            # Ranging → mean-reversion signals (V54)
+            # entries.generate only fills rows where enter_long/short == 0
             entries.generate(
                 dataframe, pair, self._cfg, self._btc_trend,
                 g.sub1, g.sub2, g.name, col,
