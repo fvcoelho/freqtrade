@@ -1,8 +1,7 @@
-"""Grid trading module for ZScore V55 — consolidation regime.
+"""Grid trading module for ZScore V55 — BTC price-action grid during consolidation.
 
-Uses spread z-score levels as grid: buy when spread z crosses down
-through a level, sell when it crosses up. Natural grid for mean-reversion
-pairs — the z-score oscillates around 0 during consolidation.
+Operates only on BTC/USDC:USDC. Uses rolling high/low to define the range,
+buys at support (bottom zone) and sells at resistance (top zone).
 """
 from __future__ import annotations
 
@@ -10,11 +9,58 @@ import numpy as np
 from pandas import DataFrame
 
 
-def compute_levels(dataframe: DataFrame, cfg: dict) -> DataFrame:
-    """Add grid helper columns. Requires spread_z columns to exist."""
+def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
+    """Compute grid levels for BTC. Only adds columns for BTC pair.
+
+    For non-BTC pairs, returns dataframe unchanged.
+    For BTC, adds: grid_pos, grid_high, grid_low, is_consolidating_btc
+    """
     grid_cfg = cfg["grid"]
+    btc_pair = cfg["groups"]["btc_ref"]
+
+    if pair != btc_pair:
+        return dataframe
+
+    range_window = grid_cfg.get("range_window", 48)
+    atr_period = grid_cfg.get("atr_period", 14)
+    atr_z_window = grid_cfg.get("atr_z_window", 48)
+    atr_z_max = grid_cfg.get("atr_z_max", 0.0)
+    mom_window = grid_cfg.get("mom_window", 12)
+    mom_max = grid_cfg.get("mom_max", 0.008)
 
     close = dataframe["close"]
+    high = dataframe["high"]
+    low = dataframe["low"]
+
+    # Rolling range
+    rolling_high = high.rolling(range_window).max()
+    rolling_low = low.rolling(range_window).min()
+    range_size = rolling_high - rolling_low
+
+    dataframe["grid_high"] = rolling_high
+    dataframe["grid_low"] = rolling_low
+    dataframe["grid_pos"] = (
+        (close - rolling_low) / range_size.replace(0, np.nan)
+    ).fillna(0.5)
+
+    # BTC-specific consolidation: ATR z-score + momentum
+    prev_close = close.shift(1)
+    tr = np.maximum(
+        high - low,
+        np.maximum(abs(high - prev_close), abs(low - prev_close)),
+    )
+    atr = tr.rolling(atr_period).mean()
+    atr_mean = atr.rolling(atr_z_window).mean()
+    atr_std = atr.rolling(atr_z_window).std()
+    atr_z = ((atr - atr_mean) / atr_std.replace(0, np.nan)).fillna(0)
+
+    momentum = close.pct_change(mom_window).abs()
+
+    dataframe["is_consolidating_btc"] = (
+        (atr_z < atr_z_max) & (momentum < mom_max)
+    )
+
+    # RSI
     if "rsi" not in dataframe.columns:
         delta = close.diff()
         gain = delta.where(delta > 0, 0.0).rolling(14).mean()
@@ -29,98 +75,64 @@ def generate(
     dataframe: DataFrame,
     pair: str,
     cfg: dict,
-    group_sub1: list[str],
-    group_sub2: list[str],
-    group_name: str,
 ) -> DataFrame:
-    """Generate grid signals using spread z-score crossings during consolidation.
+    """Generate grid signals for BTC only.
 
-    Grid levels are at z-score intervals: ±0.5, ±1.0, ±1.5, etc.
-    Long when z crosses DOWN through a negative level (spread cheapening).
-    Short when z crosses UP through a positive level (spread richening).
+    Buy when price enters bottom zone during BTC consolidation.
+    Sell when price enters top zone during BTC consolidation.
     """
+    btc_pair = cfg["groups"]["btc_ref"]
+    if pair != btc_pair:
+        return dataframe
+
+    if "is_consolidating_btc" not in dataframe.columns:
+        return dataframe
+
     grid_cfg = cfg["grid"]
     n_levels = grid_cfg["n_levels"]
     cooldown = grid_cfg["cooldown_candles"]
-    require_confirm = grid_cfg["require_confirmation"]
-    z_step = grid_cfg.get("z_step", 0.5)
 
-    is_a = pair in group_sub1
-    is_b = pair in group_sub2
-    if not is_a and not is_b:
-        return dataframe
-
-    consolidating = dataframe["is_consolidating"]
-
+    consolidating = dataframe["is_consolidating_btc"]
     no_chaos = ~dataframe["btc_high_vol"]
-    safe_long = ~dataframe["btc_dump"] & no_chaos
-    safe_short = ~dataframe["btc_pump"] & no_chaos
-
-    if require_confirm:
-        bullish = dataframe["close"] > dataframe["open"]
-        bearish = dataframe["close"] < dataframe["open"]
-    else:
-        bullish = True
-        bearish = True
 
     no_long = dataframe["enter_long"] == 0
     no_short = dataframe["enter_short"] == 0
 
-    # Use group-specific spread z-score
-    spread_col = f"spread_z_{group_name.lower()}"
-    if spread_col not in dataframe.columns:
-        return dataframe
+    pos = dataframe["grid_pos"]
+    pos_prev = pos.shift(1)
 
-    z = dataframe[spread_col]
-    z_prev = z.shift(1)
+    buy_zone = 1 / n_levels          # 0.2 for 5 levels
+    sell_zone = 1 - (1 / n_levels)   # 0.8 for 5 levels
 
-    long_cross = np.zeros(len(dataframe), dtype=bool)
-    short_cross = np.zeros(len(dataframe), dtype=bool)
-    cross_level = np.zeros(len(dataframe), dtype=int)
+    # Crossing into buy/sell zone
+    entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
+    entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
 
-    for lv in range(1, n_levels + 1):
-        neg_threshold = -lv * z_step  # -0.5, -1.0, -1.5, ...
-        pos_threshold = lv * z_step   # +0.5, +1.0, +1.5, ...
+    # Bullish/bearish confirmation
+    bullish = dataframe["close"] > dataframe["open"]
+    bearish = dataframe["close"] < dataframe["open"]
 
-        # Z crosses DOWN through negative level → long (spread is cheap)
-        crossed_down = (z_prev > neg_threshold) & (z <= neg_threshold)
-        # Z crosses UP through positive level → short (spread is rich)
-        crossed_up = (z_prev < pos_threshold) & (z >= pos_threshold)
-
-        down_mask = crossed_down.values.astype(bool)
-        up_mask = crossed_up.values.astype(bool)
-
-        long_cross = long_cross | down_mask
-        short_cross = short_cross | up_mask
-        cross_level[down_mask] = lv
-        cross_level[up_mask] = lv
-
-    gn = group_name
-
-    long_signal = (
-        consolidating & safe_long
-        & long_cross & no_long
-    )
-    # Grid short disabled — consolidation long-only
-    short_signal = np.zeros(len(dataframe), dtype=bool)
+    long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
+    short_signal = consolidating & no_chaos & entering_sell & bearish & no_short
 
     long_arr = long_signal.values.astype(bool).copy()
-    short_arr = np.asarray(short_signal).astype(bool).copy()
+    short_arr = short_signal.values.astype(bool).copy()
     long_arr, short_arr = _apply_cooldown(long_arr, short_arr, cooldown)
 
+    # Set signals
+    levels = np.round(pos.values * n_levels).astype(int)
+
     dataframe.loc[long_arr, "enter_long"] = 1
-    dataframe.loc[long_arr, "enter_tag"] = ""
     dataframe.loc[short_arr, "enter_short"] = 1
-    dataframe.loc[short_arr, "enter_tag"] = ""
 
     for i in range(len(dataframe)):
         if long_arr[i]:
             dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = (
-                f"grid_long_L{cross_level[i]}_{gn}"
+                f"grid_long_L{levels[i]}"
             )
         elif short_arr[i]:
             dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = (
-                f"grid_short_L{cross_level[i]}_{gn}"
+                f"grid_short_L{levels[i]}"
             )
 
     return dataframe

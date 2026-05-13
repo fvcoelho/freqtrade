@@ -79,11 +79,12 @@
         "enabled": true,
         "n_levels": 5,
         "cooldown_candles": 2,
-        "require_confirmation": false,
-        "rsi_filter": false,
-        "rsi_oversold": 40,
-        "rsi_overbought": 60,
-        "z_step": 1.0
+        "range_window": 48,
+        "atr_period": 14,
+        "atr_z_window": 48,
+        "atr_z_max": 0.0,
+        "mom_window": 12,
+        "mom_max": 0.008
     },
     "btc_trend": {
         "pump_threshold": 1.5,
@@ -186,6 +187,6 @@
         "roi_gate_mid_z_profit": 0.013,
         "grid_time_stop_candles": 3,
         "grid_tp_profit": 0.003,
-        "ranging_time_stop_candles": 12
+        "ranging_time_stop_candles": 72
     }
 }

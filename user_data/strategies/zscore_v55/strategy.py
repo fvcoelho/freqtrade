@@ -223,9 +223,9 @@ class ZScoreV55Strategy(IStrategy):
                 )
         dataframe["is_consolidating"] = is_consolidating
 
-        # Grid levels (for consolidation regime)
+        # Grid levels (BTC only)
         if self._cfg.get("grid", {}).get("enabled", False):
-            grid.compute_levels(dataframe, self._cfg)
+            grid.compute_levels(dataframe, pair, self._cfg, self.dp)
 
         # Export indicators for replay (backtest only)
         if self.dp and self.dp.runmode.value in ("backtest", "hyperopt"):
@@ -259,20 +259,15 @@ class ZScoreV55Strategy(IStrategy):
 
         grid_enabled = self._cfg.get("grid", {}).get("enabled", False)
 
+        # Grid signals for BTC (before group loop — BTC-specific)
+        if grid_enabled:
+            grid.generate(dataframe, pair, self._cfg)
+
+        # Ranging → mean-reversion signals per group
         for g in self._groups:
             if pair not in g.all_pairs:
                 continue
             col = f"spread_z_{g.name.lower()}"
-
-            if grid_enabled:
-                # Consolidation → grid signals
-                grid.generate(
-                    dataframe, pair, self._cfg,
-                    g.sub1, g.sub2, g.name,
-                )
-
-            # Ranging → mean-reversion signals (V54)
-            # entries.generate only fills rows where enter_long/short == 0
             entries.generate(
                 dataframe, pair, self._cfg, self._btc_trend,
                 g.sub1, g.sub2, g.name, col,
