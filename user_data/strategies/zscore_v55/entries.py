@@ -173,13 +173,11 @@ def generate(
                 mr_long = is_ranging & vol_adaptive & regime & spread_high & safe_long & pair_z_long & no_long
                 dataframe.loc[mr_long, ["enter_long", "enter_tag"]] = (1, f"mr_long_b_{gn}")
 
-    # --- CONSOLIDATION ENTRIES ---
+    # --- CONSOLIDATION ENTRIES (disabled by default — consol_zscore_entry=99) ---
     consol_spread_low = dataframe[spread_z_col] < -consol_zscore_entry
     consol_pair_z_long = dataframe["pair_zscore"] < -consol_pair_z_entry
-    if is_a:
-        consol_long = (
-            is_consolidation & regime & consol_spread_low & safe_long & consol_pair_z_long
-        )
+    if is_a and group_a_long:
+        consol_long = is_consolidation & regime & consol_spread_low & safe_long & consol_pair_z_long
         mask = consol_long & no_long
         dataframe.loc[mask, ["enter_long", "enter_tag"]] = (1, f"consol_long_a_{gn}")
 

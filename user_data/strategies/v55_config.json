@@ -70,13 +70,13 @@
         "spread_vol_max_z": 2.5
     },
     "consolidation": {
-        "consol_zscore_entry": 1.5,
-        "consol_pair_z_entry": 1.0,
-        "consol_time_stop_candles": 12,
+        "consol_zscore_entry": 99.0,
+        "consol_pair_z_entry": 99.0,
+        "consol_time_stop_candles": 6,
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": true,
+        "enabled": false,
         "long_enabled": false,
         "short_enabled": true,
         "n_levels": 5,
