@@ -91,6 +91,7 @@
         "bb_stoploss": -0.03
     },
     "btc_trend": {
+        "timeframe": "1h",
         "pump_threshold": 1.5,
         "dump_threshold": -1.5,
         "high_vol_threshold": 2.0,

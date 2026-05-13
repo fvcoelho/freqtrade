@@ -151,7 +151,8 @@ class ZScoreV55Strategy(IStrategy):
 
     def informative_pairs(self):
         pairs = self.dp.current_whitelist() if self.dp else []
-        inf = [(pair, "1d") for pair in pairs] + [(self.BTC_REF, "1h")]
+        btc_tf = self._cfg.get("btc_trend", {}).get("timeframe", "1h")
+        inf = [(pair, "1d") for pair in pairs] + [(self.BTC_REF, btc_tf)]
         if self._fast_exit_enabled:
             inf += [(pair, self._fast_exit_tf) for pair in pairs]
             inf.append((self.BTC_REF, self._fast_exit_tf))
@@ -170,11 +171,12 @@ class ZScoreV55Strategy(IStrategy):
             self._df_cache.clear()
             self._df_cache_cycle = cycle_id
 
-        # BTC trend (1h timeframe for stable regime classification)
+        # BTC trend (15m timeframe for faster regime detection)
         if not self._btc_trend:
-            btc_1h = self._get_pair_df(self.BTC_REF, "1h")
-            if btc_1h is not None and len(btc_1h) >= 50:
-                self._btc_trend = btc_trend.compute(btc_1h, self._cfg)
+            btc_tf = self._cfg.get("btc_trend", {}).get("timeframe", "1h")
+            btc_df = self._get_pair_df(self.BTC_REF, btc_tf)
+            if btc_df is not None and len(btc_df) >= 50:
+                self._btc_trend = btc_trend.compute(btc_df, self._cfg)
 
         # Map BTC signals to pair timeframe
         dataframe = btc_trend.map_to_timeframe(self._btc_trend, dataframe)
