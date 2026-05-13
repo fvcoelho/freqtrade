@@ -137,14 +137,21 @@ def check_exit(
                     peak_profit.pop(trade_key, None)
                     return "fast_rapid_spike"
 
-    # --- 2. CONSOLIDATION TIME STOP ---
-    if entry_tag.startswith("consol_"):
-        if trade_minutes / 5 >= consol_cfg["consol_time_stop_candles"]:
-            return "consol_time_stop"
+    # --- 2. PER-REGIME TIME STOP ---
+    candle_minutes = 5  # default for 5m timeframe
+    trade_candles = trade_minutes / candle_minutes
 
-    # --- 2b. GLOBAL TIME STOP ---
-    if trade_minutes >= 360:
-        return "time_stop"
+    if entry_tag.startswith("grid_"):
+        grid_time_stop = exit_cfg.get("grid_time_stop_candles", 6)
+        if trade_candles >= grid_time_stop:
+            return "grid_time_stop"
+    elif entry_tag.startswith("consol_"):
+        if trade_candles >= consol_cfg["consol_time_stop_candles"]:
+            return "consol_time_stop"
+    else:
+        ranging_time_stop = exit_cfg.get("ranging_time_stop_candles", 12)
+        if trade_candles >= ranging_time_stop:
+            return "time_stop"
 
     # --- 2c. NO REVERSION EXIT ---
     nr_cfg = cfg.get("no_reversion_exit", {})
