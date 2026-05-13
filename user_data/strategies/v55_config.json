@@ -99,7 +99,7 @@
     },
     "volume": {
         "vol_ma_window": 144,
-        "vol_ok_threshold": 0.0
+        "vol_ok_threshold": 1.0
     },
     "leverage": {
         "base_multiplier": 3.0,
