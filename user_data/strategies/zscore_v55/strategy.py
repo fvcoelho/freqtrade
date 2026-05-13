@@ -379,7 +379,12 @@ class ZScoreV55Strategy(IStrategy):
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
-        # Pass strategy state for warmup leverage mode
+        # Grid trades: fixed leverage
+        if entry_tag and entry_tag.startswith("grid_"):
+            grid_lev = self._cfg.get("grid", {}).get("leverage", 5.0)
+            return min(grid_lev, max_leverage)
+
+        # Ranging trades: warmup leverage mode
         self._pending_features["_strategy_state"] = self._state
         lev, features = lev_mod.compute(
             pair, self._cfg, self.dp, self.timeframe,

@@ -84,7 +84,8 @@
         "atr_z_window": 48,
         "atr_z_max": 0.0,
         "mom_window": 12,
-        "mom_max": 0.008
+        "mom_max": 0.008,
+        "leverage": 5.0
     },
     "btc_trend": {
         "pump_threshold": 1.5,
