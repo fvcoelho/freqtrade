@@ -62,6 +62,7 @@
         "consolidation_atr_z": -0.5,
         "consolidation_spread_max": 1.5,
         "consolidation_btc_mom_max": 0.8,
+        "consolidation_range_window": 48,
         "trending_btc_mom": 1.5,
         "trending_atr_z": 1.5,
         "spread_vol_filter": false,
@@ -77,11 +78,12 @@
     "grid": {
         "enabled": true,
         "n_levels": 5,
-        "cooldown_candles": 4,
-        "require_confirmation": true,
+        "cooldown_candles": 2,
+        "require_confirmation": false,
         "rsi_filter": false,
         "rsi_oversold": 40,
-        "rsi_overbought": 60
+        "rsi_overbought": 60,
+        "z_step": 1.0
     },
     "btc_trend": {
         "pump_threshold": 1.5,
@@ -182,7 +184,8 @@
         "roi_gate_high_z_profit": 0.015,
         "roi_gate_mid_z_minutes": 15,
         "roi_gate_mid_z_profit": 0.013,
-        "grid_time_stop_candles": 6,
+        "grid_time_stop_candles": 3,
+        "grid_tp_profit": 0.003,
         "ranging_time_stop_candles": 12
     }
 }
