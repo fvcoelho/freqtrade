@@ -137,11 +137,25 @@ def check_exit(
                     peak_profit.pop(trade_key, None)
                     return "fast_rapid_spike"
 
+    # --- 1b. MACD Recovery exit — MACD crosses back against position ---
+    if entry_tag.startswith("macd_rec_") and dp:
+        dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
+        if dataframe is not None and not dataframe.empty:
+            last = dataframe.iloc[-1]
+            macd = float(last.get("macd", 0))
+            signal = float(last.get("macdsignal", 0))
+            is_long = trade.is_short is False
+            if current_profit > 0:
+                if is_long and macd < signal:
+                    return "macd_rec_tp"
+                elif not is_long and macd > signal:
+                    return "macd_rec_tp"
+
     # --- 2. PER-REGIME TIME STOP ---
     candle_minutes = 5  # default for 5m timeframe
     trade_candles = trade_minutes / candle_minutes
 
-    if entry_tag.startswith("grid_"):
+    if entry_tag.startswith("macd_rec_") or entry_tag.startswith("grid_"):
         grid_time_stop = exit_cfg.get("grid_time_stop_candles", 6)
         if trade_candles >= grid_time_stop:
             return "grid_time_stop"

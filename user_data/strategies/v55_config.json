@@ -76,12 +76,14 @@
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": true,
-        "long_enabled": false,
+        "enabled": false,
+        "long_enabled": true,
         "short_enabled": true,
-        "n_levels": 5,
-        "cooldown_candles": 1,
-        "range_window": 48,
+        "cooldown_candles": 6,
+        "rsi_period": 14,
+        "rsi_rolling_window": 8,
+        "rsi_oversold": 35,
+        "rsi_overbought": 65,
         "atr_period": 14,
         "atr_z_window": 48,
         "atr_z_max": 0.0,
@@ -188,7 +190,7 @@
         "roi_gate_high_z_profit": 0.015,
         "roi_gate_mid_z_minutes": 15,
         "roi_gate_mid_z_profit": 0.013,
-        "grid_time_stop_candles": 3,
+        "grid_time_stop_candles": 6,
         "grid_tp_profit": 0.003,
         "ranging_time_stop_candles": 72
     }
