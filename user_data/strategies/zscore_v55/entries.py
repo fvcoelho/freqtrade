@@ -112,6 +112,9 @@ def generate(
 
     # --- Safety filters ---
     vol = dataframe["vol_ok"] == 1
+    # Volume required for ranging, not for consolidation
+    vol_ranging = vol | is_consolidation  # skip volume check when market is consolidating
+    vol_consol = True  # no volume filter during consolidation
     regime = (dataframe["regime_ok"] == 1) & (dataframe["spread_vol_ok"] == 1)
     no_chaos = ~dataframe["btc_high_vol"]
     safe_long = ~dataframe["btc_dump"] & no_chaos
@@ -140,7 +143,7 @@ def generate(
 
     # --- RANGING ENTRIES ---
     if hedge_pairs:
-        base = is_ranging & vol & regime
+        base = is_ranging & vol_ranging & regime
         if is_a:
             mask = base & spread_low & safe_long & no_long
             dataframe.loc[mask, ["enter_long", "enter_tag"]] = (1, f"duo_long_a_{gn}")
@@ -154,21 +157,21 @@ def generate(
     else:
         if is_a:
             if group_a_long:
-                mr_long = is_ranging & vol & regime & spread_low & safe_long & pair_z_long & no_long
+                mr_long = is_ranging & vol_ranging & regime & spread_low & safe_long & pair_z_long & no_long
                 dataframe.loc[mr_long, ["enter_long", "enter_tag"]] = (1, f"mr_long_a_{gn}")
             if group_a_short:
                 mr_short = (
-                    is_ranging & vol & regime & spread_high & safe_short & pair_z_short & no_short
+                    is_ranging & vol_ranging & regime & spread_high & safe_short & pair_z_short & no_short
                 )
                 dataframe.loc[mr_short, ["enter_short", "enter_tag"]] = (1, f"mr_short_a_{gn}")
         elif is_b:
             if group_b_short:
                 mr_short = (
-                    is_ranging & vol & regime & spread_low & safe_short & pair_z_short & no_short
+                    is_ranging & vol_ranging & regime & spread_low & safe_short & pair_z_short & no_short
                 )
                 dataframe.loc[mr_short, ["enter_short", "enter_tag"]] = (1, f"mr_short_b_{gn}")
             if group_b_long:
-                mr_long = is_ranging & vol & regime & spread_high & safe_long & pair_z_long & no_long
+                mr_long = is_ranging & vol_ranging & regime & spread_high & safe_long & pair_z_long & no_long
                 dataframe.loc[mr_long, ["enter_long", "enter_tag"]] = (1, f"mr_long_b_{gn}")
 
     # --- CONSOLIDATION ENTRIES ---
@@ -176,7 +179,7 @@ def generate(
     consol_pair_z_long = dataframe["pair_zscore"] < -consol_pair_z_entry
     if is_a:
         consol_long = (
-            is_consolidation & vol & regime & consol_spread_low & safe_long & consol_pair_z_long
+            is_consolidation & vol_consol & regime & consol_spread_low & safe_long & consol_pair_z_long
         )
         mask = consol_long & no_long
         dataframe.loc[mask, ["enter_long", "enter_tag"]] = (1, f"consol_long_a_{gn}")
