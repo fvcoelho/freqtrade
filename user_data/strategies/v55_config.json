@@ -76,7 +76,7 @@
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": false,
+        "enabled": true,
         "long_enabled": false,
         "short_enabled": true,
         "n_levels": 5,
