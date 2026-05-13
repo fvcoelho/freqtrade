@@ -170,7 +170,7 @@ class ZScoreV55Strategy(IStrategy):
             self._df_cache.clear()
             self._df_cache_cycle = cycle_id
 
-        # BTC trend (once per cycle)
+        # BTC trend (1h timeframe for stable regime classification)
         if not self._btc_trend:
             btc_1h = self._get_pair_df(self.BTC_REF, "1h")
             if btc_1h is not None and len(btc_1h) >= 50:
