@@ -113,8 +113,18 @@ def generate(
     entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
     entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
 
-    long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
-    short_signal = consolidating & no_chaos & entering_sell & bearish & no_short
+    long_enabled = grid_cfg.get("long_enabled", True)
+    short_enabled = grid_cfg.get("short_enabled", True)
+
+    if long_enabled:
+        long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
+    else:
+        long_signal = dataframe["close"] < 0  # always False Series
+
+    if short_enabled:
+        short_signal = consolidating & no_chaos & entering_sell & bearish & no_short
+    else:
+        short_signal = dataframe["close"] < 0  # always False Series
 
     long_arr = long_signal.values.astype(bool).copy()
     short_arr = short_signal.values.astype(bool).copy()

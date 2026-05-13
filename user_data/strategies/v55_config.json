@@ -77,6 +77,8 @@
     },
     "grid": {
         "enabled": true,
+        "long_enabled": false,
+        "short_enabled": true,
         "n_levels": 5,
         "cooldown_candles": 1,
         "range_window": 48,
