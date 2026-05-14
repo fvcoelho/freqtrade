@@ -1,7 +1,8 @@
-"""BTC Grid scalp for V55 — consolidation regime.
+"""BTC Grid scalp for V55 — rolling range consolidation detection.
 
-Buys at bottom zone and sells at top zone of BTC rolling range
-during consolidation. Simple price-action grid.
+Detects consolidation directly on 5m using rolling range %.
+When range is tight (< threshold), buys at bottom and sells at top.
+No dependency on BTC 1h for consolidation detection.
 """
 from __future__ import annotations
 
@@ -10,7 +11,7 @@ from pandas import DataFrame
 
 
 def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
-    """Compute grid levels and consolidation flag for BTC."""
+    """Compute rolling range and grid levels for BTC on 5m."""
     grid_cfg = cfg["grid"]
     btc_pair = cfg["groups"]["btc_ref"]
 
@@ -22,53 +23,28 @@ def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
     low = dataframe["low"]
 
     range_window = grid_cfg.get("range_window", 48)
+    range_max_pct = grid_cfg.get("range_max_pct", 0.015)
 
     rolling_high = high.rolling(range_window).max()
     rolling_low = low.rolling(range_window).min()
     range_size = rolling_high - rolling_low
+    range_pct = (range_size / close).fillna(1)
 
     dataframe["grid_rolling_high"] = rolling_high
     dataframe["grid_rolling_low"] = rolling_low
+    dataframe["grid_range_pct"] = range_pct
     dataframe["grid_pos"] = (
         (close - rolling_low) / range_size.replace(0, np.nan)
     ).fillna(0.5)
 
-    if "rsi" not in dataframe.columns:
-        delta = close.diff()
-        gain = delta.where(delta > 0, 0.0).rolling(14).mean()
-        loss_s = (-delta.where(delta < 0, 0.0)).rolling(14).mean()
-        rs = gain / loss_s.replace(0, np.nan)
-        dataframe["rsi"] = (100 - (100 / (1 + rs))).fillna(50)
-
-    # BTC consolidation detection
-    atr_period = grid_cfg.get("atr_period", 14)
-    atr_z_window = grid_cfg.get("atr_z_window", 48)
-    atr_z_max = grid_cfg.get("atr_z_max", 0.0)
-    mom_window = grid_cfg.get("mom_window", 12)
-    mom_max = grid_cfg.get("mom_max", 0.008)
-
-    prev_close = close.shift(1)
-    tr = np.maximum(
-        high - low,
-        np.maximum(abs(high - prev_close), abs(low - prev_close)),
-    )
-    atr = tr.rolling(atr_period).mean()
-    atr_mean = atr.rolling(atr_z_window).mean()
-    atr_std = atr.rolling(atr_z_window).std()
-    atr_z = ((atr - atr_mean) / atr_std.replace(0, np.nan)).fillna(0)
-    momentum = close.pct_change(mom_window).abs()
-
-    dataframe["is_consolidating_btc"] = (atr_z < atr_z_max) & (momentum < mom_max)
+    # Consolidation = rolling range < threshold (pure 5m, no 1h dependency)
+    dataframe["is_consolidating_btc"] = range_pct < range_max_pct
 
     return dataframe
 
 
 def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
-    """Generate grid signals for BTC during consolidation.
-
-    Buy when price crosses into bottom zone.
-    Sell when price crosses into top zone.
-    """
+    """Generate grid signals when BTC range is tight."""
     btc_pair = cfg["groups"]["btc_ref"]
     if pair != btc_pair:
         return dataframe
@@ -97,16 +73,16 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
     buy_zone = 1 / n_levels
     sell_zone = 1 - (1 / n_levels)
 
-    entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
-    entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
+    in_buy_zone = pos <= buy_zone
+    in_sell_zone = pos >= sell_zone
 
     if long_enabled:
-        long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
+        long_signal = consolidating & no_chaos & in_buy_zone & bullish & no_long
     else:
         long_signal = dataframe["close"] < 0
 
     if short_enabled:
-        short_signal = consolidating & no_chaos & entering_sell & bearish & no_short
+        short_signal = consolidating & no_chaos & in_sell_zone & bearish & no_short
     else:
         short_signal = dataframe["close"] < 0
 

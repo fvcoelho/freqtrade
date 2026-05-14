@@ -76,17 +76,13 @@
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": true,
-        "long_enabled": false,
+        "enabled": false,
+        "long_enabled": true,
         "short_enabled": true,
         "n_levels": 5,
-        "cooldown_candles": 1,
+        "cooldown_candles": 6,
         "range_window": 48,
-        "atr_period": 14,
-        "atr_z_window": 48,
-        "atr_z_max": 0.0,
-        "mom_window": 12,
-        "mom_max": 0.008,
+        "range_max_pct": 0.03,
         "leverage": 5.0
     },
     "btc_trend": {
