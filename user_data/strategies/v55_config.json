@@ -76,13 +76,17 @@
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": false,
+        "enabled": true,
         "long_enabled": true,
         "short_enabled": true,
         "n_levels": 5,
         "cooldown_candles": 6,
         "range_window": 48,
-        "range_max_pct": 0.03,
+        "range_max_pct": 0.05,
+        "buy_bbdelta": 0.008,
+        "buy_closedelta": 0.0175,
+        "buy_tail": 0.25,
+        "buy_low": 0.985,
         "leverage": 5.0
     },
     "btc_trend": {

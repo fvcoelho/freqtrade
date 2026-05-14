@@ -141,7 +141,16 @@ def check_exit(
     candle_minutes = 5  # default for 5m timeframe
     trade_candles = trade_minutes / candle_minutes
 
-    if entry_tag.startswith("grid_"):
+    if entry_tag.startswith("cluc_"):
+        # TP at BB mid band
+        if dp:
+            dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
+            if dataframe is not None and not dataframe.empty:
+                bb_mid = float(dataframe.iloc[-1].get("bb_mid20", 0))
+                if bb_mid > 0 and current_rate >= bb_mid and current_profit > 0:
+                    return "cluc_tp_bbmid"
+        # No time stop — progressive stoploss handles risk
+    elif entry_tag.startswith("grid_"):
         grid_time_stop = exit_cfg.get("grid_time_stop_candles", 6)
         if trade_candles >= grid_time_stop:
             return "grid_time_stop"
