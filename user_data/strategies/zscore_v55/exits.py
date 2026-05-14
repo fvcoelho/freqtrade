@@ -137,34 +137,11 @@ def check_exit(
                     peak_profit.pop(trade_key, None)
                     return "fast_rapid_spike"
 
-    # --- 1b. BB Bounce TP at middle band ---
-    if entry_tag.startswith("bb_bounce_") and dp:
-        dataframe, _ = dp.get_analyzed_dataframe(pair, timeframe)
-        if dataframe is not None and not dataframe.empty:
-            last = dataframe.iloc[-1]
-            bb_mid = float(last.get("bb_mid", 0))
-            rsi = float(last.get("rsi", 50))
-            is_long = trade.is_short is False
-            if bb_mid > 0 and current_profit > 0:
-                # TP when price reaches BB mid band
-                if is_long and current_rate >= bb_mid:
-                    return "bb_bounce_tp"
-                elif not is_long and current_rate <= bb_mid:
-                    return "bb_bounce_tp"
-            # Also exit on extreme RSI (mark_strat style)
-            if is_long and rsi > 90 and current_profit > 0:
-                return "bb_bounce_tp"
-            elif not is_long and rsi < 10 and current_profit > 0:
-                return "bb_bounce_tp"
-
     # --- 2. PER-REGIME TIME STOP ---
     candle_minutes = 5  # default for 5m timeframe
     trade_candles = trade_minutes / candle_minutes
 
-    # BB bounce trades: NO time stop — let them run with stoploss/ROI only
-    if entry_tag.startswith("bb_bounce_"):
-        pass  # skip time stop entirely
-    elif entry_tag.startswith("grid_"):
+    if entry_tag.startswith("grid_"):
         grid_time_stop = exit_cfg.get("grid_time_stop_candles", 6)
         if trade_candles >= grid_time_stop:
             return "grid_time_stop"

@@ -1,8 +1,7 @@
-"""BTC BB Bounce scalp for V55 — consolidation regime.
+"""BTC Grid scalp for V55 — consolidation regime.
 
-Simple mean-reversion: buy when price drops below BB lower band,
-TP at BB middle band. No time stop — lets trade run.
-Inspired by mark_strat strategy.
+Buys at bottom zone and sells at top zone of BTC rolling range
+during consolidation. Simple price-action grid.
 """
 from __future__ import annotations
 
@@ -11,7 +10,7 @@ from pandas import DataFrame
 
 
 def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
-    """Compute Bollinger Bands and consolidation flag for BTC."""
+    """Compute grid levels and consolidation flag for BTC."""
     grid_cfg = cfg["grid"]
     btc_pair = cfg["groups"]["btc_ref"]
 
@@ -22,21 +21,24 @@ def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
     high = dataframe["high"]
     low = dataframe["low"]
 
-    # Bollinger Bands
-    bb_window = grid_cfg.get("bb_window", 20)
-    bb_std = grid_cfg.get("bb_std", 2.0)
-    sma = close.rolling(bb_window).mean()
-    std = close.rolling(bb_window).std()
-    dataframe["bb_upper"] = sma + bb_std * std
-    dataframe["bb_lower"] = sma - bb_std * std
-    dataframe["bb_mid"] = sma
+    range_window = grid_cfg.get("range_window", 48)
 
-    # RSI
-    delta = close.diff()
-    gain = delta.where(delta > 0, 0.0).rolling(14).mean()
-    loss_s = (-delta.where(delta < 0, 0.0)).rolling(14).mean()
-    rs = gain / loss_s.replace(0, np.nan)
-    dataframe["rsi"] = (100 - (100 / (1 + rs))).fillna(50)
+    rolling_high = high.rolling(range_window).max()
+    rolling_low = low.rolling(range_window).min()
+    range_size = rolling_high - rolling_low
+
+    dataframe["grid_rolling_high"] = rolling_high
+    dataframe["grid_rolling_low"] = rolling_low
+    dataframe["grid_pos"] = (
+        (close - rolling_low) / range_size.replace(0, np.nan)
+    ).fillna(0.5)
+
+    if "rsi" not in dataframe.columns:
+        delta = close.diff()
+        gain = delta.where(delta > 0, 0.0).rolling(14).mean()
+        loss_s = (-delta.where(delta < 0, 0.0)).rolling(14).mean()
+        rs = gain / loss_s.replace(0, np.nan)
+        dataframe["rsi"] = (100 - (100 / (1 + rs))).fillna(50)
 
     # BTC consolidation detection
     atr_period = grid_cfg.get("atr_period", 14)
@@ -62,11 +64,10 @@ def compute_levels(dataframe: DataFrame, pair: str, cfg: dict, dp) -> DataFrame:
 
 
 def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
-    """Generate BB bounce signals for BTC during consolidation.
+    """Generate grid signals for BTC during consolidation.
 
-    Long: price < BB lower (oversold bounce)
-    Short: price > BB upper (overbought rejection)
-    No time stop — exits via ROI, trailing, or BB mid TP.
+    Buy when price crosses into bottom zone.
+    Sell when price crosses into top zone.
     """
     btc_pair = cfg["groups"]["btc_ref"]
     if pair != btc_pair:
@@ -76,7 +77,8 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
         return dataframe
 
     grid_cfg = cfg["grid"]
-    cooldown = grid_cfg.get("cooldown_candles", 3)
+    n_levels = grid_cfg.get("n_levels", 5)
+    cooldown = grid_cfg.get("cooldown_candles", 1)
     long_enabled = grid_cfg.get("long_enabled", True)
     short_enabled = grid_cfg.get("short_enabled", True)
 
@@ -86,17 +88,25 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
     no_long = dataframe["enter_long"] == 0
     no_short = dataframe["enter_short"] == 0
 
-    close = dataframe["close"]
+    pos = dataframe["grid_pos"]
+    pos_prev = pos.shift(1)
 
-    # Long: price below BB lower band (mark_strat style — simple)
+    bullish = dataframe["close"] > dataframe["open"]
+    bearish = dataframe["close"] < dataframe["open"]
+
+    buy_zone = 1 / n_levels
+    sell_zone = 1 - (1 / n_levels)
+
+    entering_buy = (pos_prev > buy_zone) & (pos <= buy_zone)
+    entering_sell = (pos_prev < sell_zone) & (pos >= sell_zone)
+
     if long_enabled:
-        long_signal = consolidating & no_chaos & no_long & (close < dataframe["bb_lower"])
+        long_signal = consolidating & no_chaos & entering_buy & bullish & no_long
     else:
         long_signal = dataframe["close"] < 0
 
-    # Short: price above BB upper band
     if short_enabled:
-        short_signal = consolidating & no_chaos & no_short & (close > dataframe["bb_upper"])
+        short_signal = consolidating & no_chaos & entering_sell & bearish & no_short
     else:
         short_signal = dataframe["close"] < 0
 
@@ -104,14 +114,20 @@ def generate(dataframe: DataFrame, pair: str, cfg: dict) -> DataFrame:
     short_arr = short_signal.values.astype(bool).copy()
     long_arr, short_arr = _apply_cooldown(long_arr, short_arr, cooldown)
 
+    levels = np.round(pos.values * n_levels).astype(int)
+
     dataframe.loc[long_arr, "enter_long"] = 1
     dataframe.loc[short_arr, "enter_short"] = 1
 
     for i in range(len(dataframe)):
         if long_arr[i]:
-            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "bb_bounce_long"
+            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = (
+                f"grid_long_L{levels[i]}"
+            )
         elif short_arr[i]:
-            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = "bb_bounce_short"
+            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = (
+                f"grid_short_L{levels[i]}"
+            )
 
     return dataframe
 

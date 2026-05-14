@@ -76,19 +76,18 @@
         "loss_cooldown_hours": 0
     },
     "grid": {
-        "enabled": false,
-        "long_enabled": true,
+        "enabled": true,
+        "long_enabled": false,
         "short_enabled": true,
-        "cooldown_candles": 3,
-        "bb_window": 20,
-        "bb_std": 2.0,
+        "n_levels": 5,
+        "cooldown_candles": 1,
+        "range_window": 48,
         "atr_period": 14,
         "atr_z_window": 48,
         "atr_z_max": 0.0,
         "mom_window": 12,
         "mom_max": 0.008,
-        "leverage": 5.0,
-        "bb_stoploss": -0.03
+        "leverage": 5.0
     },
     "btc_trend": {
         "timeframe": "1h",
@@ -190,7 +189,7 @@
         "roi_gate_high_z_profit": 0.015,
         "roi_gate_mid_z_minutes": 15,
         "roi_gate_mid_z_profit": 0.013,
-        "grid_time_stop_candles": 6,
+        "grid_time_stop_candles": 3,
         "grid_tp_profit": 0.003,
         "ranging_time_stop_candles": 72
     }
