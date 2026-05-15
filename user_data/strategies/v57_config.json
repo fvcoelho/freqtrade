@@ -1,0 +1,86 @@
+{
+    "timeframe": "5m",
+    "startup_candle_count": 900,
+    "basket": {
+        "pairs": [
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "LINK/USDC:USDC",
+            "BNB/USDC:USDC",
+            "XRP/USDC:USDC",
+            "SUI/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "AAVE/USDC:USDC",
+            "ENA/USDC:USDC",
+            "ONDO/USDC:USDC",
+            "NEAR/USDC:USDC",
+            "INJ/USDC:USDC",
+            "HYPE/USDC:USDC",
+            "TON/USDC:USDC",
+            "TAO/USDC:USDC",
+            "ZEC/USDC:USDC",
+            "FARTCOIN/USDC:USDC",
+            "PENDLE/USDC:USDC",
+            "TRUMP/USDC:USDC"
+        ],
+        "btc_ref": "BTC/USDC:USDC",
+        "entry_z": 2.0,
+        "exit_z": 0.3,
+        "profit_lock": 0.002,
+        "loss_exit_z": -4.0,
+        "max_positions": 4,
+        "stake_per_position": 100,
+        "time_stop_candles": 24,
+        "bear_mom_threshold": -1.0,
+        "bull_mom_threshold": 0.0,
+        "max_loss_per_trade": -0.15,
+        "zscore_method": "kalman",
+        "kalman_gain": 0.05
+    },
+    "zscore": {
+        "zscore_window": 288,
+        "cum_return_window": 24
+    },
+    "risk": {
+        "stoploss": -0.99,
+        "trailing_stop_positive": 0.006,
+        "trailing_stop_positive_offset": 0.012
+    },
+    "btc_trend": {
+        "timeframe": "1h",
+        "pump_threshold": 3.0,
+        "dump_threshold": -3.0,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 72
+    },
+    "volume": {
+        "vol_ma_window": 144,
+        "vol_ok_threshold": 1.0
+    },
+    "leverage": {
+        "base_multiplier": 6.0
+    },
+    "dca": {
+        "max_adds": 2,
+        "thresholds": [
+            0.01,
+            0.02
+        ],
+        "multipliers": [
+            0.5,
+            0.3
+        ]
+    },
+    "stake": {
+        "mode": "dynamic",
+        "reserve_pct": 0.1,
+        "dca_reserve_pct": 0.15,
+        "stake_cap": 200.0,
+        "min_stake": 10.0,
+        "rebalance_secs": 300
+    }
+}
