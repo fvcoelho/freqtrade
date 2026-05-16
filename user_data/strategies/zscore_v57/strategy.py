@@ -244,6 +244,7 @@ class ZScoreV57Strategy(IStrategy):
             stake_currency=self.config["stake_currency"],
             open_trade_count=len(open_trades),
             max_stake=max_stake,
+            open_trades=open_trades,
         )
         if min_stake and stake < min_stake:
             stake = min_stake

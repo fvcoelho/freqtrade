@@ -1,0 +1,2 @@
+import{P as e,c as t,d as n,ot as r}from"./runtime-core.esm-bundler-DJInd-dt.js";var i={viewBox:`0 0 24 24`,width:`1.2em`,height:`1.2em`};function a(r,a){return e(),n(`svg`,i,[...a[0]||=[t(`path`,{fill:`currentColor`,d:`M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10s10-4.5 10-10S17.5 2 12 2m-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8z`},null,-1)]])}var o=r({name:`mdi-check-circle`,render:a});export{o as t};
+//# sourceMappingURL=check-circle-P3Y83PI4.js.map

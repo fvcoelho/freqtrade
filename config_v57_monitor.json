@@ -1,0 +1,74 @@
+{
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "max_open_trades": 4,
+  "stake_currency": "USDC",
+  "stake_amount": 100,
+  "tradable_balance_ratio": 0.99,
+  "fiat_display_currency": "USD",
+  "dry_run": true,
+  "dry_run_wallet": 75.48,
+  "cancel_open_orders_on_exit": false,
+  "exchange": {
+    "name": "hyperliquid",
+    "key": "",
+    "secret": "",
+    "pair_whitelist": [
+      "BTC/USDC:USDC",
+      "ETH/USDC:USDC",
+      "SOL/USDC:USDC",
+      "LINK/USDC:USDC",
+      "BNB/USDC:USDC",
+      "XRP/USDC:USDC",
+      "SUI/USDC:USDC",
+      "DOGE/USDC:USDC",
+      "AAVE/USDC:USDC",
+      "ENA/USDC:USDC",
+      "ONDO/USDC:USDC",
+      "NEAR/USDC:USDC",
+      "INJ/USDC:USDC",
+      "HYPE/USDC:USDC",
+      "TON/USDC:USDC",
+      "TAO/USDC:USDC",
+      "ZEC/USDC:USDC",
+      "FARTCOIN/USDC:USDC",
+      "PENDLE/USDC:USDC",
+      "TRUMP/USDC:USDC"
+    ],
+    "pair_blacklist": []
+  },
+  "entry_pricing": {
+    "price_side": "same",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "exit_pricing": {
+    "price_side": "same",
+    "use_order_book": true,
+    "order_book_top": 1
+  },
+  "api_server": {
+    "enabled": true,
+    "listen_ip_address": "0.0.0.0",
+    "listen_port": 8083,
+    "verbosity": "error",
+    "enable_openapi": true,
+    "jwt_secret_key": "freqtrade_secret_key_change_me",
+    "CORS_origins": [
+      "http://localhost:8083"
+    ],
+    "username": "freqtrader",
+    "password": "freqtrader",
+    "allow_custom_messages": true
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "bot_name": "V57_monitor_dryrun",
+  "initial_state": "running",
+  "internals": {
+    "process_throttle_secs": 5
+  }
+}
