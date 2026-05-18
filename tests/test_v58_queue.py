@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "user_data" / "strategies"))
 
-from zscore_v58.queue import compute_scores, build_queues, update_confirmation, reset
+from zscore_v58.entry_queue import compute_scores, build_queues, update_confirmation, reset
 
 
 def _make_cfg():

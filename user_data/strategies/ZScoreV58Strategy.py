@@ -83,6 +83,10 @@ class ZScoreV58Strategy(IStrategy):
 
         self._dynamic_stake = DynamicStake(c)
 
+        # Override queue params from freqtrade CLI config if present
+        if "queue" in self.config:
+            c["queue"] = {**c.get("queue", {}), **self.config["queue"]}
+
         # Reset queue state on init
         entry_queue.reset()
 
@@ -140,6 +144,13 @@ class ZScoreV58Strategy(IStrategy):
     # ── Entry ─────────────────────────────────────────────────────
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """Mark candidate entry signals using same logic as V57.
+
+        In backtesting, this is called ONCE with the full dataframe.
+        We mark all rows where entry conditions are met (z threshold + regime).
+        The actual queue scoring + confirmation happens in confirm_trade_entry,
+        which the backtester calls candle-by-candle.
+        """
         pair = metadata["pair"]
         dataframe["enter_long"] = 0
         dataframe["enter_short"] = 0
@@ -148,58 +159,17 @@ class ZScoreV58Strategy(IStrategy):
         if pair == self.BTC_REF or dataframe.empty:
             return dataframe
 
-        # Queue logic runs once per candle cycle (first pair triggers it)
-        cycle_id = id(dataframe)
-        if entry_queue._score_cache.get("cycle") != cycle_id:
-            self._candle_index += 1
-            self._run_queue_cycle(cycle_id)
+        # Use V57-style vectorized signals as CANDIDATES
+        # The queue confirmation in confirm_trade_entry will filter these
+        basket.generate_basket_entries(dataframe, pair, self._cfg)
 
-        # Check if this pair is in the ready list
-        ready_list = entry_queue._score_cache.get("ready", [])
-        for ready_pair, side in ready_list:
-            if ready_pair == pair:
-                if side == "long":
-                    dataframe.iloc[-1, dataframe.columns.get_loc("enter_long")] = 1
-                    dataframe.iloc[-1, dataframe.columns.get_loc("enter_tag")] = "queue_long"
-                else:
-                    dataframe.iloc[-1, dataframe.columns.get_loc("enter_short")] = 1
-                    dataframe.iloc[-1, dataframe.columns.get_loc("enter_tag")] = "queue_short"
-                break
+        # Re-tag: change basket_long/short to queue_long/short
+        mask_long = dataframe["enter_tag"] == "basket_long"
+        mask_short = dataframe["enter_tag"] == "basket_short"
+        dataframe.loc[mask_long, "enter_tag"] = "queue_long"
+        dataframe.loc[mask_short, "enter_tag"] = "queue_short"
 
         return dataframe
-
-    def _run_queue_cycle(self, cycle_id: int):
-        """Run scoring → queue → confirmation for current candle. Cache results."""
-        pair_data: dict[str, dict] = {}
-        for p in self._basket_pairs:
-            if p == self.BTC_REF:
-                continue
-            df = self._get_pair_df(p)
-            if df is None or df.empty or len(df) < 4:
-                continue
-            last = df.iloc[-1]
-            pair_data[p] = {
-                "basket_z": float(last.get("basket_z", 0.0)),
-                "basket_z_prev3": float(df["basket_z"].iloc[-4]) if "basket_z" in df.columns and len(df) >= 4 else 0.0,
-                "vol_ratio": float(last.get("vol_ratio", 1.0)),
-                "vol_ok": bool(last.get("vol_ok", False)),
-                "btc_mom": float(last.get("btc_mom", 0.0)),
-                "btc_pump": bool(last.get("btc_pump", False)),
-                "btc_dump": bool(last.get("btc_dump", False)),
-                "btc_high_vol": bool(last.get("btc_high_vol", False)),
-            }
-
-        open_trades = Trade.get_trades_proxy(is_open=True)
-        open_pairs = {t.pair for t in open_trades}
-
-        scores = entry_queue.compute_scores(pair_data, self._cfg, self._candle_index)
-        long_q, short_q = entry_queue.build_queues(scores, pair_data, self._cfg, open_pairs)
-        ready = entry_queue.update_confirmation(long_q, short_q, self._cfg)
-
-        # Sort ready by score descending
-        ready.sort(key=lambda x: scores.get(x[0], 0), reverse=True)
-
-        entry_queue._score_cache = {"cycle": cycle_id, "scores": scores, "ready": ready}
 
     # ── Exit ──────────────────────────────────────────────────────
 
@@ -212,10 +182,14 @@ class ZScoreV58Strategy(IStrategy):
         if not tag.startswith("queue_"):
             return None
 
+        # Temporarily set enter_tag to basket_ for exit check compatibility
+        orig_tag = trade.enter_tag
+        trade.enter_tag = tag.replace("queue_", "basket_")
         result = basket.check_basket_exit(
             pair, trade, current_profit, self._cfg,
             self.dp, self._df_cache, self.timeframe, self._basket_pairs,
         )
+        trade.enter_tag = orig_tag
         if result:
             return result
 
@@ -246,14 +220,106 @@ class ZScoreV58Strategy(IStrategy):
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
+        """Queue-based entry gate.
+
+        Called by backtester candle-by-candle when a signal is detected.
+        Checks:
+        1. Max positions and no-duplicate
+        2. Pair had persistent z-score signal for N consecutive candles (confirmation)
+        3. Pair's score is in top-K among all candidates right now
+        """
         open_trades = Trade.get_trades_proxy(is_open=True)
         max_pos = self._cfg.get("basket", {}).get("max_positions", 4)
         if len(open_trades) >= max_pos:
             return False
         if pair in {t.pair for t in open_trades}:
             return False
-        entry_queue._confirm_long[pair] = 0
-        entry_queue._confirm_short[pair] = 0
+
+        queue_cfg = self._cfg.get("queue", {})
+        confirm_candles = queue_cfg.get("confirm_candles", 3)
+        top_k = queue_cfg.get("top_k", 3)
+        entry_z = self._cfg["basket"].get("entry_z", 2.0)
+
+        # Get this pair's dataframe and find current candle position
+        if not self.dp:
+            return False
+        df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+        if df is None or df.empty or "basket_z" not in df.columns:
+            return False
+
+        # Find the row index for current_time (backtesting gives full df)
+        import pandas as pd
+        ct = pd.Timestamp(current_time)
+        if df["date"].dt.tz is not None:
+            ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+        mask = df["date"] <= ct
+        if not mask.any():
+            return False
+        current_idx = mask.sum() - 1
+
+        if current_idx < confirm_candles:
+            return False
+
+        # Check z-score persistence: was basket_z past (relaxed) threshold for last N candles?
+        # confirm_z_ratio < 1.0 makes confirmation easier (e.g. 0.7 = z needs to be 70% of entry_z)
+        confirm_z_ratio = queue_cfg.get("confirm_z_ratio", 1.0)
+        confirm_threshold = entry_z * confirm_z_ratio
+
+        is_long = side == "long"
+        start_idx = current_idx - confirm_candles + 1
+        recent_z = df["basket_z"].iloc[start_idx:current_idx + 1].values
+
+        if is_long:
+            persistent = all(z < -confirm_threshold for z in recent_z)
+        else:
+            persistent = all(z > confirm_threshold for z in recent_z)
+
+        if not persistent:
+            return False
+
+        # Score this pair and compare against all other candidates
+        open_pairs = {t.pair for t in open_trades}
+        pair_data: dict[str, dict] = {}
+        for p in self._basket_pairs:
+            if p == self.BTC_REF:
+                continue
+            p_df, _ = self.dp.get_analyzed_dataframe(p, self.timeframe)
+            if p_df is None or p_df.empty or len(p_df) < 4:
+                continue
+            # Use same time index for all pairs
+            p_mask = p_df["date"] <= ct
+            if not p_mask.any():
+                continue
+            p_idx = p_mask.sum() - 1
+            if p_idx < 3:
+                continue
+            row = p_df.iloc[p_idx]
+            pair_data[p] = {
+                "basket_z": float(row.get("basket_z", 0.0)),
+                "basket_z_prev3": float(p_df["basket_z"].iloc[p_idx - 3]),
+                "vol_ratio": float(row.get("vol_ratio", 1.0)),
+                "vol_ok": bool(row.get("vol_ok", False)),
+                "btc_mom": float(row.get("btc_mom", 0.0)),
+                "btc_pump": bool(row.get("btc_pump", False)),
+                "btc_dump": bool(row.get("btc_dump", False)),
+                "btc_high_vol": bool(row.get("btc_high_vol", False)),
+            }
+
+        self._candle_index += 1
+        scores = entry_queue.compute_scores(pair_data, self._cfg, self._candle_index)
+        long_q, short_q = entry_queue.build_queues(scores, pair_data, self._cfg, open_pairs)
+
+        # Check if this pair is in the top-K queue
+        target_queue = long_q if is_long else short_q
+        if pair not in target_queue:
+            return False
+
+        # Minimum score threshold
+        min_score = queue_cfg.get("min_score", 0.0)
+        pair_score = scores.get(pair, 0.0)
+        if pair_score < min_score:
+            return False
+
         return True
 
     # ── Stoploss ──────────────────────────────────────────────────

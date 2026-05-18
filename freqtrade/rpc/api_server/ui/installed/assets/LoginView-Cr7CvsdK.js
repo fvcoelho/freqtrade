@@ -1,2 +1,0 @@
-import{$ as e,P as t,d as n,g as r}from"./runtime-core.esm-bundler-DJInd-dt.js";import{t as i}from"./BotLogin-CIK_5WvQ.js";import{U as a}from"./index-BpFhqtQV.js";import{t as o}from"./DraggableContainer-BP79AjfJ.js";var s={},c={class:`border max-w-xl mx-auto p-4`};function l(a,s){let l=i,u=o;return t(),n(`div`,c,[r(u,{header:`Freqtrade bot Login`},{default:e(()=>[r(l,{ref:`loginForm`},null,512)]),_:1})])}var u=a(s,[[`render`,l]]);export{u as default};
-//# sourceMappingURL=LoginView-Cr7CvsdK.js.map
