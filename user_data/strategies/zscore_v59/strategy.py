@@ -291,7 +291,44 @@ class ZScoreV59Strategy(IStrategy):
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
-        return min(self._cfg.get("leverage", {}).get("base_multiplier", 3.0), max_leverage)
+        """Z-based leverage: higher |basket_z| = more leverage.
+
+        |z| <= z_min → lev_min
+        |z| >= z_max → lev_max
+        between    → linear interpolation
+        """
+        lev_cfg = self._cfg.get("leverage", {})
+        lev_min = lev_cfg.get("min", 2.0)
+        lev_max = lev_cfg.get("max", 8.0)
+        z_min = lev_cfg.get("z_min", 0.5)
+        z_max = lev_cfg.get("z_max", 3.0)
+
+        # Get current basket_z for this pair
+        if self.dp:
+            try:
+                import pandas as pd
+                df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+                if df is not None and not df.empty and "basket_z" in df.columns:
+                    ct = pd.Timestamp(current_time)
+                    if df["date"].dt.tz is not None:
+                        ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+                    mask = df["date"] <= ct
+                    if mask.any():
+                        idx = mask.sum() - 1
+                        abs_z = abs(float(df["basket_z"].iloc[idx]))
+                        # Linear interpolation
+                        if abs_z <= z_min:
+                            lev = lev_min
+                        elif abs_z >= z_max:
+                            lev = lev_max
+                        else:
+                            t = (abs_z - z_min) / (z_max - z_min)
+                            lev = lev_min + t * (lev_max - lev_min)
+                        return min(round(lev, 1), max_leverage)
+            except Exception:
+                pass
+
+        return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,

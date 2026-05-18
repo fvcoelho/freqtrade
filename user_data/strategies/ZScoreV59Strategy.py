@@ -70,6 +70,8 @@ class ZScoreV59Strategy(IStrategy):
 
         if "queue" in self.config:
             c["queue"] = {**c.get("queue", {}), **self.config["queue"]}
+        if "leverage" in self.config:
+            c["leverage"] = {**c.get("leverage", {}), **self.config["leverage"]}
 
         entry_queue.reset()
         logger.info("V59 loaded — %d pairs, always-on queue, min_score=%.2f",
@@ -291,7 +293,69 @@ class ZScoreV59Strategy(IStrategy):
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
-        return min(self._cfg.get("leverage", {}).get("base_multiplier", 3.0), max_leverage)
+        """Trade-type + Z-based leverage.
+
+        BREAKOUT:       fixed max leverage (high conviction, sudden move)
+        TRENDING:       z-based with trending range (moderate conviction)
+        MEAN REVERSION: z-based with standard range (varies with z)
+        """
+        lev_cfg = self._cfg.get("leverage", {})
+        type_cfg = lev_cfg.get("by_type", {})
+
+        if not self.dp:
+            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+
+        try:
+            import pandas as pd
+            import numpy as np
+            df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+            if df is None or df.empty or "basket_z" not in df.columns:
+                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+
+            ct = pd.Timestamp(current_time)
+            if df["date"].dt.tz is not None:
+                ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+            mask = df["date"] <= ct
+            if not mask.any():
+                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+            idx = mask.sum() - 1
+
+            abs_z = abs(float(df["basket_z"].iloc[idx]))
+            vol_ratio = float(df["vol_ratio"].iloc[idx]) if "vol_ratio" in df.columns else 1.0
+            btc_mom = float(df["btc_mom"].iloc[idx]) if "btc_mom" in df.columns else 0.0
+            btc_atr_z = float(df["btc_atr_z"].iloc[idx]) if "btc_atr_z" in df.columns else 0.0
+
+            # Compute spread velocity
+            bz_prev = float(df["basket_z"].iloc[idx - 3]) if idx >= 3 else float(df["basket_z"].iloc[idx])
+            velocity = abs(float(df["basket_z"].iloc[idx]) - bz_prev)
+
+            # Classify trade type
+            if velocity >= 1.0 and vol_ratio >= 2.0:
+                trade_type = "breakout"
+            elif abs(btc_mom) >= 1.5 and btc_atr_z < 2.0:
+                trade_type = "trending"
+            else:
+                trade_type = "mean_reversion"
+
+            # Get type-specific leverage config
+            tc = type_cfg.get(trade_type, {})
+            t_min = tc.get("min", lev_cfg.get("min", 2.0))
+            t_max = tc.get("max", lev_cfg.get("max", 8.0))
+            t_z_min = tc.get("z_min", lev_cfg.get("z_min", 0.3))
+            t_z_max = tc.get("z_max", lev_cfg.get("z_max", 2.0))
+
+            # Linear interpolation by |z|
+            if abs_z <= t_z_min:
+                lev = t_min
+            elif abs_z >= t_z_max:
+                lev = t_max
+            else:
+                t = (abs_z - t_z_min) / (t_z_max - t_z_min)
+                lev = t_min + t * (t_max - t_min)
+
+            return min(round(lev, 1), max_leverage)
+        except Exception:
+            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,
