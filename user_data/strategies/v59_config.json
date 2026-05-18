@@ -25,14 +25,14 @@
             "TRUMP/USDC:USDC"
         ],
         "btc_ref": "BTC/USDC:USDC",
-        "entry_z": 0.1,
+        "entry_z": 1.5,
         "bull_mom_threshold": 0.0,
         "bear_mom_threshold": -1.0,
-        "exit_z": 0.3,
-        "profit_lock": 0.002,
+        "exit_z": 0.5,
+        "profit_lock": 0.006,
         "loss_exit_z": -4.0,
         "max_positions": 4,
-        "time_stop_candles": 24,
+        "time_stop_candles": 48,
         "max_loss_per_trade": -0.15,
         "zscore_method": "kalman",
         "kalman_gain": 0.05
@@ -89,8 +89,8 @@
     "dca": {
         "max_adds": 2,
         "thresholds": [
-            0.01,
-            0.02
+            0.015,
+            0.03
         ],
         "multipliers": [
             0.5,
@@ -102,7 +102,7 @@
         "reserve_pct": 0.1,
         "dca_reserve_pct": 0.15,
         "stake_cap": 200.0,
-        "min_stake": 10.0,
+        "min_stake": 5.0,
         "rebalance_secs": 300
     },
     "queue": {
@@ -121,6 +121,9 @@
             "ranging_short": 0.6,
             "bear_long": 0.3,
             "bear_short": 1.0
+        },
+        "ranging_balance": {
+            "max_per_side": 2
         }
     }
 }
