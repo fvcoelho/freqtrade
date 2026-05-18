@@ -317,26 +317,32 @@ class ZScoreV59Strategy(IStrategy):
         BREAKOUT:       fixed max leverage (high conviction, sudden move)
         TRENDING:       z-based with trending range (moderate conviction)
         MEAN REVERSION: z-based with standard range (varies with z)
+
+        Returned as an integer — Hyperliquid only accepts integer leverage,
+        and floors silently otherwise, causing DB/exchange drift.
         """
         lev_cfg = self._cfg.get("leverage", {})
         type_cfg = lev_cfg.get("by_type", {})
 
+        def _floor_lev(x: float) -> float:
+            return float(max(1, min(int(x), int(max_leverage))))
+
         if not self.dp:
-            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+            return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
 
         try:
             import pandas as pd
             import numpy as np
             df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
             if df is None or df.empty or "basket_z" not in df.columns:
-                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+                return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
 
             ct = pd.Timestamp(current_time)
             if df["date"].dt.tz is not None:
                 ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
             mask = df["date"] <= ct
             if not mask.any():
-                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+                return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
             idx = mask.sum() - 1
 
             abs_z = abs(float(df["basket_z"].iloc[idx]))
@@ -372,9 +378,9 @@ class ZScoreV59Strategy(IStrategy):
                 t = (abs_z - t_z_min) / (t_z_max - t_z_min)
                 lev = t_min + t * (t_max - t_min)
 
-            return min(round(lev, 1), max_leverage)
+            return _floor_lev(lev)
         except Exception:
-            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+            return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,

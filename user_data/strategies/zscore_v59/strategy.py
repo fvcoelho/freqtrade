@@ -296,6 +296,9 @@ class ZScoreV59Strategy(IStrategy):
         |z| <= z_min → lev_min
         |z| >= z_max → lev_max
         between    → linear interpolation
+
+        Returned as an integer — Hyperliquid only accepts integer leverage,
+        and floors silently otherwise, causing DB/exchange drift.
         """
         lev_cfg = self._cfg.get("leverage", {})
         lev_min = lev_cfg.get("min", 2.0)
@@ -324,11 +327,11 @@ class ZScoreV59Strategy(IStrategy):
                         else:
                             t = (abs_z - z_min) / (z_max - z_min)
                             lev = lev_min + t * (lev_max - lev_min)
-                        return min(round(lev, 1), max_leverage)
+                        return float(max(1, min(int(lev), int(max_leverage))))
             except Exception:
                 pass
 
-        return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
+        return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,
