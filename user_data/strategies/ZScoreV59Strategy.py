@@ -72,6 +72,10 @@ class ZScoreV59Strategy(IStrategy):
             c["queue"] = {**c.get("queue", {}), **self.config["queue"]}
         if "leverage" in self.config:
             c["leverage"] = {**c.get("leverage", {}), **self.config["leverage"]}
+        if "risk" in self.config:
+            c["risk"] = {**c.get("risk", {}), **self.config["risk"]}
+        if "basket" in self.config:
+            c["basket"] = {**c.get("basket", {}), **self.config["basket"]}
 
         entry_queue.reset()
         logger.info("V59 loaded — %d pairs, always-on queue, min_score=%.2f",
@@ -179,7 +183,7 @@ class ZScoreV59Strategy(IStrategy):
         trade.enter_tag = orig_tag
         if result:
             return result
-        max_candles = self._cfg.get("basket", {}).get("time_stop_candles", 72)
+        max_candles = self._cfg.get("basket", {}).get("time_stop_candles", 24)
         trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
         if trade_age >= max_candles:
             return "basket_time_stop"
@@ -282,13 +286,28 @@ class ZScoreV59Strategy(IStrategy):
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float,
                         after_fill: bool, **kwargs) -> float | None:
+        """Progressive trailing stoploss — replaces basket_time_stop.
+
+        Trailing: locks in profit when trade is winning.
+        Time-decay: tightens stoploss as trade ages (losers exit earlier).
+
+        Config: risk.trailing_stops = [
+            {"after_minutes": 0,  "stop": -0.10, "trail_trigger": 0.005, "trail": -0.004},
+            {"after_minutes": 30, "stop": -0.05, "trail_trigger": 0.005, "trail": -0.004},
+            {"after_minutes": 60, "stop": -0.02, "trail_trigger": 0.005, "trail": -0.004},
+            {"after_minutes": 90, "stop": -0.01, "trail_trigger": 0.005, "trail": -0.006},
+        ]
+        """
         tag = trade.enter_tag or ""
-        if tag.startswith("queue_"):
-            return -0.99
-        r = self._cfg["risk"]
-        if current_profit >= r.get("trailing_stop_positive_offset", 0.012):
-            return -r.get("trailing_stop_positive", 0.006)
-        return r.get("stoploss", -0.07)
+        if not tag.startswith("queue_"):
+            r = self._cfg["risk"]
+            if current_profit >= r.get("trailing_stop_positive_offset", 0.012):
+                return -r.get("trailing_stop_positive", 0.006)
+            return r.get("stoploss", -0.07)
+
+        # Queue trades: no trailing — basket exits (revert/time/max_loss) handle everything
+        # Trailing interferes with mean-reversion logic and worsens results
+        return -0.99
 
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,

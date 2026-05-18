@@ -3,11 +3,26 @@
     "startup_candle_count": 900,
     "basket": {
         "pairs": [
-            "BTC/USDC:USDC", "ETH/USDC:USDC", "SOL/USDC:USDC", "LINK/USDC:USDC",
-            "BNB/USDC:USDC", "XRP/USDC:USDC", "SUI/USDC:USDC", "DOGE/USDC:USDC",
-            "AAVE/USDC:USDC", "ENA/USDC:USDC", "ONDO/USDC:USDC", "NEAR/USDC:USDC",
-            "INJ/USDC:USDC", "HYPE/USDC:USDC", "TON/USDC:USDC", "TAO/USDC:USDC",
-            "ZEC/USDC:USDC", "FARTCOIN/USDC:USDC", "PENDLE/USDC:USDC", "TRUMP/USDC:USDC"
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "LINK/USDC:USDC",
+            "BNB/USDC:USDC",
+            "XRP/USDC:USDC",
+            "SUI/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "AAVE/USDC:USDC",
+            "ENA/USDC:USDC",
+            "ONDO/USDC:USDC",
+            "NEAR/USDC:USDC",
+            "INJ/USDC:USDC",
+            "HYPE/USDC:USDC",
+            "TON/USDC:USDC",
+            "TAO/USDC:USDC",
+            "ZEC/USDC:USDC",
+            "FARTCOIN/USDC:USDC",
+            "PENDLE/USDC:USDC",
+            "TRUMP/USDC:USDC"
         ],
         "btc_ref": "BTC/USDC:USDC",
         "entry_z": 0.1,
@@ -22,28 +37,90 @@
         "zscore_method": "kalman",
         "kalman_gain": 0.05
     },
-    "zscore": { "zscore_window": 288 },
-    "risk": { "stoploss": -0.99, "trailing_stop_positive": 0.006, "trailing_stop_positive_offset": 0.012 },
-    "btc_trend": { "timeframe": "1h", "pump_threshold": 3.0, "dump_threshold": -3.0, "high_vol_threshold": 2.0, "vol_ended_threshold": 1.5, "mom_period": 4, "atr_period": 14, "atr_z_window": 72 },
-    "volume": { "vol_ma_window": 144, "vol_ok_threshold": 1.0 },
+    "zscore": {
+        "zscore_window": 288
+    },
+    "risk": {
+        "stoploss": -0.99,
+        "trailing_stop_positive": 0.006,
+        "trailing_stop_positive_offset": 0.012
+    },
+    "btc_trend": {
+        "timeframe": "1h",
+        "pump_threshold": 3.0,
+        "dump_threshold": -3.0,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 72
+    },
+    "volume": {
+        "vol_ma_window": 144,
+        "vol_ok_threshold": 1.0
+    },
     "leverage": {
-        "base_multiplier": 6.0, "min": 2.0, "max": 8.0, "z_min": 0.3, "z_max": 2.0,
+        "base_multiplier": 6.0,
+        "min": 2.0,
+        "max": 8.0,
+        "z_min": 0.3,
+        "z_max": 2.0,
         "by_type": {
-            "breakout": { "min": 6.0, "max": 12.0, "z_min": 0.3, "z_max": 2.0 },
-            "trending": { "min": 3.0, "max": 6.0, "z_min": 0.3, "z_max": 2.0 },
-            "mean_reversion": { "min": 2.0, "max": 8.0, "z_min": 0.3, "z_max": 2.0 }
+            "breakout": {
+                "min": 6.0,
+                "max": 12.0,
+                "z_min": 0.3,
+                "z_max": 2.0
+            },
+            "trending": {
+                "min": 3.0,
+                "max": 6.0,
+                "z_min": 0.3,
+                "z_max": 2.0
+            },
+            "mean_reversion": {
+                "min": 2.0,
+                "max": 8.0,
+                "z_min": 0.3,
+                "z_max": 2.0
+            }
         }
     },
-    "dca": { "max_adds": 2, "thresholds": [0.01, 0.02], "multipliers": [0.5, 0.3] },
-    "stake": { "mode": "dynamic", "reserve_pct": 0.1, "dca_reserve_pct": 0.15, "stake_cap": 200.0, "min_stake": 10.0, "rebalance_secs": 300 },
+    "dca": {
+        "max_adds": 2,
+        "thresholds": [
+            0.01,
+            0.02
+        ],
+        "multipliers": [
+            0.5,
+            0.3
+        ]
+    },
+    "stake": {
+        "mode": "dynamic",
+        "reserve_pct": 0.1,
+        "dca_reserve_pct": 0.15,
+        "stake_cap": 200.0,
+        "min_stake": 10.0,
+        "rebalance_secs": 300
+    },
     "queue": {
         "min_score": 0.45,
         "cooldown_candles": 36,
-        "weights": { "basket_z": 0.5, "vol_ratio": 0.2, "spread_velocity": 0.2, "cooldown": 0.1 },
+        "weights": {
+            "basket_z": 0.5,
+            "vol_ratio": 0.2,
+            "spread_velocity": 0.2,
+            "cooldown": 0.1
+        },
         "regime_multipliers": {
-            "bull_long": 1.0, "bull_short": 0.3,
-            "ranging_long": 0.6, "ranging_short": 0.6,
-            "bear_long": 0.3, "bear_short": 1.0
+            "bull_long": 1.0,
+            "bull_short": 0.3,
+            "ranging_long": 0.6,
+            "ranging_short": 0.6,
+            "bear_long": 0.3,
+            "bear_short": 1.0
         }
     }
 }
