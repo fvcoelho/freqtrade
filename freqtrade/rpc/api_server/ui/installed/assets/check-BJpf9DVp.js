@@ -1,2 +1,0 @@
-import{P as e,c as t,d as n,ot as r}from"./runtime-core.esm-bundler-DJInd-dt.js";var i={viewBox:`0 0 24 24`,width:`1.2em`,height:`1.2em`};function a(r,a){return e(),n(`svg`,i,[...a[0]||=[t(`path`,{fill:`currentColor`,d:`M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z`},null,-1)]])}var o=r({name:`mdi-check`,render:a});export{o as t};
-//# sourceMappingURL=check-BJpf9DVp.js.map

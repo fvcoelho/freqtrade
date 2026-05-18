@@ -1,2 +1,0 @@
-import{P as e,c as t,d as n,ot as r}from"./runtime-core.esm-bundler-DJInd-dt.js";var i={viewBox:`0 0 24 24`,width:`1.2em`,height:`1.2em`};function a(r,a){return e(),n(`svg`,i,[...a[0]||=[t(`path`,{fill:`currentColor`,d:`M19 19V5H5v14zm0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-8 4h2v4h4v2h-4v4h-2v-4H7v-2h4z`},null,-1)]])}var o=r({name:`mdi-plus-box-outline`,render:a});export{o as t};
-//# sourceMappingURL=plus-box-outline-Ci6iGpby.js.map

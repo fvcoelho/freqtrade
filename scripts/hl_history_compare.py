@@ -19,13 +19,22 @@ from pathlib import Path
 import ccxt
 
 REPO = Path(__file__).resolve().parents[1]
+SECRETS = REPO / "user_data" / "secrets" / "hl_mainnet.json"
 CONFIG = REPO / "config_v59_mainnet.json"
 DB = REPO / "user_data" / "v59_mainnet.sqlite"
 
 
 def load_hl_creds() -> tuple[str, str]:
-    cfg = json.loads(CONFIG.read_text())
-    return cfg["exchange"]["wallet_address"], cfg["exchange"]["private_key"]
+    """Load wallet/key from gitignored secrets file (or fall back to config)."""
+    import os
+    if env_w := os.environ.get("HL_WALLET"):
+        return env_w, os.environ["HL_PRIVATE_KEY"]
+    src = SECRETS if SECRETS.exists() else CONFIG
+    cfg = json.loads(src.read_text())
+    ex = cfg["exchange"]
+    if not ex.get("wallet_address") or not ex.get("private_key"):
+        raise SystemExit(f"No credentials in {src}. Set HL_WALLET/HL_PRIVATE_KEY env vars or populate {SECRETS}.")
+    return ex["wallet_address"], ex["private_key"]
 
 
 def fetch_db_closed_trades(since_ms: int) -> list[dict]:
