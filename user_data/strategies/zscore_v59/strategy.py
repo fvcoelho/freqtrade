@@ -70,6 +70,12 @@ class ZScoreV59Strategy(IStrategy):
 
         if "queue" in self.config:
             c["queue"] = {**c.get("queue", {}), **self.config["queue"]}
+        if "leverage" in self.config:
+            c["leverage"] = {**c.get("leverage", {}), **self.config["leverage"]}
+        if "risk" in self.config:
+            c["risk"] = {**c.get("risk", {}), **self.config["risk"]}
+        if "basket" in self.config:
+            c["basket"] = {**c.get("basket", {}), **self.config["basket"]}
 
         entry_queue.reset()
         logger.info("V59 loaded — %d pairs, always-on queue, min_score=%.2f",
@@ -177,7 +183,7 @@ class ZScoreV59Strategy(IStrategy):
         trade.enter_tag = orig_tag
         if result:
             return result
-        max_candles = self._cfg.get("basket", {}).get("time_stop_candles", 72)
+        max_candles = self._cfg.get("basket", {}).get("time_stop_candles", 24)
         trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
         if trade_age >= max_candles:
             return "basket_time_stop"
@@ -200,7 +206,11 @@ class ZScoreV59Strategy(IStrategy):
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
-        """Queue gate: only #1 in its queue enters if score >= min_score."""
+        """Queue gate: only #1 in its queue enters if score >= min_score.
+
+        Ranging regime: enforce balanced 2L/2S to reduce directional risk.
+        Bull/Bear: no per-side limit, best signals fill all 4 slots.
+        """
         open_trades = Trade.get_trades_proxy(is_open=True)
         max_pos = self._cfg.get("basket", {}).get("max_positions", 4)
         if len(open_trades) >= max_pos:
@@ -235,13 +245,24 @@ class ZScoreV59Strategy(IStrategy):
         my_bz = float(df["basket_z"].iloc[idx])
         btc_mom = float(df["btc_mom"].iloc[idx]) if "btc_mom" in df.columns else 0.0
 
-        # Determine regime multiplier
+        # Determine regime
         if btc_mom > 0.0:
             regime = "bull"
         elif btc_mom <= -1.0:
             regime = "bear"
         else:
             regime = "ranging"
+
+        # Ranging regime: enforce balanced long/short (2L + 2S)
+        if regime == "ranging":
+            ranging_cfg = queue_cfg.get("ranging_balance", {})
+            max_per_side = ranging_cfg.get("max_per_side", 2)
+            open_longs = sum(1 for t in open_trades if not t.is_short)
+            open_shorts = sum(1 for t in open_trades if t.is_short)
+            if is_long and open_longs >= max_per_side:
+                return False
+            if not is_long and open_shorts >= max_per_side:
+                return False
 
         side_key = "long" if is_long else "short"
         my_mult = mults.get(f"{regime}_{side_key}", 0.6)
@@ -281,57 +302,79 @@ class ZScoreV59Strategy(IStrategy):
                         current_rate: float, current_profit: float,
                         after_fill: bool, **kwargs) -> float | None:
         tag = trade.enter_tag or ""
-        if tag.startswith("queue_"):
-            return -0.99
-        r = self._cfg["risk"]
-        if current_profit >= r.get("trailing_stop_positive_offset", 0.012):
-            return -r.get("trailing_stop_positive", 0.006)
-        return r.get("stoploss", -0.07)
+        if not tag.startswith("queue_"):
+            r = self._cfg["risk"]
+            if current_profit >= r.get("trailing_stop_positive_offset", 0.012):
+                return -r.get("trailing_stop_positive", 0.006)
+            return r.get("stoploss", -0.07)
+
+        # Queue trades: no trailing — basket exits (revert/time/max_loss) handle everything
+        return -0.99
 
     def leverage(self, pair: str, current_time: datetime, current_rate: float,
                  proposed_leverage: float, max_leverage: float,
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
-        """Z-based leverage: higher |basket_z| = more leverage.
+        """Trade-type + Z-based leverage.
 
-        |z| <= z_min → lev_min
-        |z| >= z_max → lev_max
-        between    → linear interpolation
+        BREAKOUT:       fixed max leverage (high conviction, sudden move)
+        TRENDING:       z-based with trending range (moderate conviction)
+        MEAN REVERSION: z-based with standard range (varies with z)
 
-        Returned as an integer — Hyperliquid only accepts integer leverage,
-        and floors silently otherwise, causing DB/exchange drift.
+        Returned as integer — Hyperliquid only accepts integer leverage.
         """
         lev_cfg = self._cfg.get("leverage", {})
-        lev_min = lev_cfg.get("min", 2.0)
-        lev_max = lev_cfg.get("max", 8.0)
-        z_min = lev_cfg.get("z_min", 0.5)
-        z_max = lev_cfg.get("z_max", 3.0)
+        type_cfg = lev_cfg.get("by_type", {})
 
-        # Get current basket_z for this pair
-        if self.dp:
-            try:
-                import pandas as pd
-                df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-                if df is not None and not df.empty and "basket_z" in df.columns:
-                    ct = pd.Timestamp(current_time)
-                    if df["date"].dt.tz is not None:
-                        ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
-                    mask = df["date"] <= ct
-                    if mask.any():
-                        idx = mask.sum() - 1
-                        abs_z = abs(float(df["basket_z"].iloc[idx]))
-                        # Linear interpolation
-                        if abs_z <= z_min:
-                            lev = lev_min
-                        elif abs_z >= z_max:
-                            lev = lev_max
-                        else:
-                            t = (abs_z - z_min) / (z_max - z_min)
-                            lev = lev_min + t * (lev_max - lev_min)
-                        return float(max(1, min(int(lev), int(max_leverage))))
-            except Exception:
-                pass
+        if not self.dp:
+            return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
 
-        return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
+        try:
+            import pandas as pd
+            import numpy as np
+            df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+            if df is None or df.empty or "basket_z" not in df.columns:
+                return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
+
+            ct = pd.Timestamp(current_time)
+            if df["date"].dt.tz is not None:
+                ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+            mask = df["date"] <= ct
+            if not mask.any():
+                return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
+            idx = mask.sum() - 1
+
+            abs_z = abs(float(df["basket_z"].iloc[idx]))
+            vol_ratio = float(df["vol_ratio"].iloc[idx]) if "vol_ratio" in df.columns else 1.0
+            btc_mom = float(df["btc_mom"].iloc[idx]) if "btc_mom" in df.columns else 0.0
+            btc_atr_z = float(df["btc_atr_z"].iloc[idx]) if "btc_atr_z" in df.columns else 0.0
+
+            bz_prev = float(df["basket_z"].iloc[idx - 3]) if idx >= 3 else float(df["basket_z"].iloc[idx])
+            velocity = abs(float(df["basket_z"].iloc[idx]) - bz_prev)
+
+            if velocity >= 1.0 and vol_ratio >= 2.0:
+                trade_type = "breakout"
+            elif abs(btc_mom) >= 1.5 and btc_atr_z < 2.0:
+                trade_type = "trending"
+            else:
+                trade_type = "mean_reversion"
+
+            tc = type_cfg.get(trade_type, {})
+            t_min = tc.get("min", lev_cfg.get("min", 2.0))
+            t_max = tc.get("max", lev_cfg.get("max", 8.0))
+            t_z_min = tc.get("z_min", lev_cfg.get("z_min", 0.3))
+            t_z_max = tc.get("z_max", lev_cfg.get("z_max", 2.0))
+
+            if abs_z <= t_z_min:
+                lev = t_min
+            elif abs_z >= t_z_max:
+                lev = t_max
+            else:
+                t = (abs_z - t_z_min) / (t_z_max - t_z_min)
+                lev = t_min + t * (t_max - t_min)
+
+            return float(max(1, min(int(lev), int(max_leverage))))
+        except Exception:
+            return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,
