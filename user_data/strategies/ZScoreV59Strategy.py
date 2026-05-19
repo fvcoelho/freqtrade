@@ -241,13 +241,23 @@ class ZScoreV59Strategy(IStrategy):
         my_bz = float(df["basket_z"].iloc[idx])
         btc_mom = float(df["btc_mom"].iloc[idx]) if "btc_mom" in df.columns else 0.0
 
-        # Determine regime multiplier
+        # Determine regime
         if btc_mom > 0.0:
             regime = "bull"
         elif btc_mom <= -1.0:
             regime = "bear"
         else:
             regime = "ranging"
+
+        # Ranging: enforce balanced 2L + 2S to reduce directional risk
+        if regime == "ranging":
+            max_per_side = queue_cfg.get("ranging_balance", {}).get("max_per_side", 2)
+            open_longs = sum(1 for t in open_trades if not t.is_short)
+            open_shorts = sum(1 for t in open_trades if t.is_short)
+            if is_long and open_longs >= max_per_side:
+                return False
+            if not is_long and open_shorts >= max_per_side:
+                return False
 
         side_key = "long" if is_long else "short"
         my_mult = mults.get(f"{regime}_{side_key}", 0.6)

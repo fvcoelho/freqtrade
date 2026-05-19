@@ -386,4 +386,25 @@ class ZScoreV54Strategy(IStrategy):
                             proposed_stake: float, min_stake: Optional[float],
                             max_stake: float, leverage: float, entry_tag: Optional[str],
                             side: str, **kwargs) -> float:
-        return lev_mod.stake_amount(self._cfg, max_stake)
+        # Dynamic stake with warmup: base = wallet/max_trades, scale up with streak
+        # streak 0: 70% base (cold)
+        # streak 1: 85% base
+        # streak 2: 100% base
+        # streak 3: 115% base
+        # streak 4+: 130% base (hot)
+        try:
+            total = self.wallets.get_total(self.config["stake_currency"])
+            max_trades = self._cfg.get("max_total_trades", 2)
+            base_stake = (total * 0.90) / max_trades
+
+            streak = self._state.get_warmup_streak(pair)
+            stake_multipliers = [0.70, 0.85, 1.00, 1.15, 1.30]
+            idx = min(streak, len(stake_multipliers) - 1)
+            stake = base_stake * stake_multipliers[idx]
+
+            stake = max(5.0, min(stake, max_stake))
+            logger.info("StakeWarmup: pair=%s wallet=%.2f base=%.2f streak=%d mult=%.2f → stake=%.2f",
+                        pair, total, base_stake, streak, stake_multipliers[idx], stake)
+            return stake
+        except Exception:
+            return lev_mod.stake_amount(self._cfg, max_stake)
