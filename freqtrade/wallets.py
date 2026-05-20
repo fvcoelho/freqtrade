@@ -230,7 +230,7 @@ class Wallets:
         if (
             require_update
             or self._last_wallet_refresh is None
-            or (self._last_wallet_refresh + timedelta(seconds=3600) < now)
+            or (self._last_wallet_refresh + timedelta(seconds=900) < now)
         ):
             if not self._config["dry_run"] or self._config.get("runmode") == RunMode.LIVE:
                 self._update_live()
