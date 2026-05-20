@@ -173,5 +173,89 @@
         "roi_gate_high_z_profit": 0.015,
         "roi_gate_mid_z_minutes": 15,
         "roi_gate_mid_z_profit": 0.013
+    },
+    "v63_unified": {
+        "enable_v54_ranging": false,
+        "enable_v61b_trending": true,
+        "v61b_basket_pairs": [
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "XRP/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "SUI/USDC:USDC",
+            "ONDO/USDC:USDC",
+            "HYPE/USDC:USDC",
+            "TON/USDC:USDC",
+            "ZEC/USDC:USDC"
+        ],
+        "v61b_btc_ref": "BTC/USDC:USDC",
+        "v61b_entry_z": 1.5,
+        "v61b_exit_z": 0.5,
+        "v61b_max_loss": -0.1,
+        "v61b_time_stop": 24,
+        "v61b_bull_mom": 0.5,
+        "v61b_bear_mom": -0.5,
+        "v61b_min_score": 0.45,
+        "v61b_max_long": 1,
+        "v61b_max_short": 3,
+        "v61b_leverage_min": 6,
+        "v61b_leverage_max": 20,
+        "v61b_modes": {
+            "BTC/USDC:USDC": {
+                "long": false,
+                "short": false
+            },
+            "ETH/USDC:USDC": {
+                "long": true,
+                "short": true
+            },
+            "SOL/USDC:USDC": {
+                "long": true,
+                "short": true
+            },
+            "XRP/USDC:USDC": {
+                "long": true,
+                "short": true
+            },
+            "DOGE/USDC:USDC": {
+                "long": false,
+                "short": false
+            },
+            "SUI/USDC:USDC": {
+                "long": true,
+                "short": true
+            },
+            "ONDO/USDC:USDC": {
+                "long": false,
+                "short": true
+            },
+            "HYPE/USDC:USDC": {
+                "long": true,
+                "short": true
+            },
+            "TON/USDC:USDC": {
+                "long": false,
+                "short": true
+            },
+            "ZEC/USDC:USDC": {
+                "long": false,
+                "short": true
+            }
+        },
+        "v61b_queue_weights": {
+            "basket_z": 0.5,
+            "vol_ratio": 0.2,
+            "spread_velocity": 0.2,
+            "cooldown": 0.1
+        },
+        "v61b_regime_multipliers": {
+            "bull_long": 1.0,
+            "bull_short": 0.3,
+            "ranging_long": 0.6,
+            "ranging_short": 0.6,
+            "bear_long": 0.3,
+            "bear_short": 1.0
+        }
     }
 }

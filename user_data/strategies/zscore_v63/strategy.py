@@ -1,0 +1,593 @@
+"""
+ZScoreV63Strategy — Dual Independent Group Mean-Reversion Strategy
+===================================================================
+
+Two independent groups, each with own spread z-score signal.
+Max 2 concurrent trades (1 per group). Per-group cooldown.
+
+Group A: XRP vs (SOL+LINK) — LONG only
+Group B: (BTC+SOL) vs ETH — LONG + SHORT
+Leverage: Warmup 3→5x (streak-based, gap 12h reset)
+
+Modules:
+    lib/btc_trend.py, volume.py, regime.py — shared infrastructure
+    zscore_v63/groups.py   — group definitions, per-group state
+    zscore_v63/zscore.py   — z-score computation (per-pair + per-group spread)
+    zscore_v63/entries.py  — per-group entry signal generation
+    zscore_v63/exits.py    — exit logic + per-group cooldown
+    zscore_v63/leverage.py — warmup/volume/inverse/exp leverage modes
+    zscore_v63/state.py    — persistent state (streaks, trades, equity)
+    zscore_v63/risk.py     — pre-trade risk gates
+    zscore_v63/dca.py      — DCA on winning positions
+"""
+import json
+import logging
+import sys
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
+
+_STRATEGIES_DIR = str(Path(__file__).resolve().parent.parent)
+if _STRATEGIES_DIR not in sys.path:
+    sys.path.insert(0, _STRATEGIES_DIR)
+
+from pandas import DataFrame
+
+from freqtrade.persistence import Trade
+from freqtrade.strategy import IStrategy
+
+from lib import btc_trend, volume, regime
+from zscore_v63 import config as cfg_loader
+from zscore_v63 import groups as grp
+from zscore_v63.state import StrategyState
+from zscore_v63 import zscore, entries, exits, leverage as lev_mod, risk, dca
+from zscore_v59 import basket as v59_basket
+
+logger = logging.getLogger(__name__)
+
+CONFIG_PATH = Path(__file__).parent.parent / "v63_config.json"
+
+
+class ZScoreV63Strategy(IStrategy):
+    """Dual-group orchestrator — runs two independent spread z-score signals."""
+
+    INTERFACE_VERSION = 3
+    can_short = True
+    process_only_new_candles = True
+    timeframe = "5m"
+    startup_candle_count = 900
+    stoploss = -0.07
+    minimal_roi = {"0": 0.025, "3": 0.015, "10": 0.01, "20": 0.005}
+    trailing_stop = True
+    trailing_stop_positive = 0.006
+    trailing_stop_positive_offset = 0.012
+    trailing_only_offset_is_reached = True
+    use_custom_stoploss = True
+    position_adjustment_enable = True
+    max_entry_position_adjustment = 3
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        c = cfg_loader.load(CONFIG_PATH)
+        self._cfg = c
+
+        # Groups
+        self._groups = grp.load_groups(c)
+        self.BTC_REF: str = c["groups"]["btc_ref"]
+
+        # Timeframe & stake
+        self.timeframe = c.get("timeframe", "5m")
+        self.startup_candle_count = c.get("startup_candle_count", 900)
+
+        # Risk (Freqtrade attributes)
+        r = c["risk"]
+        self.stoploss = r["stoploss"]
+        self.minimal_roi = {str(k): v for k, v in r["minimal_roi"].items()}
+        self.trailing_stop_positive = r["trailing_stop_positive"]
+        self.trailing_stop_positive_offset = r["trailing_stop_positive_offset"]
+
+        ds = r.get("dynamic_stoploss", {})
+        self._dynamic_sl_enabled = ds.get("enabled", False)
+        if self._dynamic_sl_enabled:
+            self.use_custom_stoploss = True
+
+        # Enable custom stoploss for partial stop feature
+        ps = c.get("partial_stop", {})
+        if ps.get("enabled", False):
+            self.use_custom_stoploss = True
+
+        # DCA
+        dc = c["dca"]
+        self.max_entry_position_adjustment = dc["max_adds"]
+
+        # Fast exit
+        fe = c.get("fast_exit", {})
+        self._fast_exit_enabled = fe.get("enabled", False)
+        self._fast_exit_tf = fe.get("timeframe", "5m")
+
+        # Internal state
+        self._pair_zscores: dict[str, DataFrame] = {}
+        self._df_cache: dict[str, DataFrame] = {}
+        self._df_cache_cycle: int = 0
+        self._btc_trend: dict = {}
+        self._trade_history: list[dict] = []
+        self._pending_features: dict[str, list] = {}
+        self._peak_profit: dict[str, float] = {}
+
+        # Persistent state (survives backtest cycles)
+        run_id = f"v54_{c.get('timeframe', '5m')}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        self._state = StrategyState(run_id)
+        self._state.initial_balance = 100.0
+        self._state.balance = 100.0
+        self._state.metadata = {
+            "strategy": "ZScoreV63Strategy",
+            "leverage_mode": c.get("leverage", {}).get("mode", "volume"),
+            "groups": {g.name: {"sub1": g.sub1, "sub2": g.sub2} for g in self._groups},
+        }
+
+        group_names = [g.name for g in self._groups]
+        all_pairs = grp.all_tradable_pairs(self._groups)
+        logger.info(f"V54 loaded — groups={group_names} pairs={all_pairs} BTC={self.BTC_REF}")
+
+    # =========================================================================
+    # DATAFRAME CACHE
+    # =========================================================================
+
+    def _get_pair_df(self, pair: str, timeframe: str | None = None) -> DataFrame | None:
+        tf = timeframe or self.timeframe
+        key = f"{pair}__{tf}"
+        if key in self._df_cache:
+            return self._df_cache[key]
+        if not self.dp:
+            return None
+        df = self.dp.get_pair_dataframe(pair=pair, timeframe=tf)
+        if df is not None:
+            self._df_cache[key] = df
+        return df
+
+    # =========================================================================
+    # INFORMATIVE PAIRS
+    # =========================================================================
+
+    def informative_pairs(self):
+        pairs = self.dp.current_whitelist() if self.dp else []
+        inf = [(pair, "1d") for pair in pairs] + [(self.BTC_REF, "1h")]
+        if self._fast_exit_enabled:
+            inf += [(pair, self._fast_exit_tf) for pair in pairs]
+            inf.append((self.BTC_REF, self._fast_exit_tf))
+        return inf
+
+    # =========================================================================
+    # INDICATORS — per-pair + per-group spread z-scores
+    # =========================================================================
+
+    def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        pair = metadata["pair"]
+
+        # Invalidate cache each cycle
+        cycle_id = id(dataframe)
+        if cycle_id != self._df_cache_cycle:
+            self._df_cache.clear()
+            self._df_cache_cycle = cycle_id
+
+        # BTC trend (once per cycle)
+        if not self._btc_trend:
+            btc_1h = self._get_pair_df(self.BTC_REF, "1h")
+            if btc_1h is not None and len(btc_1h) >= 50:
+                self._btc_trend = btc_trend.compute(btc_1h, self._cfg)
+
+        # Map BTC signals to pair timeframe
+        dataframe = btc_trend.map_to_timeframe(self._btc_trend, dataframe)
+
+        # Per-pair z-score (once per pair — shared across groups)
+        zscore.compute(
+            dataframe, pair, self._cfg, self.dp,
+            self._pair_zscores, self._df_cache,
+            # Use first group's sub1+sub2 for the shared pair z-score
+            self._groups[0].sub1, self._groups[0].sub2,
+        )
+
+        # Per-group spread z-score
+        for g in self._groups:
+            col = f"spread_z_{g.name.lower()}"
+            dataframe[col] = zscore.compute_group_spread_z(
+                dataframe, pair, self._cfg, self.dp,
+                self._df_cache, g.sub1, g.sub2,
+            )
+
+        # Regime filter (use first group's sub1[0] vs sub2[0] for correlation)
+        regime.compute(
+            dataframe, pair, self._cfg, self.dp,
+            self._df_cache, self.timeframe,
+            self._groups[0].sub1, self._groups[0].sub2,
+        )
+
+        # Spread volatility filter
+        regime.compute_spread_vol(dataframe, self._cfg)
+
+        # Volume filter
+        volume.compute(dataframe, self._cfg)
+
+        # --- V61B: basket z-score + queue score (uses zscore_v59/basket.py) ---
+        u = self._cfg.get("v63_unified", {})
+        if u.get("enable_v61b_trending", False):
+            import numpy as np
+            bp = u["v61b_basket_pairs"]
+            window = self._cfg["zscore"]["zscore_window"]
+
+            # Build V59-compatible config for basket computation
+            v61b_cfg = {
+                "basket": {
+                    "pairs": bp,
+                    "btc_ref": u.get("v61b_btc_ref", "BTC/USDC:USDC"),
+                    "zscore_method": "kalman",
+                    "kalman_gain": 0.05,
+                },
+                "zscore": {"zscore_window": window},
+            }
+
+            v59_basket.compute_basket_zscore(
+                dataframe, pair, bp, window,
+                self.timeframe, self.dp, self._df_cache, v61b_cfg,
+            )
+
+            # Queue score
+            if "basket_z" in dataframe.columns:
+                bz_abs = np.abs(dataframe["basket_z"].values)
+                bz_norm = np.minimum(bz_abs, 4.0) / 4.0
+                vr = dataframe["vol_ratio"].values if "vol_ratio" in dataframe.columns else np.ones(len(dataframe))
+                vol_norm = np.minimum(vr, 3.0) / 3.0
+                bz_vals = dataframe["basket_z"].values
+                bz_prev3 = np.roll(bz_vals, 3); bz_prev3[:3] = bz_vals[:3]
+                vel_norm = np.minimum(np.abs(bz_vals - bz_prev3), 2.0) / 2.0
+                w = u["v61b_queue_weights"]
+                dataframe["queue_score"] = (w["basket_z"] * bz_norm + w["vol_ratio"] * vol_norm +
+                                            w["spread_velocity"] * vel_norm + w["cooldown"] * 1.0)
+
+        # Export indicators for replay (backtest only)
+        if self.dp and self.dp.runmode.value in ("backtest", "hyperopt"):
+            export_dir = Path(__file__).parent.parent.parent / "backtest_results" / "indicators"
+            export_dir.mkdir(parents=True, exist_ok=True)
+            coin = pair.split("/")[0]
+            cols = [c for c in dataframe.columns if c in [
+                "date", "open", "high", "low", "close", "volume",
+                "pair_zscore", "log_return",
+                "pair_z_cross_up", "pair_z_cross_down",
+                "vol_ratio", "vol_ok",
+                "regime_ok", "rolling_corr", "spread_vol_ok",
+                "btc_pump", "btc_dump", "btc_high_vol", "btc_vol_ended",
+                "btc_mom", "btc_atr_z",
+            ] + [f"spread_z_{g.name.lower()}" for g in self._groups]]
+            dataframe[cols].to_feather(export_dir / f"{coin}_indicators.feather")
+
+        return dataframe
+
+    # =========================================================================
+    # ENTRY — iterate groups, generate per-group signals
+    # =========================================================================
+
+    def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        pair = metadata["pair"]
+
+        # Initialize columns (first group call)
+        dataframe["enter_long"] = 0
+        dataframe["enter_short"] = 0
+        dataframe["enter_tag"] = ""
+
+        u = self._cfg.get("v63_unified", {})
+
+        # V54 ranging entries (group-based)
+        if u.get("enable_v54_ranging", True):
+            for g in self._groups:
+                if pair not in g.all_pairs:
+                    continue
+                col = f"spread_z_{g.name.lower()}"
+                entries.generate(
+                    dataframe, pair, self._cfg, self._btc_trend,
+                    g.sub1, g.sub2, g.name, col,
+                )
+
+        # V61B trending entries (queue-based, uses v59_basket)
+        if u.get("enable_v61b_trending", False) and "basket_z" in dataframe.columns:
+            btc_ref = u.get("v61b_btc_ref", "BTC/USDC:USDC")
+            if pair != btc_ref:
+                v61b_cfg = {
+                    "basket": {
+                        "entry_z": u.get("v61b_entry_z", 1.5),
+                        "bull_mom_threshold": u.get("v61b_bull_mom", 0.5),
+                        "bear_mom_threshold": u.get("v61b_bear_mom", -0.5),
+                    }
+                }
+                v59_basket.generate_basket_entries(dataframe, pair, v61b_cfg)
+                # Re-tag basket entries to queue entries
+                mask_long = dataframe["enter_tag"] == "basket_long"
+                mask_short = dataframe["enter_tag"] == "basket_short"
+                dataframe.loc[mask_long, "enter_tag"] = "queue_long"
+                dataframe.loc[mask_short, "enter_tag"] = "queue_short"
+
+        return dataframe
+
+    # =========================================================================
+    # EXIT
+    # =========================================================================
+
+    def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        return dataframe
+
+    def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
+                    current_rate: float, current_profit: float, **kwargs) -> Optional[str]:
+        tag = trade.enter_tag or ""
+
+        # V61B queue trades: basket revert + time stop + max loss
+        if tag.startswith("queue_"):
+            u = self._cfg.get("v63_unified", {})
+            max_loss = u.get("v61b_max_loss", -0.10)
+            time_stop = u.get("v61b_time_stop", 24)
+            exit_z = u.get("v61b_exit_z", 0.5)
+
+            if current_profit <= max_loss:
+                return "basket_max_loss"
+            trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
+            if trade_age >= time_stop:
+                return "basket_time_stop"
+            # Basket revert
+            if self.dp:
+                import pandas as pd
+                df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+                if df is not None and "basket_z" in df.columns:
+                    ct = pd.Timestamp(current_time)
+                    if df["date"].dt.tz is not None:
+                        ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+                    mask = df["date"] <= ct
+                    if mask.any():
+                        bz = float(df["basket_z"].iloc[mask.sum() - 1])
+                        if not trade.is_short and bz >= exit_z and current_profit > 0:
+                            return "basket_revert_profit"
+                        if not trade.is_short and bz >= 0:
+                            return "basket_revert_neutral"
+                        if trade.is_short and bz <= -exit_z and current_profit > 0:
+                            return "basket_revert_profit"
+                        if trade.is_short and bz <= 0:
+                            return "basket_revert_neutral"
+            return None
+
+        # V54 group trades: standard exits
+        return exits.check_exit(
+            pair, trade, current_time, current_rate, current_profit,
+            self._cfg, self.dp, self._btc_trend, self._peak_profit,
+            self.timeframe, self._df_cache, self._pending_features,
+        )
+
+    def confirm_trade_exit(self, pair: str, trade: Trade, order_type: str,
+                           amount: float, rate: float, time_in_force: str,
+                           exit_reason: str, current_time: datetime, **kwargs) -> bool:
+        allow, new_cooldown = exits.confirm_exit(
+            pair, trade, exit_reason, current_time, rate,
+            self._cfg, self._pending_features, self._trade_history,
+        )
+        # Apply cooldown to the group(s) this pair belongs to
+        if new_cooldown:
+            for g in self._groups:
+                if pair in g.unique_pairs:
+                    g.cooldown_until = new_cooldown
+                    logger.info(f"V54 COOLDOWN: group {g.name} until {new_cooldown}")
+
+        # Record trade in persistent state
+        profit = trade.calc_profit_ratio(rate)
+        self._state.record_trade(
+            pair=pair, profit_ratio=profit, profit_abs=trade.calc_profit_ratio(rate) * trade.stake_amount,
+            leverage=trade.leverage, entry_tag=trade.enter_tag or "",
+            exit_reason=exit_reason, open_date=trade.open_date_utc,
+            close_date=current_time, open_rate=trade.open_rate,
+            close_rate=rate, is_short=trade.is_short,
+        )
+        self._state.save()
+
+        return allow
+
+    # =========================================================================
+    # CONFIRM ENTRY — per-group limits
+    # =========================================================================
+
+    def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
+                            rate: float, time_in_force: str, current_time: datetime,
+                            entry_tag: Optional[str], side: str, **kwargs) -> bool:
+        open_trades = Trade.get_trades_proxy(is_open=True)
+        tag = entry_tag or ""
+        u = self._cfg.get("v63_unified", {})
+
+        # V61B queue trades
+        if tag.startswith("queue_") and u.get("enable_v61b_trending", False):
+            max_pos = 4
+            if len(open_trades) >= max_pos:
+                return False
+            if pair in {t.pair for t in open_trades}:
+                return False
+            # Per-pair mode check
+            modes = u.get("v61b_modes", {})
+            pm = modes.get(pair, {})
+            if side == "long" and not pm.get("long", True):
+                return False
+            if side == "short" and not pm.get("short", True):
+                return False
+            # Max per side
+            open_longs = sum(1 for t in open_trades if not t.is_short)
+            open_shorts = sum(1 for t in open_trades if t.is_short)
+            if side == "long" and open_longs >= u.get("v61b_max_long", 1):
+                return False
+            if side == "short" and open_shorts >= u.get("v61b_max_short", 3):
+                return False
+            # Queue ranking: check #1 in queue
+            return self._confirm_v61b_queue(pair, side, current_time, open_trades)
+
+        # V54 group trades
+        if u.get("enable_v54_ranging", True):
+            max_total = self._cfg.get("max_total_trades", 2)
+            if len(open_trades) >= max_total:
+                return False
+            for g in self._groups:
+                if pair in g.all_pairs:
+                    if risk.confirm_entry(pair, self._cfg, current_time, g, self._groups, open_trades):
+                        return True
+
+        return False
+
+    def _confirm_v61b_queue(self, pair: str, side: str, current_time, open_trades) -> bool:
+        """V61B queue gate: only #1 enters if score >= min_score."""
+        import pandas as pd
+        u = self._cfg.get("v63_unified", {})
+        min_score = u.get("v61b_min_score", 0.45)
+        mults = u.get("v61b_regime_multipliers", {})
+
+        df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+        if df is None or df.empty or "queue_score" not in df.columns:
+            return False
+
+        ct = pd.Timestamp(current_time)
+        if df["date"].dt.tz is not None:
+            ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
+        mask = df["date"] <= ct
+        if not mask.any():
+            return False
+        idx = mask.sum() - 1
+
+        score = float(df["queue_score"].iloc[idx])
+        btc_mom = float(df["btc_mom"].iloc[idx]) if "btc_mom" in df.columns else 0.0
+        is_long = side == "long"
+
+        if btc_mom > 0:
+            mult = mults.get("bull_long" if is_long else "bull_short", 0.6)
+        elif btc_mom <= -1:
+            mult = mults.get("bear_long" if is_long else "bear_short", 0.6)
+        else:
+            mult = mults.get("ranging_long" if is_long else "ranging_short", 0.6)
+
+        adj_score = score * mult
+        if adj_score < min_score:
+            return False
+
+        # Check if #1 in queue
+        open_pairs = {t.pair for t in open_trades}
+        btc_ref = u.get("v61b_btc_ref", "BTC/USDC:USDC")
+        for p in u.get("v61b_basket_pairs", []):
+            if p == pair or p in open_pairs or p == btc_ref:
+                continue
+            p_df, _ = self.dp.get_analyzed_dataframe(p, self.timeframe)
+            if p_df is None or p_df.empty or "queue_score" not in p_df.columns:
+                continue
+            p_mask = p_df["date"] <= ct
+            if not p_mask.any():
+                continue
+            p_idx = p_mask.sum() - 1
+            p_bz = float(p_df["basket_z"].iloc[p_idx])
+            if is_long and p_bz >= 0:
+                continue
+            if not is_long and p_bz <= 0:
+                continue
+            p_adj = float(p_df["queue_score"].iloc[p_idx]) * mult
+            if p_adj > adj_score:
+                return False
+        return True
+
+    # =========================================================================
+    # CUSTOM STOPLOSS
+    # =========================================================================
+
+    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
+                        current_rate: float, current_profit: float, after_fill: bool,
+                        **kwargs) -> float | None:
+        """Partial Stoploss — tighter stop to reduce max loss per trade.
+
+        Freqtrade requires this method name (IStrategy interface).
+        When partial_stop is enabled, replaces the fixed -7% with a
+        tighter level (e.g., -4%) to cut losses earlier.
+        """
+        tag = trade.enter_tag or ""
+        # V61B queue trades: no trailing, basket exits handle everything
+        if tag.startswith("queue_"):
+            return -0.99
+
+        ps = self._cfg.get("partial_stop", {})
+        if ps.get("enabled", False):
+            return ps.get("trigger", -0.04)
+
+        # ── Dynamic Stoploss (z-score based) ──
+        if not self._dynamic_sl_enabled:
+            return None
+        features = trade.get_custom_data("v26_features")
+        if not features:
+            features = self._pending_features.get(pair)
+        if not features:
+            return None
+        entry_z = abs(features[0])
+        ds = self._cfg["risk"].get("dynamic_stoploss", {})
+        if entry_z >= ds.get("strong_z", 3.0):
+            return ds.get("strong_stop", -0.10)
+        elif entry_z >= ds.get("medium_z", 2.0):
+            return ds.get("medium_stop", -0.05)
+        else:
+            return ds.get("weak_stop", -0.03)
+
+    # =========================================================================
+    # LEVERAGE
+    # =========================================================================
+
+    def leverage(self, pair: str, current_time: datetime, current_rate: float,
+                 proposed_leverage: float, max_leverage: float,
+                 entry_tag: Optional[str], side: str, **kwargs) -> float:
+        # Pass strategy state for warmup leverage mode
+        self._pending_features["_strategy_state"] = self._state
+        lev, features = lev_mod.compute(
+            pair, self._cfg, self.dp, self.timeframe,
+            entry_tag, side, max_leverage, self._pending_features,
+        )
+        return lev
+
+    # =========================================================================
+    # DCA
+    # =========================================================================
+
+    def adjust_trade_position(self, trade: Trade, current_time: datetime,
+                              current_rate: float, current_profit: float,
+                              min_stake: Optional[float], max_stake: float,
+                              current_entry_rate: float, current_exit_rate: float,
+                              current_entry_profit: float, current_exit_profit: float,
+                              **kwargs) -> Optional[float]:
+        # Log all calls to debug partial stop
+        if current_profit < -0.02:
+            logger.warning("ADJUST_POS CALLED: %s profit=%.2f%% stake=$%.2f exits=%d entries=%d",
+                         trade.pair, current_profit * 100, trade.stake_amount,
+                         trade.nr_of_successful_exits, trade.nr_of_successful_entries)
+        return dca.adjust_position(trade, current_profit, self._cfg, min_stake, max_stake)
+
+    # =========================================================================
+    # STAKE
+    # =========================================================================
+
+    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
+                            proposed_stake: float, min_stake: Optional[float],
+                            max_stake: float, leverage: float, entry_tag: Optional[str],
+                            side: str, **kwargs) -> float:
+        # Dynamic stake with warmup: base = wallet/max_trades, scale up with streak
+        # streak 0: 70% base (cold)
+        # streak 1: 85% base
+        # streak 2: 100% base
+        # streak 3: 115% base
+        # streak 4+: 130% base (hot)
+        try:
+            total = self.wallets.get_total(self.config["stake_currency"])
+            max_trades = self._cfg.get("max_total_trades", 2)
+            base_stake = (total * 0.90) / max_trades
+
+            streak = self._state.get_warmup_streak(pair)
+            stake_multipliers = [0.70, 0.85, 1.00, 1.15, 1.30]
+            idx = min(streak, len(stake_multipliers) - 1)
+            stake = base_stake * stake_multipliers[idx]
+
+            stake = max(5.0, min(stake, max_stake))
+            logger.info("StakeWarmup: pair=%s wallet=%.2f base=%.2f streak=%d mult=%.2f → stake=%.2f",
+                        pair, total, base_stake, streak, stake_multipliers[idx], stake)
+            return stake
+        except Exception:
+            return lev_mod.stake_amount(self._cfg, max_stake)
