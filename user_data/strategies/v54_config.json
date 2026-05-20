@@ -62,8 +62,8 @@
         "consolidation_atr_z": -0.5,
         "consolidation_spread_max": 1.5,
         "consolidation_btc_mom_max": 0.8,
-        "trending_btc_mom": 1.5,
-        "trending_atr_z": 1.5,
+        "trending_btc_mom": 2.0,
+        "trending_atr_z": 2.0,
         "spread_vol_filter": false,
         "spread_vol_window": 144,
         "spread_vol_max_z": 2.5
