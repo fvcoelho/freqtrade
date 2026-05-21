@@ -143,7 +143,7 @@ class BetaV59Strategy(IStrategy):
                      weights.get("cooldown", 0.1) * cd_norm)
             dataframe["queue_score"] = score
 
-        # Log tick snapshot for last candle
+        # Store tick data for queue ranking log
         if not dataframe.empty and "basket_z" in dataframe.columns:
             last = dataframe.iloc[-1]
             bz = float(last.get("basket_z", 0))
@@ -152,16 +152,56 @@ class BetaV59Strategy(IStrategy):
             qs = float(last.get("queue_score", 0)) if "queue_score" in dataframe.columns else 0
             bm = float(last.get("btc_mom", 0)) if "btc_mom" in dataframe.columns else 0
             ba = float(last.get("btc_atr_z", 0)) if "btc_atr_z" in dataframe.columns else 0
-            bp = float(last.get("btc_pump", 0)) if "btc_pump" in dataframe.columns else 0
-            bd = float(last.get("btc_dump", 0)) if "btc_dump" in dataframe.columns else 0
             regime = "bull" if bm > 0 else ("bear" if bm <= -1 else "ranging")
             side = "LONG" if bz < 0 else ("SHORT" if bz > 0 else "NEUTRAL")
-            logger.info(
-                "TICK %s | regime=%s side=%s | bz=%.3f pz=%.3f vol=%.2f score=%.3f "
-                "| btc_mom=%.3f atr_z=%.2f pump=%d dump=%d | date=%s",
-                pair, regime, side, bz, pz, vr, qs, bm, ba, bp, bd,
-                str(last["date"])[:19],
-            )
+
+            # Compute adjusted score
+            mults = self._cfg.get("queue", {}).get("regime_multipliers", {})
+            side_key = "long" if bz < 0 else "short"
+            mult = mults.get(f"{regime}_{side_key}", 0.6)
+            adj_score = qs * mult
+            min_score = self._cfg.get("queue", {}).get("min_score", 0.45)
+
+            self._queue_signals[pair] = {
+                "bz": bz, "pz": pz, "vr": vr, "raw": qs, "adj": adj_score,
+                "mult": mult, "side": side, "regime": regime, "btc_mom": bm,
+                "atr_z": ba, "date": str(last["date"])[:19],
+            }
+
+            # After last pair is processed, log full queue ranking
+            if len(self._queue_signals) >= len(self._basket_pairs):
+                long_q = [(p, s) for p, s in self._queue_signals.items() if s["side"] == "LONG"]
+                short_q = [(p, s) for p, s in self._queue_signals.items() if s["side"] == "SHORT"]
+                long_q.sort(key=lambda x: x[1]["adj"], reverse=True)
+                short_q.sort(key=lambda x: x[1]["adj"], reverse=True)
+
+                date_str = self._queue_signals.get(pair, {}).get("date", "")
+                regime_str = self._queue_signals.get(pair, {}).get("regime", "?")
+                btc_mom_str = self._queue_signals.get(pair, {}).get("btc_mom", 0)
+
+                long_lines = []
+                for rank, (p, s) in enumerate(long_q, 1):
+                    p_short = p.replace("/USDC:USDC", "")
+                    pass_str = ">>PASS<<" if s["adj"] >= min_score else ""
+                    long_lines.append(
+                        f"  #{rank} {p_short:5s} adj={s['adj']:.3f} (raw={s['raw']:.3f}*{s['mult']:.1f}) bz={s['bz']:.3f} vol={s['vr']:.2f} {pass_str}"
+                    )
+                short_lines = []
+                for rank, (p, s) in enumerate(short_q, 1):
+                    p_short = p.replace("/USDC:USDC", "")
+                    pass_str = ">>PASS<<" if s["adj"] >= min_score else ""
+                    short_lines.append(
+                        f"  #{rank} {p_short:5s} adj={s['adj']:.3f} (raw={s['raw']:.3f}*{s['mult']:.1f}) bz={s['bz']:.3f} vol={s['vr']:.2f} {pass_str}"
+                    )
+
+                logger.info(
+                    "QUEUE %s | regime=%s btc_mom=%.3f min_score=%.2f\n"
+                    "  LONG QUEUE (%d):\n%s\n"
+                    "  SHORT QUEUE (%d):\n%s",
+                    date_str, regime_str, btc_mom_str, min_score,
+                    len(long_q), "\n".join(long_lines) if long_lines else "  (empty)",
+                    len(short_q), "\n".join(short_lines) if short_lines else "  (empty)",
+                )
 
         return dataframe
 
