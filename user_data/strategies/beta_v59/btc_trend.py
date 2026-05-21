@@ -59,10 +59,15 @@ def compute(btc_df: DataFrame, cfg: dict) -> dict:
     }
 
 
-def map_to_timeframe(btc_state: dict, dataframe: DataFrame) -> DataFrame:
+def map_to_timeframe(btc_state: dict, dataframe: DataFrame, btc_timeframe: str = "1h") -> DataFrame:
     """Map BTC 1h signals to pair's 5m timeframe via forward-fill.
 
     Adds columns: btc_pump, btc_dump, btc_high_vol, btc_vol_ended, btc_mom, btc_atr_z
+
+    Shifts btc_state dates by +1 btc_timeframe so each date represents the candle's
+    CLOSE time. Without this shift, the 1h candle indexed at 14:00 (covering 14:00-14:59)
+    leaks future data to 5m candles within that hour. With shift, 5m at 14:05 sees the
+    1h candle that opened at 13:00 and closed at 14:00 — the last fully closed one.
     """
     if not btc_state:
         for col in ("btc_pump", "btc_dump", "btc_high_vol", "btc_vol_ended"):
@@ -81,10 +86,12 @@ def map_to_timeframe(btc_state: dict, dataframe: DataFrame) -> DataFrame:
     }
 
     pair_dates = pd.to_datetime(dataframe["date"], utc=True)
+    btc_td = pd.Timedelta(btc_timeframe)
+    btc_close_dates = pd.to_datetime(btc_state["dates"], utc=True) + btc_td
 
     for col_name, (signal_key, numeric) in signal_map.items():
         btc_df = pd.DataFrame({
-            "date": pd.to_datetime(btc_state["dates"], utc=True),
+            "date": btc_close_dates,
             signal_key: btc_state[signal_key],
         }).set_index("date")
         merged = btc_df.reindex(pair_dates, method="ffill")

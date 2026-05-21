@@ -94,13 +94,17 @@ class BetaV59Strategy(IStrategy):
         return df
 
     def informative_pairs(self):
-        pairs = self.dp.current_whitelist() if self.dp else []
         btc_tf = self._cfg.get("btc_trend", {}).get("timeframe", "1h")
-        return [(pair, "1d") for pair in pairs] + [(self.BTC_REF, btc_tf)]
+        return [(self.BTC_REF, btc_tf)]
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         pair = metadata["pair"]
-        cycle_id = id(dataframe)
+        # Cycle key: last candle timestamp — stable across pairs within a tick.
+        # id(dataframe) was per-pair and broke queue accumulation.
+        if not dataframe.empty and "date" in dataframe.columns:
+            cycle_id = str(dataframe["date"].iloc[-1])
+        else:
+            cycle_id = "empty"
         if cycle_id != self._df_cache_cycle:
             self._df_cache.clear()
             self._df_cache_cycle = cycle_id

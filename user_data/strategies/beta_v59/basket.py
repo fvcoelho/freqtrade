@@ -309,22 +309,17 @@ def check_basket_exit(
     exit_z = basket_cfg.get("exit_z", 0.3)
     profit_lock = basket_cfg.get("profit_lock", 0.002)
     loss_exit_z = basket_cfg.get("loss_exit_z", -4.0)
-    zscore_window = cfg["zscore"]["zscore_window"]
 
-    # Get current pair data
-    pair_df = df_cache.get(f"{pair}__{timeframe}")
-    if pair_df is None and dp:
-        pair_df = dp.get_pair_dataframe(pair=pair, timeframe=timeframe)
-    if pair_df is None or len(pair_df) < zscore_window:
+    # Read basket_z from analyzed dataframe (already time-bounded by backtest loop).
+    # Previously this recomputed from df_cache, which held the FULL backtest history
+    # because populate_indicators populates df_cache once at startup before the
+    # backtest's per-candle slice_date is set — every tail(-1) leaked the end of run.
+    if dp is None:
         return None
-
-    # Compute current basket z (uses cached basket_avg)
-    temp_df = pair_df.tail(zscore_window * 2).copy().reset_index(drop=True)
-    compute_basket_zscore(temp_df, pair, all_pairs, zscore_window, timeframe, dp, df_cache)
-
-    if "basket_z" not in temp_df.columns:
+    df, _ = dp.get_analyzed_dataframe(pair, timeframe)
+    if df is None or df.empty or "basket_z" not in df.columns:
         return None
-    current_z = temp_df["basket_z"].iloc[-1]
+    current_z = float(df["basket_z"].iloc[-1])
 
     is_long = not trade.is_short
 
