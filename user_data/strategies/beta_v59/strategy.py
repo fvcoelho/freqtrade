@@ -143,6 +143,26 @@ class BetaV59Strategy(IStrategy):
                      weights.get("cooldown", 0.1) * cd_norm)
             dataframe["queue_score"] = score
 
+        # Log tick snapshot for last candle
+        if not dataframe.empty and "basket_z" in dataframe.columns:
+            last = dataframe.iloc[-1]
+            bz = float(last.get("basket_z", 0))
+            pz = float(last.get("pair_z", 0)) if "pair_z" in dataframe.columns else 0
+            vr = float(last.get("vol_ratio", 0)) if "vol_ratio" in dataframe.columns else 0
+            qs = float(last.get("queue_score", 0)) if "queue_score" in dataframe.columns else 0
+            bm = float(last.get("btc_mom", 0)) if "btc_mom" in dataframe.columns else 0
+            ba = float(last.get("btc_atr_z", 0)) if "btc_atr_z" in dataframe.columns else 0
+            bp = float(last.get("btc_pump", 0)) if "btc_pump" in dataframe.columns else 0
+            bd = float(last.get("btc_dump", 0)) if "btc_dump" in dataframe.columns else 0
+            regime = "bull" if bm > 0 else ("bear" if bm <= -1 else "ranging")
+            side = "LONG" if bz < 0 else ("SHORT" if bz > 0 else "NEUTRAL")
+            logger.info(
+                "TICK %s | regime=%s side=%s | bz=%.3f pz=%.3f vol=%.2f score=%.3f "
+                "| btc_mom=%.3f atr_z=%.2f pump=%d dump=%d | date=%s",
+                pair, regime, side, bz, pz, vr, qs, bm, ba, bp, bd,
+                str(last["date"])[:19],
+            )
+
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -181,11 +201,21 @@ class BetaV59Strategy(IStrategy):
             self.dp, self._df_cache, self.timeframe, self._basket_pairs,
         )
         trade.enter_tag = orig_tag
-        if result:
-            return result
         max_candles = self._cfg.get("basket", {}).get("time_stop_candles", 24)
         trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
+        if result:
+            logger.info(
+                "EXIT %s | reason=%s profit=%.2f%% age=%.0f/%d candles | lev=%.0fx tag=%s",
+                pair, result, current_profit * 100, trade_age, max_candles,
+                trade.leverage, orig_tag,
+            )
+            return result
         if trade_age >= max_candles:
+            logger.info(
+                "EXIT %s | reason=basket_time_stop profit=%.2f%% age=%.0f/%d candles | lev=%.0fx tag=%s",
+                pair, current_profit * 100, trade_age, max_candles,
+                trade.leverage, orig_tag,
+            )
             return "basket_time_stop"
         return None
 
@@ -193,14 +223,21 @@ class BetaV59Strategy(IStrategy):
                            amount: float, rate: float, time_in_force: str,
                            exit_reason: str, current_time: datetime, **kwargs) -> bool:
         profit = trade.calc_profit_ratio(rate)
+        pnl = profit * trade.stake_amount
         self._state.record_trade(
-            pair=pair, profit_ratio=profit, profit_abs=profit * trade.stake_amount,
+            pair=pair, profit_ratio=profit, profit_abs=pnl,
             leverage=trade.leverage, entry_tag=trade.enter_tag or "",
             exit_reason=exit_reason, open_date=trade.open_date_utc,
             close_date=current_time, open_rate=trade.open_rate,
             close_rate=rate, is_short=trade.is_short,
         )
         self._state.save()
+        logger.info(
+            "CLOSE %s | %s profit=%.2f%% pnl=$%.2f | stake=$%.2f lev=%.0fx | balance=$%.2f | tag=%s reason=%s",
+            pair, "SHORT" if trade.is_short else "LONG",
+            profit * 100, pnl, trade.stake_amount, trade.leverage,
+            self._state.balance, trade.enter_tag, exit_reason,
+        )
         return True
 
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
@@ -214,8 +251,10 @@ class BetaV59Strategy(IStrategy):
         open_trades = Trade.get_trades_proxy(is_open=True)
         max_pos = self._cfg.get("basket", {}).get("max_positions", 4)
         if len(open_trades) >= max_pos:
+            logger.info("GATE %s %s | REJECT max_pos=%d reached", pair, side, max_pos)
             return False
         if pair in {t.pair for t in open_trades}:
+            logger.info("GATE %s %s | REJECT pair already open", pair, side)
             return False
         if not self.dp:
             return False
@@ -260,8 +299,10 @@ class BetaV59Strategy(IStrategy):
             open_longs = sum(1 for t in open_trades if not t.is_short)
             open_shorts = sum(1 for t in open_trades if t.is_short)
             if is_long and open_longs >= max_per_side:
+                logger.info("GATE %s %s | REJECT ranging max_long=%d", pair, side, max_per_side)
                 return False
             if not is_long and open_shorts >= max_per_side:
+                logger.info("GATE %s %s | REJECT ranging max_short=%d", pair, side, max_per_side)
                 return False
 
         side_key = "long" if is_long else "short"
@@ -270,9 +311,14 @@ class BetaV59Strategy(IStrategy):
 
         # Must pass min_score
         if my_adj_score < min_score:
+            logger.info(
+                "GATE %s %s | REJECT score=%.3f (raw=%.3f * mult=%.2f) < min=%.2f | regime=%s bz=%.3f btc_mom=%.3f",
+                pair, side, my_adj_score, my_raw_score, my_mult, min_score, regime, my_bz, btc_mom,
+            )
             return False
 
         # Check if this pair is #1 in its queue (compare against all other pairs)
+        beaten_by = None
         for p in self._basket_pairs:
             if p == self.BTC_REF or p == pair or p in open_pairs:
                 continue
@@ -294,8 +340,21 @@ class BetaV59Strategy(IStrategy):
 
             p_adj = p_raw * my_mult  # same regime multiplier
             if p_adj > my_adj_score:
-                return False  # another pair has higher score → I'm not #1
+                beaten_by = (p, p_adj)
+                break
 
+        if beaten_by:
+            logger.info(
+                "GATE %s %s | REJECT not #1 — beaten by %s (%.3f > %.3f) | regime=%s bz=%.3f",
+                pair, side, beaten_by[0], beaten_by[1], my_adj_score, regime, my_bz,
+            )
+            return False
+
+        logger.info(
+            "GATE %s %s | ACCEPT score=%.3f (raw=%.3f * mult=%.2f) | regime=%s bz=%.3f btc_mom=%.3f | open=%d/%d",
+            pair, side, my_adj_score, my_raw_score, my_mult, regime, my_bz, btc_mom,
+            len(open_trades), max_pos,
+        )
         return True
 
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
@@ -372,7 +431,12 @@ class BetaV59Strategy(IStrategy):
                 t = (abs_z - t_z_min) / (t_z_max - t_z_min)
                 lev = t_min + t * (t_max - t_min)
 
-            return float(max(1, min(int(lev), int(max_leverage))))
+            final_lev = float(max(1, min(int(lev), int(max_leverage))))
+            logger.info(
+                "LEV %s %s | type=%s lev=%.0fx (raw=%.1f) | abs_z=%.3f vol=%.2f vel=%.3f btc_mom=%.3f atr_z=%.2f",
+                pair, side, trade_type, final_lev, lev, abs_z, vol_ratio, velocity, btc_mom, btc_atr_z,
+            )
+            return final_lev
         except Exception:
             return float(max(1, min(int(lev_cfg.get("base_multiplier", 6.0)), int(max_leverage))))
 
@@ -398,4 +462,8 @@ class BetaV59Strategy(IStrategy):
         )
         if min_stake and stake < min_stake:
             stake = min_stake
+        logger.info(
+            "STAKE %s %s | stake=$%.2f lev=%.0fx | open=%d proposed=$%.2f max=$%.2f | tag=%s",
+            pair, side, stake, leverage, len(open_trades), proposed_stake, max_stake, entry_tag,
+        )
         return stake
