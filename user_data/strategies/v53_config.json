@@ -94,7 +94,8 @@
         "signal_divisor": 10.0,
         "min": 4.0,
         "max": 6.0,
-        "consol_max": 3.0,
+        "consol_max": 2.5,
+        "ranging_max": 2.8,
         "btc_high_vol_max": 2.0,
         "btc_pump_dump_multiplier": 0.6,
         "atr_cap_enabled": true,
@@ -120,6 +121,13 @@
             "decay_per_excess": 0.5,
             "lev_min": 4.0
         }
+    },
+    "ranging": {
+        "z_entry_multiplier": 1.5,
+        "stop_loss": -0.055,
+        "max_holding_minutes": 180,
+        "scalp_profit": 0.006,
+        "scalp_min_minutes": 15
     },
     "entry_modes": {
         "group_a_long": true,

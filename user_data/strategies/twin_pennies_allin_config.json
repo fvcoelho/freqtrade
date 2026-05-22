@@ -1,0 +1,61 @@
+{
+    "timeframe": "5m",
+    "startup_candle_count": 900,
+    "basket": {
+        "pairs": [
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "XRP/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "SUI/USDC:USDC",
+            "ONDO/USDC:USDC",
+            "TON/USDC:USDC"
+        ],
+        "btc_ref": "BTC/USDC:USDC",
+        "entry_z": 2.1,
+        "exit_z": 0.5,
+        "zscore_method": "kalman",
+        "kalman_gain": 0.05
+    },
+    "zscore": {
+        "zscore_window": 288
+    },
+    "risk": {
+        "stoploss": -0.99
+    },
+    "btc_trend": {
+        "timeframe": "1h",
+        "pump_threshold": 3.0,
+        "dump_threshold": -3.0,
+        "high_vol_threshold": 2.0,
+        "vol_ended_threshold": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 72
+    },
+    "volume": {
+        "vol_ma_window": 144,
+        "vol_ok_threshold": 1.0
+    },
+    "twin": {
+        "eval_candles": 2,
+        "max_positions": 4,
+        "initial_leverage": 3,
+        "winner_exit_z": 0.15,
+        "max_candles": 24,
+        "loser_max_candles": 3,
+        "safety_stop": -0.05,
+        "min_winner_profit": 0.001,
+        "scale_stake": 100.0,
+        "max_scale_times": 2,
+        "z_revert_min": 0.4,
+        "scale_min_profit": 0.0005,
+        "allin": {
+            "stake": 200.0,
+            "z_range": 0.25,
+            "min_profit": 0.003,
+            "min_scales": 1
+        }
+    }
+}
