@@ -171,6 +171,31 @@ def generate(
                 mr_long = is_ranging & vol & regime & spread_high & safe_long & pair_z_long & no_long
                 dataframe.loc[mr_long, ["enter_long", "enter_tag"]] = (1, f"mr_long_b_{gn}")
 
+    # --- LOG last candle decision variables ---
+    import logging
+    _log = logging.getLogger(__name__)
+    if len(dataframe) > 0:
+        i = len(dataframe) - 1
+        _sz = float(dataframe[spread_z_col].iloc[i])
+        _pz = float(dataframe["pair_zscore"].iloc[i]) if "pair_zscore" in dataframe.columns else 0
+        _mom = float(btc_mom.iloc[i])
+        _atr = float(btc_atr_z.iloc[i])
+        _vol = int(dataframe["vol_ok"].iloc[i]) if "vol_ok" in dataframe.columns else 0
+        _reg = int(dataframe["regime_ok"].iloc[i]) if "regime_ok" in dataframe.columns else 0
+        _rng = bool(is_ranging.iloc[i])
+        _trd = bool(is_trending.iloc[i])
+        _side = "sub1" if is_a else "sub2" if is_b else "none"
+        _log.info(
+            "ENTRY_CHECK %s grp=%s side=%s | spread_z=%.2f pair_z=%.2f | "
+            "btc_mom=%.2f atr_z=%.2f | regime=%s(rng=%s trd=%s) vol=%d reg=%d | "
+            "thresholds: z_entry=%.1f pair_z=%.1f mom_max=%.1f",
+            pair, group_name, _side, _sz, _pz,
+            _mom, _atr,
+            "RANGING" if _rng else "TRENDING" if _trd else "CONSOL",
+            _rng, _trd, _vol, _reg,
+            zscore_entry, pair_z_entry, trending_btc_mom,
+        )
+
     # --- CONSOLIDATION ENTRIES ---
     consol_spread_low = dataframe[spread_z_col] < -consol_zscore_entry
     consol_pair_z_long = dataframe["pair_zscore"] < -consol_pair_z_entry

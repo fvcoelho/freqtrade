@@ -1,6 +1,6 @@
 {
     "timeframe": "5m",
-    "startup_candle_count": 900,
+    "startup_candle_count": 300,
     "basket": {
         "pairs": [
             "BTC/USDC:USDC",

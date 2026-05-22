@@ -19,6 +19,21 @@ Modules:
     zscore_v54/state.py    — persistent state (streaks, trades, equity)
     zscore_v54/risk.py     — pre-trade risk gates
     zscore_v54/dca.py      — DCA on winning positions
+
+Configuration reference (v54_config.json)
+-----------------------------------------
+zscore:
+    zscore_entry             — Spread Z absoluto p/ entrada em regime RANGING.
+                               Default 2.1 (seletivo); 1.6 = mais trades em mercado correlacionado.
+    pair_z_entry             — Pair Z absoluto p/ confirmação por ativo. Default 1.2.
+
+consolidation:  (regime ativo quando btc_atr_z<-0.5 AND |spread_z|<1.5 AND |btc_mom|<0.8)
+    consol_zscore_entry      — Spread Z p/ entrada em CONSOLIDAÇÃO. DEVE ser <1.5, senão nunca
+                               dispara. 99.0 = desligado. 1.0 = ativo, conservador.
+                               Aplica-se SOMENTE a Group A long (XRP) — ver entries.py:174-182.
+    consol_pair_z_entry      — Pair Z p/ confirmação na entrada de consolidação.
+                               0.8 = sensível; 99.0 = desligado.
+    consol_time_stop_candles — Time-stop em candles de 5m (12 = 1h).
 """
 import json
 import logging

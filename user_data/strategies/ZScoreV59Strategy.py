@@ -206,7 +206,11 @@ class ZScoreV59Strategy(IStrategy):
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
-        """Queue gate: only #1 in its queue enters if score >= min_score."""
+        """Queue gate: only #1 in its queue enters if score >= min_score.
+
+        Ranging regime: enforce balanced 2L/2S to reduce directional risk.
+        Bull/Bear: no per-side limit, best signals fill all 4 slots.
+        """
         open_trades = Trade.get_trades_proxy(is_open=True)
         max_pos = self._cfg.get("basket", {}).get("max_positions", 4)
         if len(open_trades) >= max_pos:
@@ -249,9 +253,10 @@ class ZScoreV59Strategy(IStrategy):
         else:
             regime = "ranging"
 
-        # Ranging: enforce balanced 2L + 2S to reduce directional risk
+        # Ranging regime: enforce balanced long/short (2L + 2S)
         if regime == "ranging":
-            max_per_side = queue_cfg.get("ranging_balance", {}).get("max_per_side", 2)
+            ranging_cfg = queue_cfg.get("ranging_balance", {})
+            max_per_side = ranging_cfg.get("max_per_side", 2)
             open_longs = sum(1 for t in open_trades if not t.is_short)
             open_shorts = sum(1 for t in open_trades if t.is_short)
             if is_long and open_longs >= max_per_side:
@@ -327,32 +332,26 @@ class ZScoreV59Strategy(IStrategy):
         BREAKOUT:       fixed max leverage (high conviction, sudden move)
         TRENDING:       z-based with trending range (moderate conviction)
         MEAN REVERSION: z-based with standard range (varies with z)
-
-        Returned as an integer — Hyperliquid only accepts integer leverage,
-        and floors silently otherwise, causing DB/exchange drift.
         """
         lev_cfg = self._cfg.get("leverage", {})
         type_cfg = lev_cfg.get("by_type", {})
 
-        def _floor_lev(x: float) -> float:
-            return float(max(1, min(int(x), int(max_leverage))))
-
         if not self.dp:
-            return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
+            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
 
         try:
             import pandas as pd
             import numpy as np
             df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
             if df is None or df.empty or "basket_z" not in df.columns:
-                return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
+                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
 
             ct = pd.Timestamp(current_time)
             if df["date"].dt.tz is not None:
                 ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
             mask = df["date"] <= ct
             if not mask.any():
-                return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
+                return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
             idx = mask.sum() - 1
 
             abs_z = abs(float(df["basket_z"].iloc[idx]))
@@ -388,9 +387,9 @@ class ZScoreV59Strategy(IStrategy):
                 t = (abs_z - t_z_min) / (t_z_max - t_z_min)
                 lev = t_min + t * (t_max - t_min)
 
-            return _floor_lev(lev)
+            return min(round(lev, 1), max_leverage)
         except Exception:
-            return _floor_lev(lev_cfg.get("base_multiplier", 6.0))
+            return min(lev_cfg.get("base_multiplier", 6.0), max_leverage)
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime,
                               current_rate: float, current_profit: float,
