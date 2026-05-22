@@ -30,7 +30,7 @@
     "startup_candle_count": 900,
     "stake_per_position": 400.0,
     "risk": {
-        "stoploss": -0.1,
+        "stoploss": -0.12,
         "dynamic_stoploss": {
             "enabled": false
         },
@@ -49,7 +49,7 @@
     "zscore": {
         "zscore_window": 288,
         "cum_return_window": 24,
-        "zscore_entry": 1.7,
+        "zscore_entry": 1.5,
         "pair_z_entry": 0.9,
         "zscore_scalp_min_profit": 0.012,
         "zscore_scalp_exit_threshold": 0.2
@@ -102,7 +102,7 @@
         "min": 5.0,
         "max": 10.0,
         "consol_max": 3.5,
-        "ranging_max": 5.0,
+        "ranging_max": 8.0,
         "btc_high_vol_max": 3.0,
         "btc_pump_dump_multiplier": 0.6,
         "atr_cap_enabled": true,
@@ -158,7 +158,7 @@
     "half_life": {
         "enabled": true,
         "calc_window": 288,
-        "max_entry_candles": 70,
+        "max_entry_candles": 90,
         "time_stop_multiplier": 3.0,
         "min_time_stop_minutes": 60,
         "max_time_stop_minutes": 360
