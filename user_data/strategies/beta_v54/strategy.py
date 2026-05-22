@@ -31,6 +31,7 @@ _STRATEGIES_DIR = str(Path(__file__).resolve().parent.parent)
 if _STRATEGIES_DIR not in sys.path:
     sys.path.insert(0, _STRATEGIES_DIR)
 
+import pandas as pd
 from pandas import DataFrame
 
 from freqtrade.persistence import Trade
@@ -258,7 +259,140 @@ class BetaV54Strategy(IStrategy):
                 strategy_state=self._state,
             )
 
+        # Per-cycle diagnostic logs (one CYCLE per pair, GROUPS once per cycle)
+        self._log_cycle_state(dataframe, pair)
+        if pair == self.BTC_REF:
+            self._log_group_state()
+
         return dataframe
+
+    # =========================================================================
+    # DIAGNOSTIC LOGS — per-cycle visibility into trade decision params
+    # =========================================================================
+
+    def _log_cycle_state(self, dataframe: DataFrame, pair: str) -> None:
+        """Emit one structured INFO line per pair per cycle.
+
+        Fields: which group(s) the pair belongs to, spread-z per group, pair
+        z-score, regime classification, filter gates (vol/regime/spread_vol),
+        BTC state (mom, atr_z, pump/dump/high_vol/vol_ended), effective
+        z-threshold after dynamic_z + dd boost, half-life, drawdown %, and the
+        entry signal produced (long/short/none + tag).
+        """
+        if dataframe is None or len(dataframe) == 0:
+            return
+        try:
+            last = dataframe.iloc[-1]
+            cfg = self._cfg
+
+            pair_groups = [g.name for g in self._groups if pair in g.unique_pairs]
+
+            spreads: dict[str, float] = {}
+            for g in self._groups:
+                col = f"spread_z_{g.name.lower()}"
+                if col in dataframe.columns:
+                    val = last.get(col)
+                    if pd.notna(val):
+                        spreads[g.name] = float(val)
+
+            adx_cfg = cfg.get("adx_regime", {})
+            if adx_cfg.get("enabled", False) and "adx_ranging" in dataframe.columns:
+                is_ranging = bool(last.get("adx_ranging", False))
+                is_trending = bool(last.get("adx_trending", False))
+            else:
+                is_ranging = is_trending = False
+            regime_lbl = "trend" if is_trending else ("range" if is_ranging else "consol")
+
+            # Effective z-threshold (with dynamic_z + DD boost)
+            z_entry = cfg["zscore"]["zscore_entry"]
+            ranging_cfg = cfg.get("ranging", {})
+            dyn = ranging_cfg.get("dynamic_z_entry", {})
+            z_mult = ranging_cfg.get("z_entry_multiplier", 1.5)
+            if dyn.get("enabled", False) and self._groups:
+                col0 = f"spread_z_{self._groups[0].name.lower()}"
+                if col0 in dataframe.columns:
+                    sv = dataframe[col0].rolling(dyn.get("vol_window", 144)).std().iloc[-1]
+                    if pd.notna(sv):
+                        base = dyn.get("base_multiplier", 1.4)
+                        sens = dyn.get("vol_sensitivity", 0.4)
+                        lo = dyn.get("min_multiplier", 1.2)
+                        hi = dyn.get("max_multiplier", 2.5)
+                        z_mult = max(lo, min(hi, base + (float(sv) - 1.0) * sens))
+
+            dd_cfg = cfg.get("leverage", {}).get("drawdown_mode", {})
+            dd_pct = 0.0
+            try:
+                peak = max(
+                    self._state.initial_balance,
+                    max((e["balance"] for e in self._state.equity_curve),
+                        default=self._state.initial_balance),
+                )
+                if peak > 0:
+                    dd_pct = max(0.0, (peak - self._state.balance) / peak * 100)
+                if dd_cfg.get("enabled", False) and dd_pct / 100 > dd_cfg.get("dd_threshold", 0.08):
+                    z_mult *= dd_cfg.get("z_threshold_boost", 1.2)
+            except Exception:
+                pass
+
+            sig = "none"
+            tag = ""
+            if int(last.get("enter_long", 0) or 0) == 1:
+                sig = "LONG"
+                tag = str(last.get("enter_tag", "") or "")
+            elif int(last.get("enter_short", 0) or 0) == 1:
+                sig = "SHORT"
+                tag = str(last.get("enter_tag", "") or "")
+
+            sp_str = " ".join(f"{k}={v:+.2f}" for k, v in spreads.items()) or "n/a"
+            hl_str = ""
+            if "spread_half_life" in dataframe.columns:
+                hl_val = last.get("spread_half_life")
+                if pd.notna(hl_val):
+                    hl_str = f" hl={float(hl_val):.0f}"
+
+            logger.info(
+                "V54 CYCLE %s grp=%s spread[%s] pz=%+.2f regime=%s vok=%d rok=%d sok=%d "
+                "btc[mom=%+.2f atrz=%+.2f p=%d d=%d hv=%d ve=%d] zth=%.2f dd=%.1f%%%s sig=%s%s",
+                pair,
+                ",".join(pair_groups) or "-",
+                sp_str,
+                float(last.get("pair_zscore", 0.0) or 0.0),
+                regime_lbl,
+                int(last.get("vol_ok", 0) or 0),
+                int(last.get("regime_ok", 0) or 0),
+                int(last.get("spread_vol_ok", 0) or 0),
+                float(last.get("btc_mom", 0.0) or 0.0),
+                float(last.get("btc_atr_z", 0.0) or 0.0),
+                int(bool(last.get("btc_pump", False))),
+                int(bool(last.get("btc_dump", False))),
+                int(bool(last.get("btc_high_vol", False))),
+                int(bool(last.get("btc_vol_ended", False))),
+                z_entry * z_mult,
+                dd_pct,
+                hl_str,
+                sig,
+                f" tag={tag}" if tag else "",
+            )
+        except Exception as e:
+            logger.warning("V54 CYCLE log failed for %s: %s", pair, e)
+
+    def _log_group_state(self) -> None:
+        """One-shot per-cycle dump of group-level state: open trades & cooldowns."""
+        try:
+            open_trades = Trade.get_trades_proxy(is_open=True)
+            max_total = self._cfg.get("max_total_trades", 2)
+            max_per_g = self._cfg.get("max_trades_per_group", 1)
+            parts = []
+            for g in self._groups:
+                n = sum(1 for t in open_trades if t.pair in g.unique_pairs)
+                cd = g.cooldown_until.isoformat() if g.cooldown_until else "-"
+                parts.append(f"[{g.name}: {n}/{max_per_g} cd={cd}]")
+            logger.info(
+                "V54 GROUPS open=%d/%d %s",
+                len(open_trades), max_total, " ".join(parts),
+            )
+        except Exception as e:
+            logger.warning("V54 GROUPS log failed: %s", e)
 
     # =========================================================================
     # EXIT
@@ -310,17 +444,40 @@ class BetaV54Strategy(IStrategy):
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
         open_trades = Trade.get_trades_proxy(is_open=True)
-
-        # Max total trades
         max_total = self._cfg.get("max_total_trades", 2)
+        max_per_g = self._cfg.get("max_trades_per_group", 1)
+
         if len(open_trades) >= max_total:
+            logger.info(
+                "V54 GATE %s side=%s tag=%s → REJECT total_full(%d/%d)",
+                pair, side, entry_tag, len(open_trades), max_total,
+            )
             return False
 
         # Check per-group: at least one group must allow
+        reasons: list[str] = []
         for g in self._groups:
-            if pair in g.all_pairs:
-                if risk.confirm_entry(pair, self._cfg, current_time, g, self._groups, open_trades):
-                    return True
+            if pair not in g.all_pairs:
+                continue
+            n_grp = sum(1 for t in open_trades if t.pair in g.unique_pairs)
+            if g.cooldown_until and current_time < g.cooldown_until:
+                reasons.append(f"{g.name}:cooldown_until={g.cooldown_until.isoformat()}")
+                continue
+            if n_grp >= max_per_g:
+                reasons.append(f"{g.name}:group_full({n_grp}/{max_per_g})")
+                continue
+            logger.info(
+                "V54 GATE %s side=%s tag=%s → ACCEPT group=%s (group_open=%d/%d total_open=%d/%d)",
+                pair, side, entry_tag, g.name,
+                n_grp, max_per_g, len(open_trades), max_total,
+            )
+            return True
+
+        logger.info(
+            "V54 GATE %s side=%s tag=%s → REJECT %s",
+            pair, side, entry_tag,
+            "|".join(reasons) if reasons else "no_eligible_group",
+        )
         return False
 
     # =========================================================================
@@ -370,6 +527,10 @@ class BetaV54Strategy(IStrategy):
             pair, self._cfg, self.dp, self.timeframe,
             entry_tag, side, max_leverage, self._pending_features,
         )
+        logger.info(
+            "V54 LEV %s side=%s tag=%s lev=%.1fx (proposed=%.1f max=%.1f)",
+            pair, side, entry_tag, lev, proposed_leverage, max_leverage,
+        )
         return lev
 
     # =========================================================================
@@ -398,4 +559,9 @@ class BetaV54Strategy(IStrategy):
                             proposed_stake: float, min_stake: Optional[float],
                             max_stake: float, leverage: float, entry_tag: Optional[str],
                             side: str, **kwargs) -> float:
-        return lev_mod.stake_amount(self._cfg, max_stake)
+        stake = lev_mod.stake_amount(self._cfg, max_stake)
+        logger.info(
+            "V54 STAKE %s side=%s tag=%s stake=$%.2f (lev=%.1fx max_stake=$%.2f)",
+            pair, side, entry_tag, stake, leverage, max_stake,
+        )
+        return stake
