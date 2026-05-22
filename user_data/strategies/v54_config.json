@@ -1,37 +1,56 @@
 {
-    "_comment": "BetaV54 — V53 + ADX regime + dynamic z + half-life + corr penalty + DD mode + smart DCA",
+    "_comment": "BetaV54 \u2014 V53 + ADX regime + dynamic z + half-life + corr penalty + DD mode + smart DCA",
     "groups": {
         "group_a": {
             "name": "A",
-            "sub1": ["XRP/USDC:USDC"],
-            "sub2": ["SOL/USDC:USDC", "LINK/USDC:USDC"]
+            "sub1": [
+                "XRP/USDC:USDC"
+            ],
+            "sub2": [
+                "SOL/USDC:USDC",
+                "LINK/USDC:USDC"
+            ]
         },
         "group_b": {
             "name": "B",
-            "sub1": ["BTC/USDC:USDC", "SOL/USDC:USDC"],
-            "sub2": ["ETH/USDC:USDC"]
+            "sub1": [
+                "BTC/USDC:USDC",
+                "SOL/USDC:USDC"
+            ],
+            "sub2": [
+                "ETH/USDC:USDC"
+            ]
         },
         "btc_ref": "BTC/USDC:USDC"
     },
     "max_trades_per_group": 1,
-    "max_total_trades": 2,
+    "max_total_trades": 3,
     "cooldown_scope": "per_group",
     "timeframe": "5m",
     "startup_candle_count": 900,
     "stake_per_position": 400.0,
     "risk": {
-        "stoploss": -0.065,
-        "dynamic_stoploss": {"enabled": false},
-        "minimal_roi": {"0": 0.025, "3": 0.015, "10": 0.01, "20": 0.005},
-        "trailing_stop_positive": 0.006,
-        "trailing_stop_positive_offset": 0.012,
-        "progressive_stop": {"enabled": false}
+        "stoploss": -0.1,
+        "dynamic_stoploss": {
+            "enabled": false
+        },
+        "minimal_roi": {
+            "0": 0.03,
+            "3": 0.02,
+            "10": 0.012,
+            "20": 0.006
+        },
+        "trailing_stop_positive": 0.008,
+        "trailing_stop_positive_offset": 0.018,
+        "progressive_stop": {
+            "enabled": false
+        }
     },
     "zscore": {
         "zscore_window": 288,
         "cum_return_window": 24,
-        "zscore_entry": 2.1,
-        "pair_z_entry": 1.2,
+        "zscore_entry": 1.7,
+        "pair_z_entry": 0.9,
         "zscore_scalp_min_profit": 0.012,
         "zscore_scalp_exit_threshold": 0.2
     },
@@ -51,10 +70,10 @@
     },
     "adx_regime": {
         "enabled": true,
-        "adx_ranging_threshold": 20,
-        "adx_trending_threshold": 25,
+        "adx_ranging_threshold": 18,
+        "adx_trending_threshold": 22,
         "persistence_window": 3,
-        "persistence_threshold": 0.6
+        "persistence_threshold": 0.5
     },
     "consolidation": {
         "consol_zscore_entry": 99.0,
@@ -80,11 +99,11 @@
         "base_multiplier": 3.0,
         "signal_aggression": 1.5,
         "signal_divisor": 10.0,
-        "min": 4.0,
-        "max": 6.0,
-        "consol_max": 2.5,
-        "ranging_max": 2.8,
-        "btc_high_vol_max": 2.0,
+        "min": 5.0,
+        "max": 10.0,
+        "consol_max": 3.5,
+        "ranging_max": 5.0,
+        "btc_high_vol_max": 3.0,
         "btc_pump_dump_multiplier": 0.6,
         "atr_cap_enabled": true,
         "atr_cap_period": 12,
@@ -98,20 +117,26 @@
         "vol_cap": 20.0,
         "warmup": {
             "gap_reset_hours": 12,
-            "streak_levels": [4.0, 4.5, 5.0, 5.5, 6.0],
+            "streak_levels": [
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                10.0
+            ],
             "streak_cap": 4,
             "decay_per_excess": 0.5,
-            "lev_min": 4.0
+            "lev_min": 5.0
         },
         "corr_decay_penalty": {
             "enabled": true,
-            "corr_threshold": 0.45,
-            "penalty_multiplier": 0.7
+            "corr_threshold": 0.4,
+            "penalty_multiplier": 0.8
         },
         "drawdown_mode": {
             "enabled": true,
-            "dd_threshold": 0.08,
-            "leverage_multiplier": 0.6,
+            "dd_threshold": 0.15,
+            "leverage_multiplier": 0.7,
             "z_threshold_boost": 1.2
         }
     },
@@ -120,21 +145,21 @@
         "dynamic_z_entry": {
             "enabled": true,
             "vol_window": 144,
-            "base_multiplier": 1.4,
-            "vol_sensitivity": 0.4,
-            "min_multiplier": 1.2,
+            "base_multiplier": 1.2,
+            "vol_sensitivity": 0.3,
+            "min_multiplier": 1.0,
             "max_multiplier": 2.5
         },
-        "stop_loss": -0.055,
-        "max_holding_minutes": 180,
-        "scalp_profit": 0.007,
+        "stop_loss": -0.08,
+        "max_holding_minutes": 300,
+        "scalp_profit": 0.01,
         "scalp_min_minutes": 15
     },
     "half_life": {
         "enabled": true,
         "calc_window": 288,
-        "max_entry_candles": 50,
-        "time_stop_multiplier": 2.5,
+        "max_entry_candles": 70,
+        "time_stop_multiplier": 3.0,
         "min_time_stop_minutes": 60,
         "max_time_stop_minutes": 360
     },
@@ -151,17 +176,36 @@
     },
     "dca": {
         "max_adds": 3,
-        "thresholds": [0.003, 0.006, 0.01],
-        "multipliers": [1.0, 2.0, 3.0],
+        "thresholds": [
+            0.003,
+            0.006,
+            0.01
+        ],
+        "multipliers": [
+            1.5,
+            2.5,
+            3.5
+        ],
         "smart_dca": {
             "enabled": true,
             "min_z_favorable": 0.5
         },
         "smart_min_profit": 0.005
     },
-    "fast_exit": {"enabled": false},
-    "no_reversion_exit": {"enabled": false, "check_after_candles": 6, "z_diverge_threshold": 0.8, "max_loss_pct": -0.02},
-    "btc_fast_exit": {"enabled": false, "btc_move_pct": 1.0, "lookback_candles": 3},
+    "fast_exit": {
+        "enabled": false
+    },
+    "no_reversion_exit": {
+        "enabled": false,
+        "check_after_candles": 6,
+        "z_diverge_threshold": 0.8,
+        "max_loss_pct": -0.02
+    },
+    "btc_fast_exit": {
+        "enabled": false,
+        "btc_move_pct": 1.0,
+        "lookback_candles": 3
+    },
     "exits": {
         "mkt_stop_loss_threshold": -0.003,
         "mkt_stop_regime_loss": -0.008,
