@@ -12,8 +12,8 @@
     "zscore": {
         "ema_window": 30,
         "zscore_window": 30,
-        "entry_z": 2.0,
-        "exit_z": 0.1
+        "entry_z": 4.0,
+        "exit_z": 0.5
     },
     "risk": {
         "stoploss": -0.99
@@ -37,13 +37,13 @@
         "max_positions": 8,
         "initial_leverage": 3,
         "winner_exit_z": 0.1,
-        "max_candles": 5,
+        "max_candles": 24,
         "loser_max_candles": 1,
-        "safety_stop": -0.05,
-        "min_winner_profit": 0.0001,
+        "safety_stop": -0.15,
+        "min_winner_profit": 0.001,
         "scale_stake": 100.0,
-        "max_scale_times": 2,
-        "z_revert_min": 0.3,
-        "scale_min_profit": 0.0003
+        "max_scale_times": 1,
+        "z_revert_min": 0.5,
+        "scale_min_profit": 0.005
     }
 }

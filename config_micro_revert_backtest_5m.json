@@ -23,13 +23,8 @@
             "LINK/USDC:USDC",
             "ADA/USDC:USDC",
             "AVAX/USDC:USDC",
-            "PEPE/USDC:USDC",
-            "WIF/USDC:USDC",
             "HYPE/USDC:USDC",
-            "AAVE/USDC:USDC",
-            "OP/USDC:USDC",
-            "ARB/USDC:USDC",
-            "SEI/USDC:USDC"
+            "ARB/USDC:USDC"
         ],
         "pair_blacklist": []
     },

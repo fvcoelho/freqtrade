@@ -188,6 +188,15 @@ class MicroRevertStrategy(IStrategy):
                             proposed_stake: float, min_stake: Optional[float],
                             max_stake: float, leverage: float, entry_tag: Optional[str],
                             side: str, **kwargs) -> float:
+        # Fixed stake mode (no penny)
+        fixed = self._cfg.get("zscore", {}).get("fixed_stake")
+        if fixed:
+            stake = float(fixed)
+            stake = min(stake, max_stake)
+            if min_stake and stake < min_stake:
+                stake = min_stake
+            return stake
+
         if not self.dp:
             return min_stake or 5.0
 
