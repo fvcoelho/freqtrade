@@ -19,7 +19,7 @@ Flow:
 """
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 CONFIG_PATH = Path(__file__).parent.parent / "twin_pennies_config.json"
 
 _trade_state: dict[int, dict] = {}
+_winner_cooldowns: dict[tuple[str, str], datetime] = {}
 
 
 class TwinPenniesStrategy(IStrategy):
@@ -69,6 +70,7 @@ class TwinPenniesStrategy(IStrategy):
         self._df_cache: dict[str, DataFrame] = {}
         self._df_cache_cycle: int = 0
         self._btc_trend: dict = {}
+        self._cycle_zscores: dict[str, float] = {}
 
         tc = c.get("twin", {})
         self._eval_candles = tc.get("eval_candles", 2)
@@ -83,8 +85,12 @@ class TwinPenniesStrategy(IStrategy):
         self._z_revert_min = tc.get("z_revert_min", 0.35)
         self._scale_min_profit = tc.get("scale_min_profit", 0.0003)
 
-        global _trade_state
+        self._cooldown_minutes = float(tc.get("cooldown_after_winner_minutes", 0))
+        self._min_entry_notional = float(tc.get("min_entry_notional", 0))
+
+        global _trade_state, _winner_cooldowns
         _trade_state = {}
+        _winner_cooldowns = {}
 
         logger.info(
             "TwinPennies V4 — %d pairs, z_revert=%.2f, scale=$%.0f, "
@@ -119,6 +125,7 @@ class TwinPenniesStrategy(IStrategy):
             self._df_cache.clear()
             self._df_cache_cycle = cycle_id
             self._btc_trend = {}
+            self._cycle_zscores = {}
 
         if not self._btc_trend:
             btc_tf = self._cfg.get("btc_trend", {}).get("timeframe", "1h")
@@ -132,6 +139,60 @@ class TwinPenniesStrategy(IStrategy):
             self._cfg["zscore"]["zscore_window"],
             self.timeframe, self.dp, self._df_cache, self._cfg,
         )
+
+        # Log cycle summary on last pair processed
+        if not dataframe.empty and "basket_z" in dataframe.columns:
+            last = dataframe.iloc[-1]
+            z = float(last.get("basket_z", 0))
+            vol_ok = int(last.get("vol_ok", 0))
+            self._cycle_zscores[pair] = z
+
+            # Log full dashboard when all pairs are processed
+            if len(self._cycle_zscores) >= len(self._basket_pairs) - 1:
+                btc_mom = float(last.get("btc_mom", 0))
+                btc_atr_z = float(last.get("btc_atr_z", 0))
+                pump = bool(last.get("btc_pump", False))
+                dump = bool(last.get("btc_dump", False))
+                chaos = bool(last.get("btc_high_vol", False))
+
+                z_parts = " | ".join(
+                    f"{p.split('/')[0]}={v:+.2f}"
+                    for p, v in sorted(self._cycle_zscores.items())
+                    if p != self.BTC_REF
+                )
+
+                open_trades = Trade.get_trades_proxy(is_open=True)
+                trades_str = ""
+                if open_trades:
+                    parts = []
+                    for t in open_trades:
+                        ts = self._get_ts(t.id)
+                        lbl = "W" if ts.get("is_winner") else ("L" if ts.get("is_winner") is False else "?")
+                        sc = ts.get("scale_count", 0)
+                        age = (datetime.now(timezone.utc) - t.open_date_utc).total_seconds() / 300
+                        parts.append(
+                            f"{t.pair.split('/')[0]}({'S' if t.is_short else 'L'})[{lbl}+S{sc}] "
+                            f"p={t.calc_profit_ratio(t.close_rate or t.open_rate) * 100:+.2f}% "
+                            f"@{age:.0f}c"
+                        )
+                    trades_str = " | ".join(parts)
+
+                entry_z = self._cfg["basket"]["entry_z"]
+                signals = [
+                    p.split('/')[0] for p, v in self._cycle_zscores.items()
+                    if p != self.BTC_REF and abs(v) > entry_z
+                ]
+
+                logger.info(
+                    "TICK z=[%s] | BTC mom=%.2f atr_z=%.2f pump=%s dump=%s chaos=%s | "
+                    "signals=%s | open=%d/%d [%s]",
+                    z_parts, btc_mom, btc_atr_z, pump, dump, chaos,
+                    ",".join(signals) or "none",
+                    len(open_trades), self._max_positions,
+                    trades_str or "none",
+                )
+                self._cycle_zscores = {}
+
         return dataframe
 
     # ────────────────────────── Entries ──────────────────────────
@@ -200,12 +261,39 @@ class TwinPenniesStrategy(IStrategy):
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
         open_trades = Trade.get_trades_proxy(is_open=True)
         if len(open_trades) >= self._max_positions:
+            logger.info(
+                "ENTRY REJECT %s %s — max positions %d/%d",
+                pair, side, len(open_trades), self._max_positions,
+            )
             return False
         if pair in {t.pair for t in open_trades}:
+            logger.info("ENTRY REJECT %s %s — already open", pair, side)
             return False
 
+        if self._cooldown_minutes > 0:
+            last_exit = _winner_cooldowns.get((pair, side))
+            if last_exit is not None:
+                elapsed_min = (current_time - last_exit).total_seconds() / 60.0
+                if elapsed_min < self._cooldown_minutes:
+                    logger.info(
+                        "ENTRY REJECT %s %s — cooldown %.0f/%.0fmin since winner",
+                        pair, side, elapsed_min, self._cooldown_minutes,
+                    )
+                    return False
+
+        if self._min_entry_notional > 0:
+            notional = amount * rate
+            if notional < self._min_entry_notional:
+                logger.info(
+                    "ENTRY REJECT %s %s — notional $%.2f < min $%.2f",
+                    pair, side, notional, self._min_entry_notional,
+                )
+                return False
+
+        my_z = self._get_current_z(pair, current_time)
         entry_z = self._cfg["basket"]["entry_z"]
         open_pairs = {t.pair for t in open_trades}
+        twin_match = None
         for p in self._basket_pairs:
             if p == self.BTC_REF or p == pair or p in open_pairs:
                 continue
@@ -213,9 +301,24 @@ class TwinPenniesStrategy(IStrategy):
             if z is None:
                 continue
             if side == "long" and z > entry_z:
-                return True
+                twin_match = (p, z)
+                break
             if side == "short" and z < -entry_z:
-                return True
+                twin_match = (p, z)
+                break
+
+        if twin_match:
+            logger.info(
+                "ENTRY CONFIRM %s %s z=%.3f | twin=%s z=%.3f | rate=%.4f $%.2f lev=%s",
+                pair, side, my_z or 0, twin_match[0], twin_match[1],
+                rate, amount * rate, self._cfg.get("twin", {}).get("initial_leverage", 3),
+            )
+            return True
+
+        logger.info(
+            "ENTRY REJECT %s %s z=%.3f — no twin opposite (need |z|>%.1f)",
+            pair, side, my_z or 0, entry_z,
+        )
         return False
 
     # ────────────────────────── Tiered stake ──────────────────────────
@@ -366,6 +469,11 @@ class TwinPenniesStrategy(IStrategy):
                     current_rate: float, current_profit: float, **kwargs) -> Optional[str]:
         trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
         ts = self._get_ts(trade.id)
+        z = self._get_current_z(pair, current_time)
+        is_long = not trade.is_short
+        side = "L" if is_long else "S"
+        label = "W" if ts.get("is_winner") else ("L" if ts.get("is_winner") is False else "?")
+        sc = ts.get("scale_count", 0)
 
         # Max loss
         if current_profit < self._safety_stop:
@@ -378,9 +486,6 @@ class TwinPenniesStrategy(IStrategy):
 
         # WINNER exits
         if ts["is_winner"]:
-            z = self._get_current_z(pair, current_time)
-            is_long = not trade.is_short
-
             # Z-reversion exit (primary)
             if z is not None and current_profit > 0.003:
                 if is_long and z > -self._winner_exit_z:
@@ -389,7 +494,7 @@ class TwinPenniesStrategy(IStrategy):
                     return "twin_winner_revert"
 
             # Momentum reversal protection (scaled winners only)
-            if ts["scale_count"] > 0 and current_profit > 0.018 and trade_age > 8:
+            if sc > 0 and current_profit > 0.018 and trade_age > 8:
                 btc_mom = self._get_btc_mom(pair, current_time)
                 if is_long and btc_mom < -3.5:
                     return "twin_mom_reverse"
@@ -399,6 +504,24 @@ class TwinPenniesStrategy(IStrategy):
         # Time stop
         if trade_age >= self._max_candles:
             return "twin_time_stop"
+
+        # Log trade status every candle (no exit triggered)
+        if trade_age > 0 and trade_age % 1 < 0.2:
+            z_entry = ts.get("entry_z", 0) or 0
+            z_delta = 0.0
+            if z is not None and z_entry:
+                z_delta = (z - z_entry) if is_long else (z_entry - z)
+            btc_mom = self._get_btc_mom(pair, current_time)
+            logger.info(
+                "HOLD %s %s[%s+S%d] @%.0fc | z=%.3f entry_z=%.3f delta=%.3f | "
+                "profit=%.2f%% peak=%.2f%% $%.2f | btc_mom=%.2f | "
+                "time_left=%.0fc exit_z=%.2f",
+                pair, side, label, sc, trade_age,
+                z or 0, z_entry, z_delta,
+                current_profit * 100, ts.get("peak_profit", 0) * 100,
+                trade.stake_amount, btc_mom,
+                self._max_candles - trade_age, self._winner_exit_z,
+            )
 
         return None
 
@@ -415,4 +538,9 @@ class TwinPenniesStrategy(IStrategy):
             pair, "S" if trade.is_short else "L", label, scaled,
             profit * 100, trade.stake_amount, trade.leverage, exit_reason,
         )
+
+        if self._cooldown_minutes > 0 and exit_reason == "twin_winner_revert":
+            side = "short" if trade.is_short else "long"
+            _winner_cooldowns[(pair, side)] = current_time
+
         return True

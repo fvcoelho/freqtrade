@@ -1,0 +1,3698 @@
+[
+  {
+    "trades": 348,
+    "profit_pct": -24.869032174,
+    "cagr": -0.24869032173999983,
+    "sharpe": -1.4666989400769,
+    "sortino": -1.351328329050842,
+    "calmar": -4.656295148070374,
+    "max_dd": 27.95580167836168,
+    "winrate": 82.47126436781609,
+    "profit_factor": 0.7568534829304503,
+    "long_trades": 171,
+    "short_trades": 177,
+    "combo": "BTCADA_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 319,
+    "profit_pct": -1.143773976999998,
+    "cagr": -0.011437739769999844,
+    "sharpe": -0.07739433520335026,
+    "sortino": -0.0669637604931867,
+    "calmar": -0.3458019240401411,
+    "max_dd": 17.31276259551559,
+    "winrate": 84.63949843260188,
+    "profit_factor": 0.9848133859531665,
+    "long_trades": 167,
+    "short_trades": 152,
+    "combo": "BTCADA_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 289,
+    "profit_pct": 7.908382392999999,
+    "cagr": 0.07908382393000002,
+    "sharpe": 0.6006053904726242,
+    "sortino": 0.41038650751708317,
+    "calmar": 6.181499820113162,
+    "max_dd": 6.6964922008388275,
+    "winrate": 84.08304498269896,
+    "profit_factor": 1.1462621205457455,
+    "long_trades": 175,
+    "short_trades": 114,
+    "combo": "BTCADA_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 291,
+    "profit_pct": -1.7898052749999978,
+    "cagr": -0.017898052750000004,
+    "sharpe": -0.12748478305476169,
+    "sortino": -0.09941305428300279,
+    "calmar": -0.5247679077940748,
+    "max_dd": 17.852213974959323,
+    "winrate": 82.81786941580756,
+    "profit_factor": 0.972541584387227,
+    "long_trades": 139,
+    "short_trades": 152,
+    "combo": "BTCADA_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 270,
+    "profit_pct": -17.021514584,
+    "cagr": -0.17021514583999997,
+    "sharpe": -1.0597579248451174,
+    "sortino": -0.9833883348728427,
+    "calmar": -3.6120845733603817,
+    "max_dd": 24.66572349300001,
+    "winrate": 80.74074074074075,
+    "profit_factor": 0.7799764833402617,
+    "long_trades": 177,
+    "short_trades": 93,
+    "combo": "BTCADA_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 329,
+    "profit_pct": -8.034970431999996,
+    "cagr": -0.08034970431999999,
+    "sharpe": -0.5184027679899676,
+    "sortino": -0.44345414833511054,
+    "calmar": -2.674741143622865,
+    "max_dd": 15.723748638035751,
+    "winrate": 82.37082066869301,
+    "profit_factor": 0.9056484291724601,
+    "long_trades": 150,
+    "short_trades": 179,
+    "combo": "BTCADA_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 299,
+    "profit_pct": -19.017769038,
+    "cagr": -0.1901776903800001,
+    "sharpe": -1.068266386617561,
+    "sortino": -1.0775478373138805,
+    "calmar": -3.578891259831259,
+    "max_dd": 27.814075773998265,
+    "winrate": 81.93979933110369,
+    "profit_factor": 0.7967058988362657,
+    "long_trades": 166,
+    "short_trades": 133,
+    "combo": "BTCADA_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 297,
+    "profit_pct": 1.5212444579999969,
+    "cagr": 0.015212444579999929,
+    "sharpe": 0.10324104725469907,
+    "sortino": 0.07381327301634134,
+    "calmar": 0.6688959258977856,
+    "max_dd": 11.904030366999995,
+    "winrate": 85.85858585858585,
+    "profit_factor": 1.023640438037144,
+    "long_trades": 186,
+    "short_trades": 111,
+    "combo": "BTCADA_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 309,
+    "profit_pct": -21.229178706,
+    "cagr": -0.21229178705999996,
+    "sharpe": -1.2677306390739158,
+    "sortino": -1.1072166488379398,
+    "calmar": -4.813783406609541,
+    "max_dd": 23.08342327244319,
+    "winrate": 82.52427184466019,
+    "profit_factor": 0.7585136762639548,
+    "long_trades": 159,
+    "short_trades": 150,
+    "combo": "BTCADA_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 312,
+    "profit_pct": -3.454326210000002,
+    "cagr": -0.034543262099999916,
+    "sharpe": -0.21421307333952896,
+    "sortino": -0.18329407736828449,
+    "calmar": -1.1317688633982892,
+    "max_dd": 15.975673418999985,
+    "winrate": 80.76923076923077,
+    "profit_factor": 0.9586944666649867,
+    "long_trades": 202,
+    "short_trades": 110,
+    "combo": "BTCADA_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 349,
+    "profit_pct": -18.077019492999998,
+    "cagr": -0.18077019493000013,
+    "sharpe": -1.0958876934172215,
+    "sortino": -0.9277862321446934,
+    "calmar": -3.712269573390519,
+    "max_dd": 25.488301064095293,
+    "winrate": 80.80229226361033,
+    "profit_factor": 0.8173543973923276,
+    "long_trades": 170,
+    "short_trades": 179,
+    "combo": "BTCADA_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 285,
+    "profit_pct": -2.317139729000004,
+    "cagr": -0.023171397290000062,
+    "sharpe": -0.16795870847175895,
+    "sortino": -0.12099958241129699,
+    "calmar": -0.9404979185521986,
+    "max_dd": 12.895790008869568,
+    "winrate": 84.56140350877193,
+    "profit_factor": 0.9610223244580686,
+    "long_trades": 181,
+    "short_trades": 104,
+    "combo": "BTCADA_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 297,
+    "profit_pct": -18.429140217000004,
+    "cagr": -0.18429140217000006,
+    "sharpe": -1.1698671641119225,
+    "sortino": -1.015793785732389,
+    "calmar": -3.613747684104967,
+    "max_dd": 26.693210776104127,
+    "winrate": 82.15488215488216,
+    "profit_factor": 0.7743580213730356,
+    "long_trades": 177,
+    "short_trades": 120,
+    "combo": "BTCADA_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 285,
+    "profit_pct": -2.7548871369999985,
+    "cagr": -0.02754887136999995,
+    "sharpe": -0.18622739480612596,
+    "sortino": -0.16181302146060955,
+    "calmar": -1.0954406224751518,
+    "max_dd": 13.163413899000002,
+    "winrate": 79.64912280701755,
+    "profit_factor": 0.9610910221148975,
+    "long_trades": 193,
+    "short_trades": 92,
+    "combo": "BTCADA_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 325,
+    "profit_pct": -24.114802252,
+    "cagr": -0.24114802252000023,
+    "sharpe": -1.5382941468952087,
+    "sortino": -1.1959939954184264,
+    "calmar": -3.4573695846266324,
+    "max_dd": 36.50828781324014,
+    "winrate": 81.53846153846153,
+    "profit_factor": 0.7220807473085453,
+    "long_trades": 182,
+    "short_trades": 143,
+    "combo": "BTCADA_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 131,
+    "profit_pct": 4.916629866000001,
+    "cagr": 0.049166298659999885,
+    "sharpe": 0.35233401679681786,
+    "sortino": 0.25017919800417715,
+    "calmar": 3.944496885103502,
+    "max_dd": 6.524233039972067,
+    "winrate": 87.02290076335878,
+    "profit_factor": 1.1936105766649234,
+    "long_trades": 49,
+    "short_trades": 82,
+    "combo": "BTCADA_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 224,
+    "profit_pct": 0.24726212999999858,
+    "cagr": 0.002472621299999922,
+    "sharpe": 0.016360712150515967,
+    "sortino": 0.01491942425870976,
+    "calmar": 0.1009973302100456,
+    "max_dd": 12.81448863286266,
+    "winrate": 83.03571428571429,
+    "profit_factor": 1.0043949998532262,
+    "long_trades": 93,
+    "short_trades": 131,
+    "combo": "BTCADA_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 141,
+    "profit_pct": -1.1419454499999984,
+    "cagr": -0.011419454500000037,
+    "sharpe": -0.0748447247651583,
+    "sortino": -0.05260973395380527,
+    "calmar": -0.5470005007670655,
+    "max_dd": 10.927258128371976,
+    "winrate": 83.68794326241135,
+    "profit_factor": 0.964780083874234,
+    "long_trades": 56,
+    "short_trades": 85,
+    "combo": "BTCADA_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 296,
+    "profit_pct": -9.338577863,
+    "cagr": -0.09338577862999997,
+    "sharpe": -0.5620438640737312,
+    "sortino": -0.4900197505865292,
+    "calmar": -2.588315763795992,
+    "max_dd": 18.88500284562214,
+    "winrate": 79.72972972972973,
+    "profit_factor": 0.8900164505025929,
+    "long_trades": 190,
+    "short_trades": 106,
+    "combo": "BTCADA_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 298,
+    "profit_pct": -18.680192670999997,
+    "cagr": -0.18680192670999995,
+    "sharpe": -1.241703477126385,
+    "sortino": -0.9309885226058917,
+    "calmar": -4.2376895349224775,
+    "max_dd": 23.073091225817343,
+    "winrate": 81.20805369127517,
+    "profit_factor": 0.7508847611125283,
+    "long_trades": 151,
+    "short_trades": 147,
+    "combo": "BTCADA_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 164,
+    "profit_pct": -12.481209001999998,
+    "cagr": -0.12481209002000004,
+    "sharpe": -0.7136043084805602,
+    "sortino": -0.7011157551543672,
+    "calmar": -3.120848985046992,
+    "max_dd": 20.933289005000525,
+    "winrate": 74.39024390243902,
+    "profit_factor": 0.7769624910192479,
+    "long_trades": 74,
+    "short_trades": 90,
+    "combo": "BTCADA_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "ADA"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 389,
+    "profit_pct": -6.307809014,
+    "cagr": -0.06307809013999999,
+    "sharpe": -0.446833770101483,
+    "sortino": -0.3891187030936805,
+    "calmar": -1.7432270511049701,
+    "max_dd": 18.939920275818253,
+    "winrate": 81.49100257069408,
+    "profit_factor": 0.932128235876983,
+    "long_trades": 200,
+    "short_trades": 189,
+    "combo": "BTCAVAX_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 329,
+    "profit_pct": -11.257906415,
+    "cagr": -0.11257906415000007,
+    "sharpe": -0.7286056486620027,
+    "sortino": -0.6769357331370763,
+    "calmar": -2.7057616510982863,
+    "max_dd": 21.778184096522182,
+    "winrate": 81.15501519756839,
+    "profit_factor": 0.8702321603241969,
+    "long_trades": 184,
+    "short_trades": 145,
+    "combo": "BTCAVAX_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 287,
+    "profit_pct": 4.023560883,
+    "cagr": 0.04023560882999999,
+    "sharpe": 0.28972175459559896,
+    "sortino": 0.2120404042776622,
+    "calmar": 2.3659451791220834,
+    "max_dd": 8.901423577962507,
+    "winrate": 85.01742160278745,
+    "profit_factor": 1.067887031152121,
+    "long_trades": 167,
+    "short_trades": 120,
+    "combo": "BTCAVAX_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 305,
+    "profit_pct": -4.756839357,
+    "cagr": -0.04756839356999998,
+    "sharpe": -0.33107629240756153,
+    "sortino": -0.2669193147889588,
+    "calmar": -1.3540426225608504,
+    "max_dd": 18.388221123080317,
+    "winrate": 82.29508196721311,
+    "profit_factor": 0.9338169482915974,
+    "long_trades": 161,
+    "short_trades": 144,
+    "combo": "BTCAVAX_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 326,
+    "profit_pct": -0.4776944970000002,
+    "cagr": -0.004776944969999919,
+    "sharpe": -0.03172190655580001,
+    "sortino": -0.02805303858112082,
+    "calmar": -0.11804100410162367,
+    "max_dd": 21.18219252051075,
+    "winrate": 83.74233128834356,
+    "profit_factor": 0.9940058023078874,
+    "long_trades": 197,
+    "short_trades": 129,
+    "combo": "BTCAVAX_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 366,
+    "profit_pct": -4.593141729000004,
+    "cagr": -0.045931417290000054,
+    "sharpe": -0.3146550209628957,
+    "sortino": -0.25791705642910573,
+    "calmar": -1.2227045227834625,
+    "max_dd": 19.662643067132482,
+    "winrate": 82.5136612021858,
+    "profit_factor": 0.9476250790517226,
+    "long_trades": 171,
+    "short_trades": 195,
+    "combo": "BTCAVAX_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 330,
+    "profit_pct": 1.512624635000001,
+    "cagr": 0.01512624635000015,
+    "sharpe": 0.10288412404614158,
+    "sortino": 0.08150476389035587,
+    "calmar": 0.8382071804011194,
+    "max_dd": 9.445682861836211,
+    "winrate": 83.63636363636363,
+    "profit_factor": 1.0201570411858287,
+    "long_trades": 181,
+    "short_trades": 149,
+    "combo": "BTCAVAX_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 316,
+    "profit_pct": 9.518073052,
+    "cagr": 0.09518073052000009,
+    "sharpe": 0.6609048713808994,
+    "sortino": 0.4582956682737543,
+    "calmar": 3.7120097193474613,
+    "max_dd": 13.421266400277194,
+    "winrate": 86.07594936708861,
+    "profit_factor": 1.149451555317376,
+    "long_trades": 187,
+    "short_trades": 129,
+    "combo": "BTCAVAX_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 353,
+    "profit_pct": -13.122937517000002,
+    "cagr": -0.13122937516999988,
+    "sharpe": -0.8375002043690306,
+    "sortino": -0.7132370384583981,
+    "calmar": -3.8164701573717172,
+    "max_dd": 17.997938272324358,
+    "winrate": 83.28611898016997,
+    "profit_factor": 0.8583484239815209,
+    "long_trades": 183,
+    "short_trades": 170,
+    "combo": "BTCAVAX_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 333,
+    "profit_pct": -4.354149525000001,
+    "cagr": -0.04354149524999995,
+    "sharpe": -0.27125384343341363,
+    "sortino": -0.2353611249803543,
+    "calmar": -1.4519471767297756,
+    "max_dd": 15.6966180343624,
+    "winrate": 81.68168168168168,
+    "profit_factor": 0.9512983961780334,
+    "long_trades": 210,
+    "short_trades": 123,
+    "combo": "BTCAVAX_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 404,
+    "profit_pct": -8.621047030000001,
+    "cagr": -0.08621047029999984,
+    "sharpe": -0.5359634096767095,
+    "sortino": -0.5141518457693626,
+    "calmar": -2.5379498995817116,
+    "max_dd": 17.77995008499193,
+    "winrate": 80.44554455445545,
+    "profit_factor": 0.9184742425222374,
+    "long_trades": 203,
+    "short_trades": 201,
+    "combo": "BTCAVAX_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 298,
+    "profit_pct": 7.8639633589999995,
+    "cagr": 0.07863963359000015,
+    "sharpe": 0.5478994403246352,
+    "sortino": 0.37641717472202757,
+    "calmar": 5.761934324220331,
+    "max_dd": 7.143758184072098,
+    "winrate": 85.23489932885906,
+    "profit_factor": 1.1296994872236257,
+    "long_trades": 182,
+    "short_trades": 116,
+    "combo": "BTCAVAX_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 276,
+    "profit_pct": -24.606435391000005,
+    "cagr": -0.24606435391000003,
+    "sharpe": -1.4070636593422141,
+    "sortino": -1.3124160559844589,
+    "calmar": -4.956720055074351,
+    "max_dd": 25.984112054370772,
+    "winrate": 80.43478260869566,
+    "profit_factor": 0.7237657957578179,
+    "long_trades": 162,
+    "short_trades": 114,
+    "combo": "BTCAVAX_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 305,
+    "profit_pct": 2.887452733000006,
+    "cagr": 0.028874527330000177,
+    "sharpe": 0.19938930426742046,
+    "sortino": 0.16322461742989355,
+    "calmar": 1.0518665965567269,
+    "max_dd": 14.368379419482677,
+    "winrate": 81.63934426229508,
+    "profit_factor": 1.0410500022466027,
+    "long_trades": 197,
+    "short_trades": 108,
+    "combo": "BTCAVAX_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 319,
+    "profit_pct": -37.714568871999994,
+    "cagr": -0.3771456887200002,
+    "sharpe": -2.248167377283395,
+    "sortino": -1.8847106699059728,
+    "calmar": -5.001912230253699,
+    "max_dd": 39.46632141679893,
+    "winrate": 81.19122257053291,
+    "profit_factor": 0.6156271902673174,
+    "long_trades": 163,
+    "short_trades": 156,
+    "combo": "BTCAVAX_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 138,
+    "profit_pct": -7.019343405000001,
+    "cagr": -0.07019343405,
+    "sharpe": -0.41420500878044314,
+    "sortino": -0.38183108950344474,
+    "calmar": -3.7440506305971155,
+    "max_dd": 9.81314790197399,
+    "winrate": 82.6086956521739,
+    "profit_factor": 0.8281086034670633,
+    "long_trades": 54,
+    "short_trades": 84,
+    "combo": "BTCAVAX_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 263,
+    "profit_pct": -2.6902855070000027,
+    "cagr": -0.02690285507000001,
+    "sharpe": -0.16773330689840332,
+    "sortino": -0.14273898606705943,
+    "calmar": -0.9547843449680756,
+    "max_dd": 14.748459171779011,
+    "winrate": 82.50950570342205,
+    "profit_factor": 0.9617134808405589,
+    "long_trades": 111,
+    "short_trades": 152,
+    "combo": "BTCAVAX_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 131,
+    "profit_pct": -3.3349119929999995,
+    "cagr": -0.033349119930000004,
+    "sharpe": -0.19018755443257307,
+    "sortino": -0.1407309274696817,
+    "calmar": -1.7529835751667096,
+    "max_dd": 9.957724314120869,
+    "winrate": 85.49618320610686,
+    "profit_factor": 0.9055293957210458,
+    "long_trades": 47,
+    "short_trades": 84,
+    "combo": "BTCAVAX_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 293,
+    "profit_pct": -11.444531275000001,
+    "cagr": -0.11444531275000014,
+    "sharpe": -0.7413065027087319,
+    "sortino": -0.6289217411242483,
+    "calmar": -3.0127734072846524,
+    "max_dd": 19.883146331824026,
+    "winrate": 80.88737201365188,
+    "profit_factor": 0.8531849920561789,
+    "long_trades": 188,
+    "short_trades": 105,
+    "combo": "BTCAVAX_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 315,
+    "profit_pct": -16.338669732999996,
+    "cagr": -0.16338669733,
+    "sharpe": -1.158857750115013,
+    "sortino": -0.8380669215856174,
+    "calmar": -3.9924483470373078,
+    "max_dd": 21.42056667533122,
+    "winrate": 83.17460317460318,
+    "profit_factor": 0.7738413603225196,
+    "long_trades": 176,
+    "short_trades": 139,
+    "combo": "BTCAVAX_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 175,
+    "profit_pct": -4.879883356000001,
+    "cagr": -0.04879883355999992,
+    "sharpe": -0.2954911511270718,
+    "sortino": -0.28564820236283117,
+    "calmar": -1.4796421280266487,
+    "max_dd": 17.262604514962916,
+    "winrate": 80.0,
+    "profit_factor": 0.9059645641110868,
+    "long_trades": 78,
+    "short_trades": 97,
+    "combo": "BTCAVAX_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "AVAX"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 350,
+    "profit_pct": 6.510915954000001,
+    "cagr": 0.06510915953999996,
+    "sharpe": 0.4841261675039187,
+    "sortino": 0.3313812836833527,
+    "calmar": 2.34874156293748,
+    "max_dd": 14.50976651528944,
+    "winrate": 86.0,
+    "profit_factor": 1.0973004907016322,
+    "long_trades": 189,
+    "short_trades": 161,
+    "combo": "BTCDOGE_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": 9.621982563000001,
+    "cagr": 0.09621982562999976,
+    "sharpe": 0.673334851690326,
+    "sortino": 0.4465577479772601,
+    "calmar": 4.581024883116128,
+    "max_dd": 10.993993668932504,
+    "winrate": 85.79710144927536,
+    "profit_factor": 1.1409272926456797,
+    "long_trades": 190,
+    "short_trades": 155,
+    "combo": "BTCDOGE_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 311,
+    "profit_pct": 14.221084115999997,
+    "cagr": 0.14221084116000027,
+    "sharpe": 1.1373616146459011,
+    "sortino": 0.8077867288922337,
+    "calmar": 6.030045507511198,
+    "max_dd": 12.34427770438891,
+    "winrate": 87.45980707395499,
+    "profit_factor": 1.2680553758125557,
+    "long_trades": 179,
+    "short_trades": 132,
+    "combo": "BTCDOGE_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 316,
+    "profit_pct": -4.966852070000003,
+    "cagr": -0.04966852069999994,
+    "sharpe": -0.32654711629303457,
+    "sortino": -0.25191975987809184,
+    "calmar": -1.2850964869634824,
+    "max_dd": 20.23014785098078,
+    "winrate": 84.49367088607595,
+    "profit_factor": 0.9342436635251736,
+    "long_trades": 179,
+    "short_trades": 137,
+    "combo": "BTCDOGE_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 305,
+    "profit_pct": -17.073741770999995,
+    "cagr": -0.17073741770999984,
+    "sharpe": -1.114792008014921,
+    "sortino": -1.029454563041414,
+    "calmar": -4.273106837906798,
+    "max_dd": 20.91406845199999,
+    "winrate": 80.32786885245902,
+    "profit_factor": 0.7973275860573222,
+    "long_trades": 182,
+    "short_trades": 123,
+    "combo": "BTCDOGE_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 370,
+    "profit_pct": -8.33676047,
+    "cagr": -0.08336760469999971,
+    "sharpe": -0.5689078317308705,
+    "sortino": -0.43753629483836487,
+    "calmar": -1.8185940872654482,
+    "max_dd": 23.994688520426816,
+    "winrate": 83.78378378378379,
+    "profit_factor": 0.9036440382098601,
+    "long_trades": 175,
+    "short_trades": 195,
+    "combo": "BTCDOGE_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 333,
+    "profit_pct": -3.0566236719999984,
+    "cagr": -0.03056623672000003,
+    "sharpe": -0.20573403916851554,
+    "sortino": -0.1631463843696585,
+    "calmar": -1.3635021074100162,
+    "max_dd": 11.73382823235517,
+    "winrate": 82.88288288288288,
+    "profit_factor": 0.9608160779127871,
+    "long_trades": 181,
+    "short_trades": 152,
+    "combo": "BTCDOGE_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 304,
+    "profit_pct": 5.6880468660000005,
+    "cagr": 0.05688046866000018,
+    "sharpe": 0.4338205787208295,
+    "sortino": 0.29784747114216237,
+    "calmar": 2.9749760162183168,
+    "max_dd": 10.007676654359312,
+    "winrate": 85.19736842105263,
+    "profit_factor": 1.0997601356789444,
+    "long_trades": 177,
+    "short_trades": 127,
+    "combo": "BTCDOGE_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 321,
+    "profit_pct": -14.588675061,
+    "cagr": -0.1458867506099999,
+    "sharpe": -1.0201791407456127,
+    "sortino": -0.7986432469928475,
+    "calmar": -3.754945858036142,
+    "max_dd": 20.336009664374625,
+    "winrate": 82.55451713395638,
+    "profit_factor": 0.8073822432442722,
+    "long_trades": 176,
+    "short_trades": 145,
+    "combo": "BTCDOGE_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 293,
+    "profit_pct": -6.889029073,
+    "cagr": -0.06889029072999986,
+    "sharpe": -0.4518761920914013,
+    "sortino": -0.36762344315722634,
+    "calmar": -1.7501784814023122,
+    "max_dd": 20.60294226299999,
+    "winrate": 83.95904436860067,
+    "profit_factor": 0.9040066431038711,
+    "long_trades": 191,
+    "short_trades": 102,
+    "combo": "BTCDOGE_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 327,
+    "profit_pct": -25.630348379999994,
+    "cagr": -0.2563034838000001,
+    "sharpe": -1.6272350681180703,
+    "sortino": -1.476790922214837,
+    "calmar": -4.207194857327804,
+    "max_dd": 31.887131310419488,
+    "winrate": 80.42813455657493,
+    "profit_factor": 0.7291540371229309,
+    "long_trades": 149,
+    "short_trades": 178,
+    "combo": "BTCDOGE_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 327,
+    "profit_pct": 4.769979690000002,
+    "cagr": 0.047699796900000146,
+    "sharpe": 0.3556967318179086,
+    "sortino": 0.2529703717778007,
+    "calmar": 1.854036248000715,
+    "max_dd": 13.466411364436764,
+    "winrate": 85.3211009174312,
+    "profit_factor": 1.0745269679845808,
+    "long_trades": 218,
+    "short_trades": 109,
+    "combo": "BTCDOGE_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 332,
+    "profit_pct": -16.154542169999996,
+    "cagr": -0.16154542170000008,
+    "sharpe": -1.0984189619868852,
+    "sortino": -0.9229992111453562,
+    "calmar": -3.269575349154481,
+    "max_dd": 25.861688223386793,
+    "winrate": 84.63855421686746,
+    "profit_factor": 0.8007136288267752,
+    "long_trades": 205,
+    "short_trades": 127,
+    "combo": "BTCDOGE_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 303,
+    "profit_pct": -14.084403847,
+    "cagr": -0.14084403846999982,
+    "sharpe": -0.9073024510410608,
+    "sortino": -0.8980912681849662,
+    "calmar": -4.546021545882665,
+    "max_dd": 16.216627735999985,
+    "winrate": 80.85808580858085,
+    "profit_factor": 0.834068169897294,
+    "long_trades": 196,
+    "short_trades": 107,
+    "combo": "BTCDOGE_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 331,
+    "profit_pct": -29.993020246,
+    "cagr": -0.29993020246,
+    "sharpe": -1.8760300930887854,
+    "sortino": -1.5530925329543592,
+    "calmar": -4.261689464660449,
+    "max_dd": 36.83765426287305,
+    "winrate": 80.36253776435045,
+    "profit_factor": 0.6837268975749807,
+    "long_trades": 173,
+    "short_trades": 158,
+    "combo": "BTCDOGE_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 154,
+    "profit_pct": 8.389639557,
+    "cagr": 0.08389639556999984,
+    "sharpe": 0.6651536845198978,
+    "sortino": 0.5234355830783567,
+    "calmar": 3.9804678402113733,
+    "max_dd": 11.032215865886187,
+    "winrate": 89.6103896103896,
+    "profit_factor": 1.321857493904826,
+    "long_trades": 67,
+    "short_trades": 87,
+    "combo": "BTCDOGE_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 269,
+    "profit_pct": 3.6445936620000015,
+    "cagr": 0.03644593661999984,
+    "sharpe": 0.24927954473648983,
+    "sortino": 0.20508110992771023,
+    "calmar": 1.2168457727643147,
+    "max_dd": 15.677151151849051,
+    "winrate": 84.01486988847584,
+    "profit_factor": 1.0591217058838842,
+    "long_trades": 112,
+    "short_trades": 157,
+    "combo": "BTCDOGE_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 130,
+    "profit_pct": -4.2086759319999985,
+    "cagr": -0.042086759320000056,
+    "sharpe": -0.27060093980336936,
+    "sortino": -0.19021102869249018,
+    "calmar": -1.7323630729381154,
+    "max_dd": 12.716281590453624,
+    "winrate": 83.07692307692308,
+    "profit_factor": 0.8658644291100575,
+    "long_trades": 51,
+    "short_trades": 79,
+    "combo": "BTCDOGE_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 297,
+    "profit_pct": -14.358556710999999,
+    "cagr": -0.14358556711000003,
+    "sharpe": -0.8978659870930462,
+    "sortino": -0.8503102092474607,
+    "calmar": -3.0521173523943945,
+    "max_dd": 24.624256569,
+    "winrate": 81.81818181818183,
+    "profit_factor": 0.8285899942682533,
+    "long_trades": 183,
+    "short_trades": 114,
+    "combo": "BTCDOGE_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 312,
+    "profit_pct": -20.844740672,
+    "cagr": -0.20844740671999995,
+    "sharpe": -1.3314086117478876,
+    "sortino": -1.0846747443202682,
+    "calmar": -4.185045648403385,
+    "max_dd": 26.070530275043634,
+    "winrate": 82.6923076923077,
+    "profit_factor": 0.7513646665956044,
+    "long_trades": 158,
+    "short_trades": 154,
+    "combo": "BTCDOGE_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 156,
+    "profit_pct": -12.983577444000002,
+    "cagr": -0.12983577443999994,
+    "sharpe": -0.750586744051449,
+    "sortino": -0.7390707765311182,
+    "calmar": -3.111781266184876,
+    "max_dd": 21.839308272860286,
+    "winrate": 76.92307692307693,
+    "profit_factor": 0.7505520284401491,
+    "long_trades": 72,
+    "short_trades": 84,
+    "combo": "BTCDOGE_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "DOGE"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 355,
+    "profit_pct": -3.644052565000001,
+    "cagr": -0.03644052565,
+    "sharpe": -0.23865200328156655,
+    "sortino": -0.18640401519483119,
+    "calmar": -1.0945109652432208,
+    "max_dd": 17.426817531000005,
+    "winrate": 82.53521126760563,
+    "profit_factor": 0.95635301955195,
+    "long_trades": 186,
+    "short_trades": 169,
+    "combo": "BTCETH_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 415,
+    "profit_pct": 4.852765962000004,
+    "cagr": 0.04852765961999994,
+    "sharpe": 0.31513858497614095,
+    "sortino": 0.2859577012167784,
+    "calmar": 1.7325573319522551,
+    "max_dd": 14.660720014270275,
+    "winrate": 83.61445783132531,
+    "profit_factor": 1.0504340747182326,
+    "long_trades": 230,
+    "short_trades": 185,
+    "combo": "BTCETH_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 290,
+    "profit_pct": 19.220408405,
+    "cagr": 0.1922040840500001,
+    "sharpe": 1.42202792822251,
+    "sortino": 1.0563483798846225,
+    "calmar": 9.385055651060407,
+    "max_dd": 10.7196184393369,
+    "winrate": 86.20689655172413,
+    "profit_factor": 1.3807213704882892,
+    "long_trades": 171,
+    "short_trades": 119,
+    "combo": "BTCETH_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 331,
+    "profit_pct": 5.167525370999996,
+    "cagr": 0.05167525370999981,
+    "sharpe": 0.35749250835492036,
+    "sortino": 0.26745532063411825,
+    "calmar": 1.5866073059312094,
+    "max_dd": 17.047736952060525,
+    "winrate": 84.59214501510573,
+    "profit_factor": 1.0719948778906483,
+    "long_trades": 191,
+    "short_trades": 140,
+    "combo": "BTCETH_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 328,
+    "profit_pct": -9.514446371,
+    "cagr": -0.09514446370999985,
+    "sharpe": -0.6250161714485846,
+    "sortino": -0.5554832105907604,
+    "calmar": -2.6651491963694065,
+    "max_dd": 18.685966427572456,
+    "winrate": 83.23170731707317,
+    "profit_factor": 0.8860487953805264,
+    "long_trades": 202,
+    "short_trades": 126,
+    "combo": "BTCETH_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 393,
+    "profit_pct": -6.757859038000006,
+    "cagr": -0.06757859038000003,
+    "sharpe": -0.47320278103809743,
+    "sortino": -0.3444875468222363,
+    "calmar": -1.8143983526879865,
+    "max_dd": 19.495305872282007,
+    "winrate": 83.96946564885496,
+    "profit_factor": 0.922259754980537,
+    "long_trades": 201,
+    "short_trades": 192,
+    "combo": "BTCETH_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 374,
+    "profit_pct": -7.271644100999996,
+    "cagr": -0.07271644100999997,
+    "sharpe": -0.4581848760194297,
+    "sortino": -0.35827888244074224,
+    "calmar": -2.8070606198407417,
+    "max_dd": 13.559210129353557,
+    "winrate": 83.15508021390374,
+    "profit_factor": 0.9237019922288153,
+    "long_trades": 196,
+    "short_trades": 178,
+    "combo": "BTCETH_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 290,
+    "profit_pct": -9.483846930000004,
+    "cagr": -0.09483846929999995,
+    "sharpe": -0.6532616807854874,
+    "sortino": -0.4582438105534929,
+    "calmar": -2.432457696049128,
+    "max_dd": 20.40764108419462,
+    "winrate": 82.75862068965517,
+    "profit_factor": 0.8558095324591859,
+    "long_trades": 171,
+    "short_trades": 119,
+    "combo": "BTCETH_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 309,
+    "profit_pct": -23.398971553,
+    "cagr": -0.23398971552999992,
+    "sharpe": -1.4570982483332324,
+    "sortino": -1.1717422538785398,
+    "calmar": -4.3150023069908094,
+    "max_dd": 28.383719413094088,
+    "winrate": 81.22977346278317,
+    "profit_factor": 0.7303400171665883,
+    "long_trades": 162,
+    "short_trades": 147,
+    "combo": "BTCETH_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 310,
+    "profit_pct": -19.330293792999996,
+    "cagr": -0.19330293793000008,
+    "sharpe": -1.1770375422940695,
+    "sortino": -0.9788650761620756,
+    "calmar": -5.060536037588678,
+    "max_dd": 19.99380723069501,
+    "winrate": 81.93548387096774,
+    "profit_factor": 0.7769082424699647,
+    "long_trades": 189,
+    "short_trades": 121,
+    "combo": "BTCETH_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": -13.971853094,
+    "cagr": -0.13971853094000009,
+    "sharpe": -0.8590632131893751,
+    "sortino": -0.6895145841888874,
+    "calmar": -4.16142001703016,
+    "max_dd": 17.57381404036893,
+    "winrate": 82.6086956521739,
+    "profit_factor": 0.8493297365775045,
+    "long_trades": 180,
+    "short_trades": 165,
+    "combo": "BTCETH_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 323,
+    "profit_pct": 11.954736983999997,
+    "cagr": 0.11954736984000003,
+    "sharpe": 0.9424134246979768,
+    "sortino": 0.6127939097573918,
+    "calmar": 6.783568460741173,
+    "max_dd": 9.224341674906448,
+    "winrate": 85.13931888544892,
+    "profit_factor": 1.2152625770835865,
+    "long_trades": 206,
+    "short_trades": 117,
+    "combo": "BTCETH_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 369,
+    "profit_pct": -8.238371651000003,
+    "cagr": -0.08238371650999998,
+    "sharpe": -0.49569027505072777,
+    "sortino": -0.46226501965012173,
+    "calmar": -2.617334746651933,
+    "max_dd": 16.475388984303617,
+    "winrate": 84.28184281842819,
+    "profit_factor": 0.9132286003275454,
+    "long_trades": 194,
+    "short_trades": 175,
+    "combo": "BTCETH_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 342,
+    "profit_pct": -9.671386523,
+    "cagr": -0.09671386523000003,
+    "sharpe": -0.6055848278338449,
+    "sortino": -0.5442041158069864,
+    "calmar": -3.176889831573761,
+    "max_dd": 15.934562855920845,
+    "winrate": 82.45614035087719,
+    "profit_factor": 0.8954337699073845,
+    "long_trades": 208,
+    "short_trades": 134,
+    "combo": "BTCETH_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 399,
+    "profit_pct": -15.700054853000001,
+    "cagr": -0.15700054853,
+    "sharpe": -0.99920792748467,
+    "sortino": -0.86137324454123,
+    "calmar": -3.9199771519524558,
+    "max_dd": 20.96385763867445,
+    "winrate": 81.95488721804512,
+    "profit_factor": 0.8532575375714316,
+    "long_trades": 206,
+    "short_trades": 193,
+    "combo": "BTCETH_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 127,
+    "profit_pct": -4.5472759479999985,
+    "cagr": -0.04547275948000007,
+    "sharpe": -0.28254231732058316,
+    "sortino": -0.22175623147193985,
+    "calmar": -2.3124668192365387,
+    "max_dd": 10.292701257387554,
+    "winrate": 82.67716535433071,
+    "profit_factor": 0.8650970089813144,
+    "long_trades": 47,
+    "short_trades": 80,
+    "combo": "BTCETH_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 256,
+    "profit_pct": -7.157393476999993,
+    "cagr": -0.07157393477000007,
+    "sharpe": -0.43296601049198763,
+    "sortino": -0.3545067370678725,
+    "calmar": -1.6882315741587315,
+    "max_dd": 22.190977983099277,
+    "winrate": 80.078125,
+    "profit_factor": 0.9000364545178725,
+    "long_trades": 108,
+    "short_trades": 148,
+    "combo": "BTCETH_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 139,
+    "profit_pct": 4.146380252000002,
+    "cagr": 0.04146380252000004,
+    "sharpe": 0.27878481036968483,
+    "sortino": 0.18528305961781774,
+    "calmar": 1.910734493784164,
+    "max_dd": 11.358535804491513,
+    "winrate": 85.61151079136691,
+    "profit_factor": 1.143800748248721,
+    "long_trades": 51,
+    "short_trades": 88,
+    "combo": "BTCETH_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 285,
+    "profit_pct": -7.841483117999997,
+    "cagr": -0.07841483117999992,
+    "sharpe": -0.4783371996284095,
+    "sortino": -0.4139307085024933,
+    "calmar": -1.8504870029055587,
+    "max_dd": 22.180214430600735,
+    "winrate": 82.45614035087719,
+    "profit_factor": 0.8990893751027851,
+    "long_trades": 183,
+    "short_trades": 102,
+    "combo": "BTCETH_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 330,
+    "profit_pct": -12.528083265000001,
+    "cagr": -0.12528083265,
+    "sharpe": -0.8347251145080897,
+    "sortino": -0.5860105144292755,
+    "calmar": -3.0660305321383503,
+    "max_dd": 21.387583771156045,
+    "winrate": 82.12121212121211,
+    "profit_factor": 0.83926929535431,
+    "long_trades": 181,
+    "short_trades": 149,
+    "combo": "BTCETH_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 152,
+    "profit_pct": -12.490126567999999,
+    "cagr": -0.12490126567999993,
+    "sharpe": -0.7197491399367743,
+    "sortino": -0.7651663241811422,
+    "calmar": -3.2198270147556154,
+    "max_dd": 20.3042927831544,
+    "winrate": 75.6578947368421,
+    "profit_factor": 0.7607374371787625,
+    "long_trades": 73,
+    "short_trades": 79,
+    "combo": "BTCETH_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "ETH"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 344,
+    "profit_pct": 15.037676499000002,
+    "cagr": 0.15037676499000008,
+    "sharpe": 1.1018251865041353,
+    "sortino": 0.7859078692551965,
+    "calmar": 7.499016786751311,
+    "max_dd": 10.496148820009676,
+    "winrate": 84.59302325581395,
+    "profit_factor": 1.2263366547112333,
+    "long_trades": 209,
+    "short_trades": 135,
+    "combo": "BTCLINK_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 370,
+    "profit_pct": 2.848134000999999,
+    "cagr": 0.02848134000999991,
+    "sharpe": 0.17588072979751893,
+    "sortino": 0.16161140240784605,
+    "calmar": 1.0199961162649003,
+    "max_dd": 14.615560266298235,
+    "winrate": 81.08108108108108,
+    "profit_factor": 1.0308554396196816,
+    "long_trades": 203,
+    "short_trades": 167,
+    "combo": "BTCLINK_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 381,
+    "profit_pct": 20.247073559,
+    "cagr": 0.20247073558999995,
+    "sharpe": 1.4979945316523733,
+    "sortino": 1.089595673341323,
+    "calmar": 10.843066161988268,
+    "max_dd": 9.773806140163847,
+    "winrate": 85.30183727034121,
+    "profit_factor": 1.2784130948053083,
+    "long_trades": 197,
+    "short_trades": 184,
+    "combo": "BTCLINK_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 369,
+    "profit_pct": 0.9394597280000028,
+    "cagr": 0.009394597280000028,
+    "sharpe": 0.06503467326877028,
+    "sortino": 0.048642363766432606,
+    "calmar": 0.2609459840353282,
+    "max_dd": 18.84434810380998,
+    "winrate": 83.19783197831978,
+    "profit_factor": 1.0114083956237712,
+    "long_trades": 216,
+    "short_trades": 153,
+    "combo": "BTCLINK_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 398,
+    "profit_pct": -19.773318558,
+    "cagr": -0.19773318557999997,
+    "sharpe": -1.284552786290705,
+    "sortino": -1.1085851513319067,
+    "calmar": -3.704468836355237,
+    "max_dd": 27.938763745782364,
+    "winrate": 80.40201005025126,
+    "profit_factor": 0.816944136300992,
+    "long_trades": 229,
+    "short_trades": 169,
+    "combo": "BTCLINK_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 370,
+    "profit_pct": 5.705549576000002,
+    "cagr": 0.05705549576000002,
+    "sharpe": 0.4175686225999375,
+    "sortino": 0.3128622106602322,
+    "calmar": 2.430344121258011,
+    "max_dd": 12.288058771105222,
+    "winrate": 83.51351351351352,
+    "profit_factor": 1.0738941512265587,
+    "long_trades": 192,
+    "short_trades": 178,
+    "combo": "BTCLINK_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 352,
+    "profit_pct": 5.052390706999999,
+    "cagr": 0.050523907069999874,
+    "sharpe": 0.3422184513062784,
+    "sortino": 0.26885695929840897,
+    "calmar": 2.498276718674183,
+    "max_dd": 10.585465343165513,
+    "winrate": 82.95454545454545,
+    "profit_factor": 1.0625822000846974,
+    "long_trades": 199,
+    "short_trades": 153,
+    "combo": "BTCLINK_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 335,
+    "profit_pct": 2.5779473479999973,
+    "cagr": 0.02577947347999987,
+    "sharpe": 0.16864480746275862,
+    "sortino": 0.1307680869417544,
+    "calmar": 0.811002353777052,
+    "max_dd": 16.63816765557923,
+    "winrate": 81.49253731343283,
+    "profit_factor": 1.0321580631344227,
+    "long_trades": 182,
+    "short_trades": 153,
+    "combo": "BTCLINK_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": -4.479316373000001,
+    "cagr": -0.044793163729999974,
+    "sharpe": -0.30222226098791766,
+    "sortino": -0.24795332822637584,
+    "calmar": -1.3930174915886846,
+    "max_dd": 16.830954102409166,
+    "winrate": 82.31884057971014,
+    "profit_factor": 0.9467176710766079,
+    "long_trades": 193,
+    "short_trades": 152,
+    "combo": "BTCLINK_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": -16.607578955,
+    "cagr": -0.16607578955000002,
+    "sharpe": -1.0091505030552417,
+    "sortino": -0.8817794275171121,
+    "calmar": -4.737085620975004,
+    "max_dd": 18.350531987141068,
+    "winrate": 81.15942028985508,
+    "profit_factor": 0.829622095789399,
+    "long_trades": 201,
+    "short_trades": 144,
+    "combo": "BTCLINK_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 332,
+    "profit_pct": -6.046080303999998,
+    "cagr": -0.06046080304000001,
+    "sharpe": -0.39080803703641614,
+    "sortino": -0.33076383600154585,
+    "calmar": -1.8909698411240592,
+    "max_dd": 16.73566124742594,
+    "winrate": 78.91566265060241,
+    "profit_factor": 0.9304150775725156,
+    "long_trades": 183,
+    "short_trades": 149,
+    "combo": "BTCLINK_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 337,
+    "profit_pct": 20.967319612999997,
+    "cagr": 0.20967319613000002,
+    "sharpe": 1.471660021833576,
+    "sortino": 1.1778371930137568,
+    "calmar": 13.60458440206057,
+    "max_dd": 8.066984153060142,
+    "winrate": 86.05341246290801,
+    "profit_factor": 1.308115219343802,
+    "long_trades": 186,
+    "short_trades": 151,
+    "combo": "BTCLINK_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 359,
+    "profit_pct": 12.659621405,
+    "cagr": 0.12659621404999988,
+    "sharpe": 0.9092561412137818,
+    "sortino": 0.7338599221181625,
+    "calmar": 4.891071012108063,
+    "max_dd": 13.547848064173085,
+    "winrate": 85.79387186629526,
+    "profit_factor": 1.1730970045854432,
+    "long_trades": 204,
+    "short_trades": 155,
+    "combo": "BTCLINK_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 397,
+    "profit_pct": 6.081625424999998,
+    "cagr": 0.060816254249999924,
+    "sharpe": 0.3897206629699539,
+    "sortino": 0.3326724778014724,
+    "calmar": 1.7207278279609381,
+    "max_dd": 18.499545273525598,
+    "winrate": 84.1309823677582,
+    "profit_factor": 1.0621862368395898,
+    "long_trades": 233,
+    "short_trades": 164,
+    "combo": "BTCLINK_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 379,
+    "profit_pct": 17.094733478999995,
+    "cagr": 0.1709473347899999,
+    "sharpe": 1.1170392036704504,
+    "sortino": 1.027819396439737,
+    "calmar": 10.65249573872783,
+    "max_dd": 8.399714651546077,
+    "winrate": 82.84960422163589,
+    "profit_factor": 1.2047041241432452,
+    "long_trades": 200,
+    "short_trades": 179,
+    "combo": "BTCLINK_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 330,
+    "profit_pct": 17.520452448000004,
+    "cagr": 0.17520452448000023,
+    "sharpe": 1.361709987544483,
+    "sortino": 0.9234983975626964,
+    "calmar": 11.915587794468257,
+    "max_dd": 7.696325270789313,
+    "winrate": 86.36363636363636,
+    "profit_factor": 1.3092674831090205,
+    "long_trades": 196,
+    "short_trades": 134,
+    "combo": "BTCLINK_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 347,
+    "profit_pct": -24.754063613,
+    "cagr": -0.2475406361300002,
+    "sharpe": -1.534253075823991,
+    "sortino": -1.3103433620939713,
+    "calmar": -5.234239225902132,
+    "max_dd": 24.754063613000017,
+    "winrate": 79.82708933717579,
+    "profit_factor": 0.753795428330678,
+    "long_trades": 200,
+    "short_trades": 147,
+    "combo": "BTCLINK_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 338,
+    "profit_pct": 13.170938034999999,
+    "cagr": 0.13170938035000002,
+    "sharpe": 1.0422667375577805,
+    "sortino": 0.6751576835502,
+    "calmar": 9.706678066279212,
+    "max_dd": 7.102310392287441,
+    "winrate": 86.3905325443787,
+    "profit_factor": 1.229377402229179,
+    "long_trades": 180,
+    "short_trades": 158,
+    "combo": "BTCLINK_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 353,
+    "profit_pct": -12.159969779999999,
+    "cagr": -0.12159969780000002,
+    "sharpe": -0.7685284552781046,
+    "sortino": -0.6390329583662491,
+    "calmar": -2.8450689910454696,
+    "max_dd": 22.371405055057007,
+    "winrate": 82.43626062322946,
+    "profit_factor": 0.8704503414995197,
+    "long_trades": 204,
+    "short_trades": 149,
+    "combo": "BTCLINK_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 320,
+    "profit_pct": 0.6276724099999982,
+    "cagr": 0.0062767240999999085,
+    "sharpe": 0.042068372148877084,
+    "sortino": 0.03155073069616508,
+    "calmar": 0.2512619428767193,
+    "max_dd": 13.075547820031307,
+    "winrate": 83.75,
+    "profit_factor": 1.008575505514097,
+    "long_trades": 190,
+    "short_trades": 130,
+    "combo": "BTCLINK_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 204,
+    "profit_pct": -4.169948841999998,
+    "cagr": -0.04169948841999993,
+    "sharpe": -0.2536160601030239,
+    "sortino": -0.22806804116397134,
+    "calmar": -1.8716643382447198,
+    "max_dd": 11.661551354486388,
+    "winrate": 81.86274509803921,
+    "profit_factor": 0.9269245297267444,
+    "long_trades": 129,
+    "short_trades": 75,
+    "combo": "BTCLINK_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "LINK"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 344,
+    "profit_pct": -5.1755664050000005,
+    "cagr": -0.051755664050000094,
+    "sharpe": -0.3392610756126221,
+    "sortino": -0.2724052605463773,
+    "calmar": -1.4005855374058809,
+    "max_dd": 19.342019441017367,
+    "winrate": 82.55813953488372,
+    "profit_factor": 0.9364478556647524,
+    "long_trades": 169,
+    "short_trades": 175,
+    "combo": "BTCSOL_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 420,
+    "profit_pct": -33.798239248,
+    "cagr": -0.33798239248000006,
+    "sharpe": -2.19590748420583,
+    "sortino": -2.0470086215841077,
+    "calmar": -4.478321904619491,
+    "max_dd": 39.50320530907393,
+    "winrate": 80.0,
+    "profit_factor": 0.7221270742705682,
+    "long_trades": 211,
+    "short_trades": 209,
+    "combo": "BTCSOL_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 336,
+    "profit_pct": 2.0653397689999986,
+    "cagr": 0.020653397690000075,
+    "sharpe": 0.14215395396634686,
+    "sortino": 0.11412015888983795,
+    "calmar": 1.0321149979769009,
+    "max_dd": 10.474106523890853,
+    "winrate": 82.73809523809523,
+    "profit_factor": 1.0273857920764877,
+    "long_trades": 161,
+    "short_trades": 175,
+    "combo": "BTCSOL_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 296,
+    "profit_pct": 11.375404871000002,
+    "cagr": 0.11375404870999994,
+    "sharpe": 0.8570826543816388,
+    "sortino": 0.5789850108784259,
+    "calmar": 6.200099464458808,
+    "max_dd": 9.603328257493317,
+    "winrate": 88.17567567567568,
+    "profit_factor": 1.216532241939049,
+    "long_trades": 166,
+    "short_trades": 130,
+    "combo": "BTCSOL_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 326,
+    "profit_pct": -13.945515368,
+    "cagr": -0.13945515367999994,
+    "sharpe": -0.8866160457810006,
+    "sortino": -0.7816892969537941,
+    "calmar": -2.7357642670537214,
+    "max_dd": 26.681452215624436,
+    "winrate": 82.20858895705521,
+    "profit_factor": 0.8421465408287958,
+    "long_trades": 186,
+    "short_trades": 140,
+    "combo": "BTCSOL_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 378,
+    "profit_pct": -5.592297072999997,
+    "cagr": -0.055922970729999966,
+    "sharpe": -0.3925590685019366,
+    "sortino": -0.3199373358836001,
+    "calmar": -1.3036845615920918,
+    "max_dd": 22.45283986998151,
+    "winrate": 82.53968253968253,
+    "profit_factor": 0.9366079425441736,
+    "long_trades": 171,
+    "short_trades": 207,
+    "combo": "BTCSOL_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 365,
+    "profit_pct": -16.426000129,
+    "cagr": -0.16426000128999996,
+    "sharpe": -1.0009276502217739,
+    "sortino": -0.8499618274532729,
+    "calmar": -4.073585102738793,
+    "max_dd": 21.106129375345574,
+    "winrate": 80.82191780821918,
+    "profit_factor": 0.8410224306675022,
+    "long_trades": 172,
+    "short_trades": 193,
+    "combo": "BTCSOL_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 313,
+    "profit_pct": 2.2730350119999994,
+    "cagr": 0.02273035012000002,
+    "sharpe": 0.15328736702921572,
+    "sortino": 0.12156466092799548,
+    "calmar": 0.9665529254274333,
+    "max_dd": 12.309319757526902,
+    "winrate": 81.78913738019169,
+    "profit_factor": 1.0317703147681132,
+    "long_trades": 142,
+    "short_trades": 171,
+    "combo": "BTCSOL_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 297,
+    "profit_pct": -1.070885718000001,
+    "cagr": -0.010708857180000031,
+    "sharpe": -0.0727532554275424,
+    "sortino": -0.05081970807851975,
+    "calmar": -0.32922985703046387,
+    "max_dd": 17.025406146852955,
+    "winrate": 84.17508417508418,
+    "profit_factor": 0.9835624475319403,
+    "long_trades": 167,
+    "short_trades": 130,
+    "combo": "BTCSOL_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 302,
+    "profit_pct": -7.1274120189999985,
+    "cagr": -0.0712741201899999,
+    "sharpe": -0.4636957353706084,
+    "sortino": -0.37716486507935737,
+    "calmar": -2.449809193866796,
+    "max_dd": 15.228361319899841,
+    "winrate": 82.11920529801324,
+    "profit_factor": 0.9056957420865921,
+    "long_trades": 180,
+    "short_trades": 122,
+    "combo": "BTCSOL_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 346,
+    "profit_pct": 0.9717089659999958,
+    "cagr": 0.009717089660000067,
+    "sharpe": 0.06538469359501026,
+    "sortino": 0.05106789857540439,
+    "calmar": 0.30723273231913645,
+    "max_dd": 16.55473734066448,
+    "winrate": 82.94797687861272,
+    "profit_factor": 1.0120781765222977,
+    "long_trades": 152,
+    "short_trades": 194,
+    "combo": "BTCSOL_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 340,
+    "profit_pct": -10.797732339000003,
+    "cagr": -0.10797732338999999,
+    "sharpe": -0.690882769179343,
+    "sortino": -0.619980860526849,
+    "calmar": -3.6925494643375196,
+    "max_dd": 15.305932853556431,
+    "winrate": 80.29411764705883,
+    "profit_factor": 0.8805201243070847,
+    "long_trades": 169,
+    "short_trades": 171,
+    "combo": "BTCSOL_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 304,
+    "profit_pct": -3.305836952999999,
+    "cagr": -0.033058369530000076,
+    "sharpe": -0.2263879919720223,
+    "sortino": -0.16909538444665062,
+    "calmar": -1.007749355780213,
+    "max_dd": 17.170481285431098,
+    "winrate": 83.88157894736842,
+    "profit_factor": 0.9521393424953111,
+    "long_trades": 177,
+    "short_trades": 127,
+    "combo": "BTCSOL_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 313,
+    "profit_pct": -5.0503098529999955,
+    "cagr": -0.05050309853000001,
+    "sharpe": -0.290350687842366,
+    "sortino": -0.3099915160202155,
+    "calmar": -2.0530545884247706,
+    "max_dd": 12.875707292232702,
+    "winrate": 80.19169329073482,
+    "profit_factor": 0.943866508302349,
+    "long_trades": 185,
+    "short_trades": 128,
+    "combo": "BTCSOL_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 362,
+    "profit_pct": -37.326270948,
+    "cagr": -0.3732627094800003,
+    "sharpe": -2.208646497512354,
+    "sortino": -2.0582500794210192,
+    "calmar": -5.028498117474395,
+    "max_dd": 38.853476125153946,
+    "winrate": 78.72928176795581,
+    "profit_factor": 0.6806059172900685,
+    "long_trades": 176,
+    "short_trades": 186,
+    "combo": "BTCSOL_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 306,
+    "profit_pct": 15.381394413999997,
+    "cagr": 0.15381394414000016,
+    "sharpe": 1.2666576851149158,
+    "sortino": 0.8517493837913925,
+    "calmar": 9.517215913716932,
+    "max_dd": 8.459395974698214,
+    "winrate": 86.9281045751634,
+    "profit_factor": 1.308604436888396,
+    "long_trades": 172,
+    "short_trades": 134,
+    "combo": "BTCSOL_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 304,
+    "profit_pct": -3.4479467649999997,
+    "cagr": -0.034479467649999984,
+    "sharpe": -0.2263387298716936,
+    "sortino": -0.18845434298456076,
+    "calmar": -1.506051970871129,
+    "max_dd": 11.983237335260368,
+    "winrate": 82.89473684210526,
+    "profit_factor": 0.9540709702814109,
+    "long_trades": 182,
+    "short_trades": 122,
+    "combo": "BTCSOL_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 292,
+    "profit_pct": -30.625210346000003,
+    "cagr": -0.30625210346000065,
+    "sharpe": -1.849548290095337,
+    "sortino": -1.6002780821699736,
+    "calmar": -4.7945683575463,
+    "max_dd": 33.43359930247677,
+    "winrate": 80.13698630136986,
+    "profit_factor": 0.6573559514152747,
+    "long_trades": 140,
+    "short_trades": 152,
+    "combo": "BTCSOL_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 261,
+    "profit_pct": 15.228746056,
+    "cagr": 0.15228746055999998,
+    "sharpe": 1.0905255055715741,
+    "sortino": 0.8092004331928433,
+    "calmar": 7.848452889896226,
+    "max_dd": 10.15625640949367,
+    "winrate": 87.35632183908046,
+    "profit_factor": 1.3012810492663358,
+    "long_trades": 97,
+    "short_trades": 164,
+    "combo": "BTCSOL_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 146,
+    "profit_pct": 8.739232515,
+    "cagr": 0.08739232514999995,
+    "sharpe": 0.5723129211793386,
+    "sortino": 0.4135731465338077,
+    "calmar": 6.562424113445692,
+    "max_dd": 6.970478110454562,
+    "winrate": 86.98630136986301,
+    "profit_factor": 1.2845809831624517,
+    "long_trades": 47,
+    "short_trades": 99,
+    "combo": "BTCSOL_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 174,
+    "profit_pct": -4.108237871999997,
+    "cagr": -0.04108237872000009,
+    "sharpe": -0.25287708066584663,
+    "sortino": -0.22368245610009618,
+    "calmar": -1.4077010936136507,
+    "max_dd": 15.275614913218808,
+    "winrate": 80.45977011494253,
+    "profit_factor": 0.9157066279398495,
+    "long_trades": 67,
+    "short_trades": 107,
+    "combo": "BTCSOL_vs_SUIXRP",
+    "group_a": [
+      "BTC",
+      "SOL"
+    ],
+    "group_b": [
+      "SUI",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 370,
+    "profit_pct": 22.541125462999997,
+    "cagr": 0.22541125463,
+    "sharpe": 1.6440302169477903,
+    "sortino": 1.2303088789706598,
+    "calmar": 8.696428707064852,
+    "max_dd": 13.567137392682383,
+    "winrate": 85.94594594594595,
+    "profit_factor": 1.3189161691868458,
+    "long_trades": 215,
+    "short_trades": 155,
+    "combo": "BTCSUI_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 378,
+    "profit_pct": -0.35797325700000115,
+    "cagr": -0.0035797325699998828,
+    "sharpe": -0.021011147123391728,
+    "sortino": -0.020783618168764055,
+    "calmar": -0.09111699520021399,
+    "max_dd": 20.563865824330353,
+    "winrate": 81.21693121693121,
+    "profit_factor": 0.9965404958995026,
+    "long_trades": 189,
+    "short_trades": 189,
+    "combo": "BTCSUI_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 376,
+    "profit_pct": 20.470199586,
+    "cagr": 0.20470199585999982,
+    "sharpe": 1.5491228461727253,
+    "sortino": 1.1028726097232093,
+    "calmar": 6.455076335290737,
+    "max_dd": 16.59870713678571,
+    "winrate": 87.5,
+    "profit_factor": 1.3033972283724133,
+    "long_trades": 198,
+    "short_trades": 178,
+    "combo": "BTCSUI_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 391,
+    "profit_pct": 8.537014042000008,
+    "cagr": 0.0853701404199998,
+    "sharpe": 0.6331821101753777,
+    "sortino": 0.4791531478068878,
+    "calmar": 4.490794125877928,
+    "max_dd": 9.950305562488492,
+    "winrate": 85.6777493606138,
+    "profit_factor": 1.1093519903330544,
+    "long_trades": 205,
+    "short_trades": 186,
+    "combo": "BTCSUI_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 334,
+    "profit_pct": -2.8090773439999963,
+    "cagr": -0.028090773439999994,
+    "sharpe": -0.18230491550431893,
+    "sortino": -0.1469622240730986,
+    "calmar": -0.6149040542302857,
+    "max_dd": 23.91166999372435,
+    "winrate": 82.93413173652695,
+    "profit_factor": 0.9662995529823045,
+    "long_trades": 190,
+    "short_trades": 144,
+    "combo": "BTCSUI_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 389,
+    "profit_pct": 4.799543631,
+    "cagr": 0.04799543631000014,
+    "sharpe": 0.32750947543065817,
+    "sortino": 0.2569438803866911,
+    "calmar": 1.0389485164941528,
+    "max_dd": 24.18017749770795,
+    "winrate": 83.54755784061697,
+    "profit_factor": 1.0539960595494928,
+    "long_trades": 200,
+    "short_trades": 189,
+    "combo": "BTCSUI_vs_ADAXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ADA",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 384,
+    "profit_pct": -9.850546181999999,
+    "cagr": -0.09850546182000008,
+    "sharpe": -0.6193898523716947,
+    "sortino": -0.5434827496700871,
+    "calmar": -2.6803968199298027,
+    "max_dd": 19.236000744000002,
+    "winrate": 79.94791666666666,
+    "profit_factor": 0.907092243213849,
+    "long_trades": 205,
+    "short_trades": 179,
+    "combo": "BTCSUI_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 390,
+    "profit_pct": 4.351636716999996,
+    "cagr": 0.04351636717000007,
+    "sharpe": 0.2920934983019216,
+    "sortino": 0.22209946838222255,
+    "calmar": 1.9701537174231993,
+    "max_dd": 11.561284482303492,
+    "winrate": 82.3076923076923,
+    "profit_factor": 1.0485633420030045,
+    "long_trades": 218,
+    "short_trades": 172,
+    "combo": "BTCSUI_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 375,
+    "profit_pct": 7.342762733999998,
+    "cagr": 0.07342762733999986,
+    "sharpe": 0.509989733530341,
+    "sortino": 0.3896906081454715,
+    "calmar": 2.46038462415686,
+    "max_dd": 15.6210441048281,
+    "winrate": 84.8,
+    "profit_factor": 1.090718761379073,
+    "long_trades": 183,
+    "short_trades": 192,
+    "combo": "BTCSUI_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 371,
+    "profit_pct": -17.618355603999998,
+    "cagr": -0.17618355604000002,
+    "sharpe": -1.0786335330285468,
+    "sortino": -0.8988153377549261,
+    "calmar": -3.192180276721462,
+    "max_dd": 28.888934835805387,
+    "winrate": 79.51482479784366,
+    "profit_factor": 0.8339509613640402,
+    "long_trades": 218,
+    "short_trades": 153,
+    "combo": "BTCSUI_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 344,
+    "profit_pct": -9.497597410000004,
+    "cagr": -0.09497597410000003,
+    "sharpe": -0.6024333837822978,
+    "sortino": -0.549237278976885,
+    "calmar": -2.6530722308509054,
+    "max_dd": 18.737784948774074,
+    "winrate": 80.52325581395348,
+    "profit_factor": 0.8994867374092335,
+    "long_trades": 192,
+    "short_trades": 152,
+    "combo": "BTCSUI_vs_AVAXXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "AVAX",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 387,
+    "profit_pct": 2.9080186750000023,
+    "cagr": 0.029080186749999903,
+    "sharpe": 0.1883873597467305,
+    "sortino": 0.1484620810142935,
+    "calmar": 0.6092415615683089,
+    "max_dd": 24.983957724680515,
+    "winrate": 83.72093023255815,
+    "profit_factor": 1.03130476709274,
+    "long_trades": 205,
+    "short_trades": 182,
+    "combo": "BTCSUI_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 385,
+    "profit_pct": 11.228572847999999,
+    "cagr": 0.11228572848000007,
+    "sharpe": 0.7592170929372887,
+    "sortino": 0.5865194785689058,
+    "calmar": 6.178388534551183,
+    "max_dd": 9.51268055144588,
+    "winrate": 85.19480519480518,
+    "profit_factor": 1.1331066695156589,
+    "long_trades": 189,
+    "short_trades": 196,
+    "combo": "BTCSUI_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 357,
+    "profit_pct": 9.712027615,
+    "cagr": 0.09712027614999985,
+    "sharpe": 0.6480079488460753,
+    "sortino": 0.523609644475971,
+    "calmar": 5.434784941535908,
+    "max_dd": 9.353649951622819,
+    "winrate": 84.03361344537815,
+    "profit_factor": 1.1194711127617172,
+    "long_trades": 202,
+    "short_trades": 155,
+    "combo": "BTCSUI_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 379,
+    "profit_pct": 3.300852247999998,
+    "cagr": 0.03300852248000008,
+    "sharpe": 0.1970267906765661,
+    "sortino": 0.1961095646107816,
+    "calmar": 1.1911539580132027,
+    "max_dd": 14.504800323383,
+    "winrate": 81.79419525065963,
+    "profit_factor": 1.0328176026249738,
+    "long_trades": 194,
+    "short_trades": 185,
+    "combo": "BTCSUI_vs_DOGEXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "DOGE",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 384,
+    "profit_pct": 6.5799815260000045,
+    "cagr": 0.0657998152599999,
+    "sharpe": 0.4527125232360662,
+    "sortino": 0.34574384599040275,
+    "calmar": 2.474173005214724,
+    "max_dd": 13.92028663173924,
+    "winrate": 85.67708333333334,
+    "profit_factor": 1.0795175135637063,
+    "long_trades": 209,
+    "short_trades": 175,
+    "combo": "BTCSUI_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 371,
+    "profit_pct": 14.271514769000005,
+    "cagr": 0.14271514768999993,
+    "sharpe": 1.0584916927946164,
+    "sortino": 0.7040489511772916,
+    "calmar": 9.06295686391013,
+    "max_dd": 8.242400746097408,
+    "winrate": 85.44474393530997,
+    "profit_factor": 1.2084108643331943,
+    "long_trades": 235,
+    "short_trades": 136,
+    "combo": "BTCSUI_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 357,
+    "profit_pct": -3.1236078689999984,
+    "cagr": -0.031236078690000002,
+    "sharpe": -0.21884948819782424,
+    "sortino": -0.15413215788882328,
+    "calmar": -0.8984868364555241,
+    "max_dd": 18.196939755684113,
+    "winrate": 84.03361344537815,
+    "profit_factor": 0.9594387401657937,
+    "long_trades": 208,
+    "short_trades": 149,
+    "combo": "BTCSUI_vs_ETHXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "ETH",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 202,
+    "profit_pct": -1.7239402179999999,
+    "cagr": -0.017239402179999974,
+    "sharpe": -0.1103352719860387,
+    "sortino": -0.09031346441909432,
+    "calmar": -0.7614060678820669,
+    "max_dd": 11.851121093985713,
+    "winrate": 83.16831683168317,
+    "profit_factor": 0.9662194454943218,
+    "long_trades": 115,
+    "short_trades": 87,
+    "combo": "BTCSUI_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 196,
+    "profit_pct": 1.708892494,
+    "cagr": 0.017088924939999917,
+    "sharpe": 0.11553141748459414,
+    "sortino": 0.08194117462051982,
+    "calmar": 0.6974388364893205,
+    "max_dd": 12.8251420152762,
+    "winrate": 85.20408163265306,
+    "profit_factor": 1.0397135524717545,
+    "long_trades": 109,
+    "short_trades": 87,
+    "combo": "BTCSUI_vs_LINKXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "LINK",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 337,
+    "profit_pct": -10.628849741000005,
+    "cagr": -0.10628849741000013,
+    "sharpe": -0.675267259204374,
+    "sortino": -0.5137789654118222,
+    "calmar": -3.778472530272028,
+    "max_dd": 14.723923965263463,
+    "winrate": 81.60237388724035,
+    "profit_factor": 0.8771435458738908,
+    "long_trades": 194,
+    "short_trades": 143,
+    "combo": "BTCSUI_vs_SOLXRP",
+    "group_a": [
+      "BTC",
+      "SUI"
+    ],
+    "group_b": [
+      "SOL",
+      "XRP"
+    ]
+  },
+  {
+    "trades": 372,
+    "profit_pct": 21.039788222000006,
+    "cagr": 0.2103978822200001,
+    "sharpe": 1.6658226711120878,
+    "sortino": 1.1345144175325264,
+    "calmar": 13.260167635492968,
+    "max_dd": 8.305120104326045,
+    "winrate": 85.75268817204301,
+    "profit_factor": 1.3420616929817002,
+    "long_trades": 194,
+    "short_trades": 178,
+    "combo": "BTCXRP_vs_ADAAVAX",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "AVAX"
+    ]
+  },
+  {
+    "trades": 404,
+    "profit_pct": -7.733370957000004,
+    "cagr": -0.07733370956999996,
+    "sharpe": -0.4885942497225005,
+    "sortino": -0.43997453685618526,
+    "calmar": -2.420814126544222,
+    "max_dd": 16.720950678425556,
+    "winrate": 80.94059405940595,
+    "profit_factor": 0.9236343765925686,
+    "long_trades": 209,
+    "short_trades": 195,
+    "combo": "BTCXRP_vs_ADADOGE",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 346,
+    "profit_pct": 3.574307597999999,
+    "cagr": 0.03574307597999993,
+    "sharpe": 0.2643359671029636,
+    "sortino": 0.19176288916174833,
+    "calmar": 1.3281762367298722,
+    "max_dd": 14.086068186971094,
+    "winrate": 83.52601156069365,
+    "profit_factor": 1.0511551152799392,
+    "long_trades": 184,
+    "short_trades": 162,
+    "combo": "BTCXRP_vs_ADAETH",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 325,
+    "profit_pct": 18.066937086000003,
+    "cagr": 0.18066937086,
+    "sharpe": 1.4575668525825112,
+    "sortino": 0.994772428047475,
+    "calmar": 9.557295389517401,
+    "max_dd": 9.894710473338465,
+    "winrate": 87.6923076923077,
+    "profit_factor": 1.3414313765005352,
+    "long_trades": 191,
+    "short_trades": 134,
+    "combo": "BTCXRP_vs_ADALINK",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": -15.372491601000002,
+    "cagr": -0.15372491600999993,
+    "sharpe": -1.05747618317951,
+    "sortino": -0.7705781957955443,
+    "calmar": -2.621288964737774,
+    "max_dd": 30.696081057913688,
+    "winrate": 82.6086956521739,
+    "profit_factor": 0.811084483026884,
+    "long_trades": 188,
+    "short_trades": 157,
+    "combo": "BTCXRP_vs_ADASOL",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 327,
+    "profit_pct": -7.065337549000003,
+    "cagr": -0.07065337548999995,
+    "sharpe": -0.4385537281821988,
+    "sortino": -0.3983769648636956,
+    "calmar": -2.125717219819378,
+    "max_dd": 17.39726554332443,
+    "winrate": 83.18042813455658,
+    "profit_factor": 0.9190711227310497,
+    "long_trades": 185,
+    "short_trades": 142,
+    "combo": "BTCXRP_vs_ADASUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ADA",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 381,
+    "profit_pct": -10.809828710999996,
+    "cagr": -0.10809828711000014,
+    "sharpe": -0.7077883689299377,
+    "sortino": -0.5784072249736563,
+    "calmar": -2.8226646238499318,
+    "max_dd": 20.045324898438054,
+    "winrate": 83.46456692913385,
+    "profit_factor": 0.8836146724020993,
+    "long_trades": 179,
+    "short_trades": 202,
+    "combo": "BTCXRP_vs_AVAXDOGE",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  {
+    "trades": 322,
+    "profit_pct": -5.955557710000001,
+    "cagr": -0.05955557709999992,
+    "sharpe": -0.40570891448191954,
+    "sortino": -0.3182723770382759,
+    "calmar": -2.5352425950760966,
+    "max_dd": 12.295791273919582,
+    "winrate": 83.54037267080744,
+    "profit_factor": 0.9211351944932451,
+    "long_trades": 159,
+    "short_trades": 163,
+    "combo": "BTCXRP_vs_AVAXETH",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "AVAX",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 318,
+    "profit_pct": 3.761585406,
+    "cagr": 0.03761585406000001,
+    "sharpe": 0.2652725047055411,
+    "sortino": 0.1921407857919906,
+    "calmar": 1.833491702705831,
+    "max_dd": 10.738547578158942,
+    "winrate": 84.59119496855347,
+    "profit_factor": 1.056567856664656,
+    "long_trades": 183,
+    "short_trades": 135,
+    "combo": "BTCXRP_vs_AVAXLINK",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "AVAX",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 345,
+    "profit_pct": -7.449831254,
+    "cagr": -0.07449831253999994,
+    "sharpe": -0.5426030862664252,
+    "sortino": -0.4603104753658958,
+    "calmar": -1.7343393901477981,
+    "max_dd": 22.483603380948107,
+    "winrate": 85.5072463768116,
+    "profit_factor": 0.902345835275014,
+    "long_trades": 180,
+    "short_trades": 165,
+    "combo": "BTCXRP_vs_AVAXSOL",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "AVAX",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 322,
+    "profit_pct": -5.550326101999999,
+    "cagr": -0.05550326102000003,
+    "sharpe": -0.37096938804204216,
+    "sortino": -0.30686217162993373,
+    "calmar": -2.451640833408035,
+    "max_dd": 11.849914638292256,
+    "winrate": 84.16149068322981,
+    "profit_factor": 0.9273347351427306,
+    "long_trades": 204,
+    "short_trades": 118,
+    "combo": "BTCXRP_vs_AVAXSUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "AVAX",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 351,
+    "profit_pct": 9.564845363000002,
+    "cagr": 0.09564845362999996,
+    "sharpe": 0.6365719284713744,
+    "sortino": 0.5102000727183444,
+    "calmar": 3.350503090290092,
+    "max_dd": 14.942439221677628,
+    "winrate": 84.61538461538461,
+    "profit_factor": 1.1251431053565595,
+    "long_trades": 189,
+    "short_trades": 162,
+    "combo": "BTCXRP_vs_DOGEETH",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "DOGE",
+      "ETH"
+    ]
+  },
+  {
+    "trades": 301,
+    "profit_pct": 2.448143846000001,
+    "cagr": 0.024481438459999838,
+    "sharpe": 0.167331594546407,
+    "sortino": 0.12025192136663478,
+    "calmar": 1.490313466996329,
+    "max_dd": 8.598305546557668,
+    "winrate": 85.04983388704319,
+    "profit_factor": 1.0378074919387346,
+    "long_trades": 179,
+    "short_trades": 122,
+    "combo": "BTCXRP_vs_DOGELINK",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "DOGE",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 365,
+    "profit_pct": -4.707516244000005,
+    "cagr": -0.047075162439999874,
+    "sharpe": -0.3109889416828684,
+    "sortino": -0.25917738412074315,
+    "calmar": -1.1927004171387703,
+    "max_dd": 20.659224920895987,
+    "winrate": 83.83561643835617,
+    "profit_factor": 0.9451760284915727,
+    "long_trades": 184,
+    "short_trades": 181,
+    "combo": "BTCXRP_vs_DOGESOL",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "DOGE",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 335,
+    "profit_pct": -17.644438566,
+    "cagr": -0.1764443856600001,
+    "sharpe": -1.0897222385393377,
+    "sortino": -0.9713317708867565,
+    "calmar": -3.7870496140321617,
+    "max_dd": 24.387114475335554,
+    "winrate": 80.0,
+    "profit_factor": 0.8158423246320784,
+    "long_trades": 203,
+    "short_trades": 132,
+    "combo": "BTCXRP_vs_DOGESUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "DOGE",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 327,
+    "profit_pct": 7.92805892,
+    "cagr": 0.07928058920000014,
+    "sharpe": 0.6028886812802816,
+    "sortino": 0.40381562010703426,
+    "calmar": 4.288129404778446,
+    "max_dd": 9.677263223,
+    "winrate": 85.93272171253822,
+    "profit_factor": 1.1326416513185504,
+    "long_trades": 199,
+    "short_trades": 128,
+    "combo": "BTCXRP_vs_ETHLINK",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ETH",
+      "LINK"
+    ]
+  },
+  {
+    "trades": 318,
+    "profit_pct": 3.604467017999999,
+    "cagr": 0.036044670179999905,
+    "sharpe": 0.2524278115652648,
+    "sortino": 0.1772190859674496,
+    "calmar": 1.5681098087437324,
+    "max_dd": 12.031455035155238,
+    "winrate": 86.16352201257862,
+    "profit_factor": 1.0552831039531965,
+    "long_trades": 189,
+    "short_trades": 129,
+    "combo": "BTCXRP_vs_ETHSOL",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ETH",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 295,
+    "profit_pct": 2.6787402470000017,
+    "cagr": 0.026787402469999888,
+    "sharpe": 0.18369381282041877,
+    "sortino": 0.1613928076131634,
+    "calmar": 1.0890333626454667,
+    "max_dd": 12.874873954999998,
+    "winrate": 83.72881355932203,
+    "profit_factor": 1.039364650638969,
+    "long_trades": 187,
+    "short_trades": 108,
+    "combo": "BTCXRP_vs_ETHSUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "ETH",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 156,
+    "profit_pct": 5.977128892000001,
+    "cagr": 0.05977128891999994,
+    "sharpe": 0.3920183779309184,
+    "sortino": 0.3259730114342602,
+    "calmar": 3.1116699155003733,
+    "max_dd": 10.054319177279597,
+    "winrate": 84.61538461538461,
+    "profit_factor": 1.1659411266739301,
+    "long_trades": 60,
+    "short_trades": 96,
+    "combo": "BTCXRP_vs_LINKSOL",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "LINK",
+      "SOL"
+    ]
+  },
+  {
+    "trades": 276,
+    "profit_pct": 4.478174997999998,
+    "cagr": 0.04478174997999984,
+    "sharpe": 0.2910150632161548,
+    "sortino": 0.23713703152874238,
+    "calmar": 1.7605547418277754,
+    "max_dd": 13.313894011981139,
+    "winrate": 82.6086956521739,
+    "profit_factor": 1.0666924646212177,
+    "long_trades": 110,
+    "short_trades": 166,
+    "combo": "BTCXRP_vs_LINKSUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "LINK",
+      "SUI"
+    ]
+  },
+  {
+    "trades": 307,
+    "profit_pct": -2.3699533509999995,
+    "cagr": -0.02369953350999987,
+    "sharpe": -0.15430505824134577,
+    "sortino": -0.13407131116431376,
+    "calmar": -0.6671938287607927,
+    "max_dd": 18.592652177857467,
+    "winrate": 82.08469055374593,
+    "profit_factor": 0.9690109030535627,
+    "long_trades": 191,
+    "short_trades": 116,
+    "combo": "BTCXRP_vs_SOLSUI",
+    "group_a": [
+      "BTC",
+      "XRP"
+    ],
+    "group_b": [
+      "SOL",
+      "SUI"
+    ]
+  }
+]

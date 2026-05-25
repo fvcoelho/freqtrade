@@ -1,0 +1,233 @@
+[
+  {
+    "trades": 154,
+    "profit_pct": -13.813720826000003,
+    "profit_abs": -138.13720826000002,
+    "cagr": -0.1381372082600002,
+    "sharpe": -0.7367642995865884,
+    "sortino": -0.8183641911052197,
+    "calmar": -2.99089872967202,
+    "max_dd": 24.174780204289736,
+    "winrate": 77.92207792207793,
+    "profit_factor": 0.7593404873123071,
+    "long_trades": 70,
+    "short_trades": 84,
+    "combo": "C1_AVAXETH_SUISOL",
+    "pairs": [
+      "AVAX/USDT:USDT",
+      "ETH/USDT:USDT",
+      "SUI/USDT:USDT",
+      "SOL/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 266,
+    "profit_pct": 22.153811544,
+    "profit_abs": 221.53811543999998,
+    "cagr": 0.22153811544000024,
+    "sharpe": 1.8303970359363486,
+    "sortino": 1.1023197728542118,
+    "calmar": 13.574345487994387,
+    "max_dd": 8.542463390916776,
+    "winrate": 87.59398496240601,
+    "profit_factor": 1.57905750464096,
+    "long_trades": 167,
+    "short_trades": 99,
+    "combo": "C2_BTCETH_SOLLINK",
+    "pairs": [
+      "BTC/USDT:USDT",
+      "ETH/USDT:USDT",
+      "SOL/USDT:USDT",
+      "LINK/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 153,
+    "profit_pct": 9.287274389999999,
+    "profit_abs": 92.87274389999999,
+    "cagr": 0.09287274389999989,
+    "sharpe": 0.6965541761547931,
+    "sortino": 0.6531724543181544,
+    "calmar": 6.52669723338251,
+    "max_dd": 7.448149374114737,
+    "winrate": 87.58169934640523,
+    "profit_factor": 1.3200246308847745,
+    "long_trades": 65,
+    "short_trades": 88,
+    "combo": "C3_DOGEXRP_SUIAVAX",
+    "pairs": [
+      "DOGE/USDT:USDT",
+      "XRP/USDT:USDT",
+      "SUI/USDT:USDT",
+      "AVAX/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 135,
+    "profit_pct": -8.089256272,
+    "profit_abs": -80.89256272,
+    "cagr": -0.08089256272,
+    "sharpe": -0.5036766087219807,
+    "sortino": -0.4949983799525832,
+    "calmar": -2.4203353562232643,
+    "max_dd": 17.493899090639704,
+    "winrate": 84.44444444444444,
+    "profit_factor": 0.7852962229644601,
+    "long_trades": 49,
+    "short_trades": 86,
+    "combo": "C4_ETHXRP_LINKSOL",
+    "pairs": [
+      "ETH/USDT:USDT",
+      "XRP/USDT:USDT",
+      "LINK/USDT:USDT",
+      "SOL/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 199,
+    "profit_pct": 9.050639447000002,
+    "profit_abs": 90.50639447000002,
+    "cagr": 0.09050639446999997,
+    "sharpe": 0.6332695879780529,
+    "sortino": 0.5929716959075634,
+    "calmar": 5.552637493716983,
+    "max_dd": 8.531659426099614,
+    "winrate": 87.43718592964824,
+    "profit_factor": 1.2150883102649865,
+    "long_trades": 105,
+    "short_trades": 94,
+    "combo": "C5_AVAXSUI_LINKADA",
+    "pairs": [
+      "AVAX/USDT:USDT",
+      "SUI/USDT:USDT",
+      "LINK/USDT:USDT",
+      "ADA/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 218,
+    "profit_pct": -15.877194473000003,
+    "profit_abs": -158.77194473000003,
+    "cagr": -0.15877194473000011,
+    "sharpe": -0.9303431963133589,
+    "sortino": -0.8325827359788242,
+    "calmar": -4.011765224169214,
+    "max_dd": 20.715328406353393,
+    "winrate": 77.98165137614679,
+    "profit_factor": 0.7703610087876724,
+    "long_trades": 126,
+    "short_trades": 92,
+    "combo": "C6_AVAXLINK_SUIADA",
+    "pairs": [
+      "AVAX/USDT:USDT",
+      "LINK/USDT:USDT",
+      "SUI/USDT:USDT",
+      "ADA/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 330,
+    "profit_pct": 17.520452448000004,
+    "profit_abs": 175.20452448000003,
+    "cagr": 0.17520452448000023,
+    "sharpe": 1.361709987544483,
+    "sortino": 0.9234983975626964,
+    "calmar": 11.915587794468257,
+    "max_dd": 7.696325270789313,
+    "winrate": 86.36363636363636,
+    "profit_factor": 1.3092674831090205,
+    "long_trades": 196,
+    "short_trades": 134,
+    "combo": "C7_BTCLINK_ETHSOL",
+    "pairs": [
+      "BTC/USDT:USDT",
+      "LINK/USDT:USDT",
+      "ETH/USDT:USDT",
+      "SOL/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 210,
+    "profit_pct": 6.595432001999997,
+    "profit_abs": 65.95432001999997,
+    "cagr": 0.06595432002000012,
+    "sharpe": 0.42829801902825737,
+    "sortino": 0.39134431089020394,
+    "calmar": 3.169195380523714,
+    "max_dd": 10.893007451921068,
+    "winrate": 82.38095238095238,
+    "profit_factor": 1.1259369998280788,
+    "long_trades": 89,
+    "short_trades": 121,
+    "combo": "C8_AVAXADA_LINKSUI",
+    "pairs": [
+      "AVAX/USDT:USDT",
+      "ADA/USDT:USDT",
+      "LINK/USDT:USDT",
+      "SUI/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 306,
+    "profit_pct": 15.381394413999997,
+    "profit_abs": 153.81394413999996,
+    "cagr": 0.15381394414000016,
+    "sharpe": 1.2666576851149158,
+    "sortino": 0.8517493837913925,
+    "calmar": 9.517215913716932,
+    "max_dd": 8.459395974698214,
+    "winrate": 86.9281045751634,
+    "profit_factor": 1.308604436888396,
+    "long_trades": 172,
+    "short_trades": 134,
+    "combo": "C9_BTCSOL_ETHLINK",
+    "pairs": [
+      "BTC/USDT:USDT",
+      "SOL/USDT:USDT",
+      "ETH/USDT:USDT",
+      "LINK/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 300,
+    "profit_pct": 8.737295713999998,
+    "profit_abs": 87.37295713999998,
+    "cagr": 0.08737295714000015,
+    "sharpe": 0.6390294252768994,
+    "sortino": 0.4388994674729434,
+    "calmar": 2.4880188206295304,
+    "max_dd": 18.381330388390634,
+    "winrate": 85.0,
+    "profit_factor": 1.1514992164919051,
+    "long_trades": 171,
+    "short_trades": 129,
+    "combo": "C10_BTCETH_XRPLINK",
+    "pairs": [
+      "BTC/USDT:USDT",
+      "ETH/USDT:USDT",
+      "XRP/USDT:USDT",
+      "LINK/USDT:USDT"
+    ]
+  },
+  {
+    "trades": 265,
+    "profit_pct": -3.6358972740000035,
+    "profit_abs": -36.358972740000034,
+    "cagr": -0.036358972739999995,
+    "sharpe": -0.22638236501070805,
+    "sortino": -0.18200893428072693,
+    "calmar": -1.2911558839079247,
+    "max_dd": 14.73962700407647,
+    "winrate": 83.01886792452831,
+    "profit_factor": 0.9471879326005038,
+    "long_trades": 98,
+    "short_trades": 167,
+    "combo": "C11_ETHSOL_LINKSUI",
+    "pairs": [
+      "ETH/USDT:USDT",
+      "SOL/USDT:USDT",
+      "LINK/USDT:USDT",
+      "SUI/USDT:USDT"
+    ]
+  }
+]

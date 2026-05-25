@@ -1,0 +1,94 @@
+{
+  "active_combo": "research_top1",
+  "auto_cluster": false,
+  "combos": {
+    "research_top1": {
+      "description": "intra=0.85 inter=0.82 ar1=0.81 signals=107",
+      "group_a": [
+        "BTC/USDC:USDC",
+        "ETH/USDC:USDC"
+      ],
+      "group_b": [
+        "SOL/USDC:USDC",
+        "LINK/USDC:USDC"
+      ]
+    },
+    "research_top2": {
+      "description": "intra=0.83 inter=0.82 ar1=0.79 signals=111",
+      "group_a": [
+        "AVAX/USDC:USDC",
+        "LINK/USDC:USDC"
+      ],
+      "group_b": [
+        "SUI/USDC:USDC",
+        "ADA/USDC:USDC"
+      ]
+    },
+    "research_top3": {
+      "description": "intra=0.82 inter=0.82 ar1=0.79 signals=124",
+      "group_a": [
+        "AVAX/USDC:USDC",
+        "SUI/USDC:USDC"
+      ],
+      "group_b": [
+        "LINK/USDC:USDC",
+        "ADA/USDC:USDC"
+      ]
+    },
+    "research_top4": {
+      "description": "intra=0.82 inter=0.84 ar1=0.81 signals=135",
+      "group_a": [
+        "BTC/USDC:USDC",
+        "LINK/USDC:USDC"
+      ],
+      "group_b": [
+        "ETH/USDC:USDC",
+        "SOL/USDC:USDC"
+      ]
+    },
+    "research_top5": {
+      "description": "intra=0.82 inter=0.83 ar1=0.79 signals=109",
+      "group_a": [
+        "AVAX/USDC:USDC",
+        "ADA/USDC:USDC"
+      ],
+      "group_b": [
+        "LINK/USDC:USDC",
+        "SUI/USDC:USDC"
+      ]
+    },
+    "research_top6": {
+      "description": "intra=0.83 inter=0.84 ar1=0.81 signals=151",
+      "group_a": [
+        "BTC/USDC:USDC",
+        "SOL/USDC:USDC"
+      ],
+      "group_b": [
+        "ETH/USDC:USDC",
+        "LINK/USDC:USDC"
+      ]
+    },
+    "research_top7": {
+      "description": "intra=0.83 inter=0.80 ar1=0.79 signals=101",
+      "group_a": [
+        "BTC/USDC:USDC",
+        "ETH/USDC:USDC"
+      ],
+      "group_b": [
+        "XRP/USDC:USDC",
+        "LINK/USDC:USDC"
+      ]
+    },
+    "research_top8": {
+      "description": "intra=0.83 inter=0.80 ar1=0.79 signals=107",
+      "group_a": [
+        "ETH/USDC:USDC",
+        "SOL/USDC:USDC"
+      ],
+      "group_b": [
+        "LINK/USDC:USDC",
+        "SUI/USDC:USDC"
+      ]
+    }
+  }
+}

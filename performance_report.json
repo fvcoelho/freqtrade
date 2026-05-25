@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-05-23T20:22:18.844092",
+  "total_trades": 4,
+  "open_trades": 0,
+  "closed_trades": 4,
+  "winning_trades": 4,
+  "losing_trades": 0,
+  "total_profit_abs": 2.5469514600000003,
+  "total_volume": 0.0,
+  "avg_profit_per_trade": 0.6367378650000001,
+  "win_rate": 100.0,
+  "profit_factor": 2.54695146,
+  "avg_win": 0.636737865,
+  "avg_loss": 0.0,
+  "largest_win": 0.93234774,
+  "largest_loss": 0.0,
+  "max_drawdown": 0.0,
+  "sharpe_approx": 0.0,
+  "by_pair": {
+    "LINK/USDC:USDC": {
+      "count": 1,
+      "wins": 1,
+      "profit": 0.52762509,
+      "volume": 96.718,
+      "avg_profit": 0.52762509,
+      "win_rate": 100.0
+    },
+    "ADA/USDC:USDC": {
+      "count": 3,
+      "wins": 3,
+      "profit": 2.01932637,
+      "volume": 286.76557249999996,
+      "avg_profit": 0.67310879,
+      "win_rate": 100.0
+    }
+  },
+  "by_side": {
+    "LONG": {
+      "count": 3,
+      "wins": 3,
+      "profit": 2.01932637
+    },
+    "SHORT": {
+      "count": 1,
+      "wins": 1,
+      "profit": 0.52762509
+    }
+  },
+  "by_exit_reason": {
+    "roi": {
+      "count": 4,
+      "profit": 2.5469514600000003
+    }
+  },
+  "recent_trades": [
+    {
+      "pair": "LINK/USDC:USDC",
+      "side": "SHORT",
+      "profit": 0.52762509,
+      "profit_pct": 0.5456112053980082,
+      "exit_reason": "roi",
+      "close_date": "2026-05-10 11:22:46.584000"
+    },
+    {
+      "pair": "ADA/USDC:USDC",
+      "side": "LONG",
+      "profit": 0.60079242,
+      "profit_pct": 0.623565823236122,
+      "exit_reason": "roi",
+      "close_date": "2026-05-10 06:40:51.302000"
+    },
+    {
+      "pair": "ADA/USDC:USDC",
+      "side": "LONG",
+      "profit": 0.93234774,
+      "profit_pct": 0.976690521688842,
+      "exit_reason": "roi",
+      "close_date": "2026-05-10 05:24:18.625000"
+    },
+    {
+      "pair": "ADA/USDC:USDC",
+      "side": "LONG",
+      "profit": 0.48618621,
+      "profit_pct": 0.511770551359049,
+      "exit_reason": "roi",
+      "close_date": "2026-05-10 04:32:16.337000"
+    }
+  ],
+  "recommendations": [
+    "\ud83d\udfe2 Profit factor excelente (>2.0). Estrat\u00e9gia est\u00e1 bem calibrada.",
+    "\ud83d\udcc8 Par ADA/USDC:USDC \u00e9 o melhor performer ($2.02). Considerar aumentar aloca\u00e7\u00e3o."
+  ],
+  "alerts": []
+}

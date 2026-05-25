@@ -4,6 +4,17 @@ config*.json
 *.sqlite-shm
 *.sqlite-wal
 logfile.txt
+
+# Config backups (may contain wallet credentials)
+*.bak
+*.bak.*
+
+# Rotated/archived log files
+*.log.pre-restart-*
+*.log.*
+
+# Mac metadata
+._*
 user_data/*
 !user_data/strategy/sample_strategy.py
 !user_data/notebooks
