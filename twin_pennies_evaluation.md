@@ -1848,3 +1848,1166 @@ Para revisar sugestões e ajustar a estratégia, abra o Claude e peça para anal
 - ⚠️ 30× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
 
 ---
+
+## 2026-05-25 14:05 UTC
+
+**Open trades:** 3
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 54 | TON/USDC:USDC | S | $6.98 | 3x | 2.367→2.424 | -2.50% | 0.04% | 29c | 0.08 |
+| 55 | DOGE/USDC:USDC | L | $5.00 | 3x | 1.136→1.535 | -0.50% | 0.09% | 28c | 0.08 |
+| 56 | ONDO/USDC:USDC | S | $4.86 | 3x | 1.573→1.573 | 0.06% | 0.22% | 30c | 0.08 |
+
+**Cumulativo (n=52):** PnL $-1.33 | WR 31% (16W/36L) | avg $-0.026 | win $+0.346 | loss $-0.191 | dur 34.9m
+**Desde última run (n=1):** PnL $-2.71 | WR 0% (0W/1L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.05 (7 trades)
+- `ETH/USDC:USDC`: $-0.91 (9 trades)
+- `SUI/USDC:USDC`: $-0.42 (11 trades)
+- `DOGE/USDC:USDC`: $-0.32 (4 trades)
+- `TON/USDC:USDC`: $-0.15 (4 trades)
+- `SOL/USDC:USDC`: $+0.75 (8 trades)
+- `ONDO/USDC:USDC`: $+0.77 (9 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 30
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 4
+- `trailing_stop_loss`: 4
+- `unknown`: 3
+- `twin_max_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-1.33 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.05/7), ETH/USDC:USDC ($-0.91/9), SUI/USDC:USDC ($-0.42/11). Avaliar remover do `basket.pairs`.
+- ⚠️ 30× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 15:05 UTC
+
+**Open trades:** 3
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 57 | SOL/USDC:USDC | L | $41.41 | 3x | -1.351→-1.552 | 0.15% | 0.58% | 21c | 0.08 |
+| 58 | DOGE/USDC:USDC | L | $4.98 | 3x | -1.373→-1.634 | 0.55% | 0.67% | 21c | 0.08 |
+| 60 | XRP/USDC:USDC | L | $4.99 | 3x | -1.403→-1.381 | 0.11% | 0.24% | 22c | 0.08 |
+
+**Cumulativo (n=55):** PnL $-1.42 | WR 31% (17W/38L) | avg $-0.026 | win $+0.327 | loss $-0.184 | dur 34.0m
+**Desde última run (n=3):** PnL $-0.09 | WR 33% (1W/2L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.05 (7 trades)
+- `ETH/USDC:USDC`: $-0.91 (9 trades)
+- `SUI/USDC:USDC`: $-0.42 (12 trades)
+- `DOGE/USDC:USDC`: $-0.32 (4 trades)
+- `TON/USDC:USDC`: $-0.26 (5 trades)
+- `SOL/USDC:USDC`: $+0.75 (8 trades)
+- `ONDO/USDC:USDC`: $+0.80 (10 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 33
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 4
+- `trailing_stop_loss`: 4
+- `unknown`: 3
+- `twin_max_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-1.42 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.05/7), ETH/USDC:USDC ($-0.91/9), SUI/USDC:USDC ($-0.42/12). Avaliar remover do `basket.pairs`.
+- ⚠️ 33× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 16:05 UTC
+
+**Open trades:** 4
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 57 | SOL/USDC:USDC | L | $41.41 | 3x | -1.527→-1.552 | -0.23% | 0.61% | 9c | 0.08 |
+| 58 | DOGE/USDC:USDC | L | $4.98 | 3x | -1.563→-1.634 | -0.18% | 1.39% | 9c | 0.08 |
+| 60 | XRP/USDC:USDC | L | $4.99 | 3x | -1.504→-1.381 | -0.51% | 0.77% | 10c | 0.08 |
+| 64 | SUI/USDC:USDC | L | $5.00 | 3x | -1.897→-1.892 | -0.26% | 0.06% | 28c | 0.08 |
+
+**Cumulativo (n=58):** PnL $-1.62 | WR 31% (18W/40L) | avg $-0.028 | win $+0.310 | loss $-0.180 | dur 33.0m
+**Desde última run (n=3):** PnL $-0.21 | WR 33% (1W/2L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.05 (7 trades)
+- `ETH/USDC:USDC`: $-0.94 (10 trades)
+- `TON/USDC:USDC`: $-0.45 (6 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.32 (4 trades)
+- `SOL/USDC:USDC`: $+0.75 (8 trades)
+- `ONDO/USDC:USDC`: $+0.80 (10 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 35
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 5
+- `twin_time_stop`: 4
+- `unknown`: 3
+- `twin_max_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-1.62 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.05/7), ETH/USDC:USDC ($-0.94/10), TON/USDC:USDC ($-0.45/6). Avaliar remover do `basket.pairs`.
+- ⚠️ 35× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 17:05 UTC
+
+**Open trades:** 2
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 66 | ETH/USDC:USDC | L | $4.99 | 3x | -1.108→-1.425 | -0.02% | 0.08% | 28c | 0.08 |
+| 67 | SOL/USDC:USDC | L | $4.89 | 3x | -1.324→-1.498 | -0.52% | 0.00% | 28c | 0.08 |
+
+**Cumulativo (n=63):** PnL $-2.22 | WR 32% (20W/43L) | avg $-0.035 | win $+0.282 | loss $-0.183 | dur 37.9m
+**Desde última run (n=2):** PnL $-0.37 | WR 0% (0W/2L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.03 (8 trades)
+- `ETH/USDC:USDC`: $-0.94 (10 trades)
+- `TON/USDC:USDC`: $-0.69 (7 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.28 (5 trades)
+- `SOL/USDC:USDC`: $+0.46 (9 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 36
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 7
+- `trailing_stop_loss`: 6
+- `unknown`: 3
+- `twin_max_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 32% + PnL $-2.22 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.03/8), ETH/USDC:USDC ($-0.94/10), TON/USDC:USDC ($-0.69/7). Avaliar remover do `basket.pairs`.
+- ⚠️ 36× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 18:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=70):** PnL $-0.97 | WR 31% (22W/48L) | avg $-0.014 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run (n=7):** PnL $+1.25 | WR 29% (2W/5L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.62 (10 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 40
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-0.97 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 40× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 19:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=70):** PnL $-0.97 | WR 31% (22W/48L) | avg $-0.014 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.62 (10 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 40
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-0.97 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 40× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 20:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=70):** PnL $-0.97 | WR 31% (22W/48L) | avg $-0.014 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.62 (10 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 40
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 4
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-0.97 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 40× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 21:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=70):** PnL $-0.97 | WR 31% (22W/48L) | avg $-0.014 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.62 (10 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 40
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 480
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 50
+- `twin.loser_max_candles` = 7
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-0.97 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 40× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 22:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=70):** PnL $-0.97 | WR 31% (22W/48L) | avg $-0.014 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.62 (10 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 40
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 480
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 50
+- `twin.loser_max_candles` = 7
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-0.97 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 40× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-25 23:05 UTC
+
+**Open trades:** 3
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 74 | ETH/USDC:USDC | S | $6.95 | 3x | 1.171→2.243 | -0.07% | 0.48% | 44c | 0.08 |
+| 75 | XRP/USDC:USDC | S | $4.94 | 3x | 0.580→1.266 | -0.37% | 0.07% | 44c | 0.08 |
+| 76 | DOGE/USDC:USDC | S | $4.99 | 3x | 0.006→1.921 | 0.18% | 0.48% | 44c | 0.08 |
+
+**Cumulativo (n=71):** PnL $-1.12 | WR 31% (22W/49L) | avg $-0.016 | win $+0.338 | loss $-0.175 | dur 35.8m
+**Desde última run (n=1):** PnL $-0.15 | WR 0% (0W/1L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.02 (9 trades)
+- `ETH/USDC:USDC`: $-0.96 (11 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.31 (6 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+- `ONDO/USDC:USDC`: $+0.67 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 41
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 2
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 480
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 50
+- `twin.loser_max_candles` = 7
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 31% + PnL $-1.12 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.02/9), ETH/USDC:USDC ($-0.96/11), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 41× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 00:05 UTC
+
+**Open trades:** 2
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 78 | ETH/USDC:USDC | S | $6.96 | 3x | 1.541→2.032 | -0.47% | 0.00% | 45c | 0.08 |
+| 79 | ONDO/USDC:USDC | L | $4.88 | 3x | -1.377→-1.907 | -1.89% | 0.00% | 46c | 0.08 |
+
+**Cumulativo (n=75):** PnL $-1.49 | WR 29% (22W/53L) | avg $-0.020 | win $+0.338 | loss $-0.168 | dur 35.3m
+**Desde última run (n=4):** PnL $-0.37 | WR 0% (0W/4L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.06 (10 trades)
+- `ETH/USDC:USDC`: $-0.98 (12 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.33 (7 trades)
+- `ONDO/USDC:USDC`: $+0.38 (12 trades)
+- `SOL/USDC:USDC`: $+0.44 (10 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 44
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `unknown`: 3
+- `twin_max_loss`: 3
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 480
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 50
+- `twin.loser_max_candles` = 7
+- `twin.safety_stop` = -0.05
+- `twin.initial_leverage` = 3
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.49 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.06/10), ETH/USDC:USDC ($-0.98/12), SUI/USDC:USDC ($-0.41/13). Avaliar remover do `basket.pairs`.
+- ⚠️ 44× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 01:05 UTC
+
+**Open trades:** 2
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 80 | XRP/USDC:USDC | S | $40.74 | 3x | 0.825→1.246 | 0.63% | 1.19% | 20c | 0.08 |
+| 81 | DOGE/USDC:USDC | S | $4.99 | 3x | 0.784→1.102 | 2.63% | 3.01% | 20c | 0.08 |
+
+**Cumulativo (n=80):** PnL $-2.37 | WR 28% (22W/58L) | avg $-0.030 | win $+0.338 | loss $-0.169 | dur 34.5m
+**Desde última run (n=5):** PnL $-0.88 | WR 0% (0W/5L)
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.06 (10 trades)
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.33 (7 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.0833
+- `twin.initial_leverage` = 5
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 28% + PnL $-2.37 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.06/10), ETH/USDC:USDC ($-1.00/13), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 02:05 UTC
+
+**Open trades:** 2
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 80 | XRP/USDC:USDC | S | $40.74 | 3x | 0.703→1.077 | 0.84% | 1.28% | 8c | 0.08 |
+| 81 | DOGE/USDC:USDC | S | $14.91 | 3x | 0.211→0.748 | 1.61% | 2.17% | 8c | 0.08 |
+
+**Cumulativo (n=80):** PnL $-2.37 | WR 28% (22W/58L) | avg $-0.030 | win $+0.338 | loss $-0.169 | dur 34.5m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `XRP/USDC:USDC`: $-1.06 (10 trades)
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.33 (7 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `trailing_stop_loss`: 8
+- `twin_time_stop`: 7
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 28% + PnL $-2.37 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ⚠️ Pares persistindo negativos: XRP/USDC:USDC ($-1.06/10), ETH/USDC:USDC ($-1.00/13), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 03:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=82):** PnL $-1.68 | WR 29% (24W/58L) | avg $-0.020 | win $+0.339 | loss $-0.169 | dur 37.3m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.68 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 04:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=82):** PnL $-1.68 | WR 29% (24W/58L) | avg $-0.020 | win $+0.339 | loss $-0.169 | dur 37.3m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.68 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 05:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=82):** PnL $-1.68 | WR 29% (24W/58L) | avg $-0.020 | win $+0.339 | loss $-0.169 | dur 37.3m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.68 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 06:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=82):** PnL $-1.68 | WR 29% (24W/58L) | avg $-0.020 | win $+0.339 | loss $-0.169 | dur 37.3m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.68 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 07:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=82):** PnL $-1.68 | WR 29% (24W/58L) | avg $-0.020 | win $+0.339 | loss $-0.169 | dur 37.3m
+**Desde última run:** nenhum trade novo.
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `SUI/USDC:USDC`: $-0.41 (13 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+0.47 (11 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 10
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `twin_max_loss`: 5
+- `unknown`: 4
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ⚠️ Win-rate 29% + PnL $-1.68 = expectância negativa. Subir `basket.entry_z` (atual 1.2 → testar 1.5) para filtrar sinais mais extremos.
+- ℹ️ Ganho médio ($0.34) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 10× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 08:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=84):** PnL $+0.16 | WR 31% (26W/58L) | avg $+0.002 | win $+0.384 | loss $-0.169 | dur 37.0m
+**Desde última run (n=2):** PnL $+1.84 | WR 100% (2W/0L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SUI/USDC:USDC`: $-0.09 (14 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `TON/USDC:USDC`: $+1.99 (12 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 11
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.38) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 11× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 09:05 UTC
+
+**Open trades:** 0
+
+**Cumulativo (n=85):** PnL $+0.81 | WR 32% (27W/58L) | avg $+0.010 | win $+0.394 | loss $-0.169 | dur 36.7m
+**Desde última run (n=1):** PnL $+0.66 | WR 100% (1W/0L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `ONDO/USDC:USDC`: $-0.45 (15 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `SUI/USDC:USDC`: $+0.57 (15 trades)
+- `TON/USDC:USDC`: $+1.99 (12 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 45
+- `twin_winner_revert`: 12
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.39) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), XRP/USDC:USDC ($-0.57/11), ONDO/USDC:USDC ($-0.45/15). Avaliar remover do `basket.pairs`.
+- ⚠️ 45× `twin_loser_close` vs 12× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 10:05 UTC
+
+**Open trades:** 1
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 91 | ONDO/USDC:USDC | S | $7.00 | 7x | 2.248→2.241 | -3.87% | 1.33% | 28c | 0.08 |
+
+**Cumulativo (n=86):** PnL $+0.43 | WR 31% (27W/59L) | avg $+0.005 | win $+0.394 | loss $-0.173 | dur 36.5m
+**Desde última run (n=1):** PnL $-0.38 | WR 0% (0W/1L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `ONDO/USDC:USDC`: $-0.84 (16 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `SUI/USDC:USDC`: $+0.57 (15 trades)
+- `TON/USDC:USDC`: $+1.99 (12 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 46
+- `twin_winner_revert`: 12
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.39) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), ONDO/USDC:USDC ($-0.84/16), XRP/USDC:USDC ($-0.57/11). Avaliar remover do `basket.pairs`.
+- ⚠️ 46× `twin_loser_close` vs 12× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 11:05 UTC
+
+**Open trades:** 3
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 90 | DOGE/USDC:USDC | L | $52.09 | 7x | -1.126→-1.930 | -0.20% | 2.54% | 24c | 0.08 |
+| 92 | SOL/USDC:USDC | L | $2.08 | 7x | -1.186→-1.346 | -0.53% | 0.48% | 26c | 0.08 |
+| 94 | XRP/USDC:USDC | L | $2.13 | 7x | -1.357→-1.725 | 0.10% | 0.21% | 29c | 0.08 |
+
+**Cumulativo (n=88):** PnL $+0.35 | WR 31% (27W/61L) | avg $+0.004 | win $+0.394 | loss $-0.169 | dur 36.0m
+**Desde última run (n=2):** PnL $-0.08 | WR 0% (0W/2L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `ONDO/USDC:USDC`: $-0.84 (16 trades)
+- `XRP/USDC:USDC`: $-0.57 (11 trades)
+- `DOGE/USDC:USDC`: $-0.12 (8 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `SUI/USDC:USDC`: $+0.53 (16 trades)
+- `TON/USDC:USDC`: $+1.94 (13 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 48
+- `twin_winner_revert`: 12
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.39) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), ONDO/USDC:USDC ($-0.84/16), XRP/USDC:USDC ($-0.57/11). Avaliar remover do `basket.pairs`.
+- ⚠️ 48× `twin_loser_close` vs 12× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 12:05 UTC
+
+**Open trades:** 1
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 92 | SOL/USDC:USDC | L | $2.08 | 7x | 0.828→-1.346 | -3.82% | 0.48% | 14c | 0.08 |
+
+**Cumulativo (n=90):** PnL $+0.52 | WR 31% (28W/62L) | avg $+0.006 | win $+0.386 | loss $-0.166 | dur 36.1m
+**Desde última run (n=1):** PnL $-0.01 | WR 0% (0W/1L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.00 (13 trades)
+- `ONDO/USDC:USDC`: $-0.84 (16 trades)
+- `XRP/USDC:USDC`: $-0.58 (12 trades)
+- `DOGE/USDC:USDC`: $+0.06 (9 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `SUI/USDC:USDC`: $+0.53 (16 trades)
+- `TON/USDC:USDC`: $+1.94 (13 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 49
+- `twin_winner_revert`: 13
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.39) >2× perda média ($-0.17). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.00/13), ONDO/USDC:USDC ($-0.84/16), XRP/USDC:USDC ($-0.58/12). Avaliar remover do `basket.pairs`.
+- ⚠️ 49× `twin_loser_close` vs 13× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---
+
+## 2026-05-26 13:05 UTC
+
+**Open trades:** 2
+
+| ID | Pair | Side | Stake | Lev | z→entry | profit | peak | tleft | exit_z |
+|----|------|------|-------|-----|---------|--------|------|-------|--------|
+| 92 | SOL/USDC:USDC | L | $2.08 | 7x | 0.027→-1.346 | -2.86% | 0.48% | 2c | 0.08 |
+| 95 | DOGE/USDC:USDC | S | $2.14 | 7x | 0.555→1.484 | -1.56% | 2.13% | 19c | 0.08 |
+
+**Cumulativo (n=91):** PnL $+0.49 | WR 31% (28W/63L) | avg $+0.005 | win $+0.386 | loss $-0.164 | dur 35.9m
+**Desde última run (n=1):** PnL $-0.03 | WR 0% (0W/1L)
+
+**Por par (cumulativo):**
+- `ETH/USDC:USDC`: $-1.02 (14 trades)
+- `ONDO/USDC:USDC`: $-0.84 (16 trades)
+- `XRP/USDC:USDC`: $-0.58 (12 trades)
+- `DOGE/USDC:USDC`: $+0.06 (9 trades)
+- `SOL/USDC:USDC`: $+0.40 (11 trades)
+- `SUI/USDC:USDC`: $+0.53 (16 trades)
+- `TON/USDC:USDC`: $+1.94 (13 trades)
+
+**Exit reasons:**
+- `twin_loser_close`: 50
+- `twin_winner_revert`: 13
+- `twin_time_stop`: 9
+- `trailing_stop_loss`: 8
+- `unknown`: 5
+- `twin_max_loss`: 5
+- `stop_loss`: 1
+
+**Tunables atuais:**
+- `basket.entry_z` = 1.2
+- `basket.exit_z` = 0.5
+- `basket.zscore_method` = kalman
+- `zscore.zscore_window` = 288
+- `twin.winner_exit_z` = 0.08
+- `twin.max_candles` = 30
+- `twin.loser_max_candles` = 3
+- `twin.safety_stop` = -0.1167
+- `twin.initial_leverage` = 7
+- `twin.scale_stake` = 250.0
+- `twin.max_scale_times` = 1
+- `twin.z_revert_min` = 0.35
+
+**Sugestões heurísticas:**
+- ℹ️ Ganho médio ($0.39) >2× perda média ($-0.16). Reward/risk excelente — pode aumentar `twin.initial_leverage` ou `scale_stake`.
+- ⚠️ Pares persistindo negativos: ETH/USDC:USDC ($-1.02/14), ONDO/USDC:USDC ($-0.84/16), XRP/USDC:USDC ($-0.58/12). Avaliar remover do `basket.pairs`.
+- ⚠️ 50× `twin_loser_close` vs 13× `twin_winner_revert`. Mais saídas por perda que por reversão — filtro de entrada (`entry_z`) precisa apertar.
+
+---

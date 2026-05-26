@@ -1,0 +1,87 @@
+{
+    "timeframe": "5m",
+    "startup_candle_count": 900,
+    "basket": {
+        "pairs": [
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "XRP/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "SUI/USDC:USDC",
+            "ONDO/USDC:USDC",
+            "TON/USDC:USDC"
+        ],
+        "btc_ref": "BTC/USDC:USDC",
+        "entry_z": 1.5,
+        "exit_z": 0.5,
+        "zscore_method": "kalman",
+        "kalman_gain": 0.05
+    },
+    "zscore": {
+        "zscore_window": 288
+    },
+    "risk": {
+        "stoploss": -0.99
+    },
+    "btc_trend": {
+        "timeframe": "1h",
+        "pump_threshold": 1.0,
+        "dump_threshold": -1.0,
+        "high_vol_threshold": 1.0,
+        "vol_ended_threshold": 1.5,
+        "mom_period": 4,
+        "atr_period": 14,
+        "atr_z_window": 72
+    },
+    "volume": {
+        "vol_ma_window": 144,
+        "vol_ok_threshold": 1.0
+    },
+    "twin": {
+        "eval_candles": 2,
+        "max_positions": 4,
+        "initial_leverage": 7,
+        "short_leverage": 4,
+        "long_leverage": 7,
+        "winner_exit_z": 0.08,
+        "max_candles": 24,
+        "loser_max_candles": 2,
+        "safety_stop": -0.08,
+        "min_winner_profit": 0.0023,
+        "scale_stake": 250.0,
+        "max_scale_times": 1,
+        "z_revert_min": 0.30,
+        "scale_min_profit": 0.0007,
+        "cooldown_after_winner_minutes": 0,
+        "min_entry_notional": 0,
+        "require_twin_for_short": false,
+        "stale_exit_after_candles": 10,
+        "stale_z_threshold": 0.5,
+        "z_worsen_mult": 1.4,
+        "cooldown_after_n_losses": 2,
+        "cooldown_pair_minutes": 60
+    },
+    "breakout": {
+        "lookback": 24,
+        "atr_period": 14,
+        "atr_z_window": 144,
+        "min_breakout_atr_mult": 0.30,
+        "min_atr_z": 0.5,
+        "use_trend_filter": true,
+        "trend_fast": 20,
+        "trend_slow": 50,
+        "min_btc_mom": 0.3,
+        "max_candles": 36,
+        "safety_stop": -0.07,
+        "chandelier_atr_mult": 1.5,
+        "chandelier_min_profit": 0.002,
+        "invalidation_atr_buffer": 0.25,
+        "min_profit_for_invalidation": -0.005,
+        "initial_stake": 12.0,
+        "scale_stake": 250.0,
+        "max_scale_times": 0,
+        "scale_at_profit": 0.015,
+        "scale_requires_new_high": true
+    }
+}
