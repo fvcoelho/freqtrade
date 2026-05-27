@@ -44,7 +44,7 @@ from freqtrade.persistence import Trade
 from freqtrade.strategy import IStrategy
 
 from twin_pennies import btc_trend, volume, basket, config as cfg_loader
-from twin_pennies_hybrid import breakout
+from twin_pennies_hybrid import breakout, climax_retest
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +110,23 @@ class TwinPenniesHybridStrategy(IStrategy):
         self._cooldown_after_n_losses = int(tc.get("cooldown_after_n_losses", 0))
         self._cooldown_pair_minutes = float(tc.get("cooldown_pair_minutes", 0))
 
+        # Chaos-short params (Design A — trend-follow on laggards in chaos+dump)
+        cs = c.get("chaos_short", {})
+        self._cs_enabled = bool(cs.get("enabled", False))
+        self._cs_entry_z = float(cs.get("entry_z", 1.5))
+        self._cs_min_btc_mom_neg = float(cs.get("min_btc_mom_neg", -1.5))
+        self._cs_leverage = int(cs.get("leverage", 4))
+        self._cs_initial_stake = float(cs.get("initial_stake", 12.0))
+        self._cs_max_candles = int(cs.get("max_candles", 12))
+        self._cs_safety_stop = float(cs.get("safety_stop", -0.05))
+        self._cs_chandelier_atr_mult = float(cs.get("chandelier_atr_mult", 1.5))
+        self._cs_chandelier_min_profit = float(cs.get("chandelier_min_profit", 0.003))
+        self._cs_mom_flip_exit_mom = float(cs.get("mom_flip_exit_mom", 0.0))
+        self._cs_mom_flip_min_profit = float(cs.get("mom_flip_min_profit", 0.005))
+        self._cs_scale_stake = float(cs.get("scale_stake", 250.0))
+        self._cs_max_scale_times = int(cs.get("max_scale_times", 0))
+        self._cs_scale_at_profit = float(cs.get("scale_at_profit", 0.012))
+
         # Long (breakout) params
         bk = c.get("breakout", {})
         self._bk_disable_long = bool(bk.get("disable_long", False))
@@ -126,6 +143,23 @@ class TwinPenniesHybridStrategy(IStrategy):
         self._bk_max_scale_times = int(bk.get("max_scale_times", 1))
         self._bk_scale_at_profit = float(bk.get("scale_at_profit", 0.01))
         self._bk_scale_breakout_required = bool(bk.get("scale_requires_new_high", True))
+
+        # Climax-retest LONG params (V12 — Multi-TF Donchian + volume climax + retest)
+        cl = c.get("long_climax_retest", {})
+        self._cl_enabled = bool(cl.get("enabled", False))
+        self._cl_entry_tf = cl.get("entry_timeframe", "15m")
+        self._cl_regime_tf = cl.get("regime_timeframe", "1h")
+        self._cl_initial_stake = float(cl.get("initial_stake", 50.0))
+        self._cl_leverage = int(cl.get("leverage", 3))
+        self._cl_max_candles = int(cl.get("max_candles", 96))  # candles in entry TF (15m → 24h)
+        self._cl_safety_stop = float(cl.get("safety_stop", -0.07))
+        self._cl_chandelier_atr_mult = float(cl.get("chandelier_atr_mult", 2.0))
+        self._cl_chandelier_min_profit = float(cl.get("chandelier_min_profit", 0.005))
+        self._cl_sma_break_period = int(cl.get("sma_break_period", 20))  # in entry TF
+        self._cl_sma_break_confirm = int(cl.get("sma_break_confirm", 2))
+        self._cl_scale_out_at = float(cl.get("scale_out_at", 0.02))
+        self._cl_scale_out_fraction = float(cl.get("scale_out_fraction", 0.5))
+        self._cl_pending_atr: dict[str, float] = {}
 
         global _trade_state, _winner_cooldowns, _loss_streaks, _pair_cooldowns
         _trade_state = {}
@@ -158,7 +192,21 @@ class TwinPenniesHybridStrategy(IStrategy):
     def informative_pairs(self):
         pairs = self.dp.current_whitelist() if self.dp else []
         btc_tf = self._cfg.get("btc_trend", {}).get("timeframe", "1h")
-        return [(self.BTC_REF, btc_tf)]
+        info = [(self.BTC_REF, btc_tf)]
+        if self._cl_enabled:
+            # Climax-retest needs 15m + 1h per pair (and BTC 1h is already above).
+            for p in self._basket_pairs:
+                info.append((p, self._cl_entry_tf))
+                if self._cl_regime_tf != btc_tf or p != self.BTC_REF:
+                    info.append((p, self._cl_regime_tf))
+        # Dedup preserving order
+        seen = set()
+        out = []
+        for item in info:
+            if item not in seen:
+                seen.add(item)
+                out.append(item)
+        return out
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         pair = metadata["pair"]
@@ -183,6 +231,17 @@ class TwinPenniesHybridStrategy(IStrategy):
             self.timeframe, self.dp, self._df_cache, self._cfg,
         )
         breakout.compute(dataframe, self._cfg)
+
+        # Climax+retest LONG signal — runs on all pairs in long_pair_whitelist
+        # (including BTC if listed). The module itself filters by whitelist.
+        if self._cl_enabled:
+            dataframe = climax_retest.compute_entry_mask(
+                dataframe, pair, self.dp, self._cfg, self._df_cache,
+            )
+        else:
+            dataframe["cl_enter"] = 0
+            dataframe["cl_entry_level"] = pd.NA
+            dataframe["cl_entry_atr"] = pd.NA
 
         if not dataframe.empty:
             last = dataframe.iloc[-1]
@@ -252,7 +311,15 @@ class TwinPenniesHybridStrategy(IStrategy):
         dataframe["enter_short"] = 0
         dataframe["enter_tag"] = ""
 
-        if pair == self.BTC_REF or dataframe.empty:
+        if dataframe.empty:
+            return dataframe
+
+        # BTC_REF: only the climax-long branch is allowed (short basket signals
+        # use BTC as reference, not a trade-able pair).
+        if pair == self.BTC_REF:
+            if self._cl_enabled and "cl_enter" in dataframe.columns:
+                mask_climax = dataframe["cl_enter"].fillna(0).astype(int) == 1
+                dataframe.loc[mask_climax, ["enter_long", "enter_tag"]] = (1, "hybrid_long_climax")
             return dataframe
 
         vol_ok = dataframe.get("vol_ok", pd.Series(1, index=dataframe.index)) == 1
@@ -268,7 +335,15 @@ class TwinPenniesHybridStrategy(IStrategy):
             mask_short = is_leading & ~btc_pump & no_chaos & vol_ok
             dataframe.loc[mask_short, ["enter_short", "enter_tag"]] = (1, "hybrid_short_mr")
 
-        # LONG — breakout
+        # SHORT — chaos trend-follow (laggards continue down during chaos+dump)
+        if self._cs_enabled and "basket_z" in dataframe.columns:
+            chaos = dataframe.get("btc_high_vol", pd.Series(False, index=dataframe.index)).astype(bool)
+            is_lagging = dataframe["basket_z"] < -self._cs_entry_z
+            mom_dump = btc_mom < self._cs_min_btc_mom_neg
+            mask_chaos_short = is_lagging & chaos & mom_dump & vol_ok
+            dataframe.loc[mask_chaos_short, ["enter_short", "enter_tag"]] = (1, "hybrid_short_chaos")
+
+        # LONG — breakout (legacy Donchian path)
         if not self._bk_disable_long and "breakout_strong" in dataframe.columns:
             is_breakout = dataframe["breakout_strong"] == 1
             trend_up = dataframe.get("trend_up", pd.Series(1, index=dataframe.index)) == 1
@@ -277,6 +352,12 @@ class TwinPenniesHybridStrategy(IStrategy):
             atr_z_ok = atr_z >= self._bk_min_atr_z
             mask_long = is_breakout & mom_ok & trend_up & atr_z_ok & ~btc_dump & no_chaos & vol_ok
             dataframe.loc[mask_long, ["enter_long", "enter_tag"]] = (1, "hybrid_long_bk")
+
+        # LONG — climax + retest (V12, multi-TF). Indicators computed in
+        # populate_indicators on 15m and merged onto the 5m frame.
+        if self._cl_enabled and "cl_enter" in dataframe.columns:
+            mask_climax = dataframe["cl_enter"].fillna(0).astype(int) == 1
+            dataframe.loc[mask_climax, ["enter_long", "enter_tag"]] = (1, "hybrid_long_climax")
 
         return dataframe
 
@@ -381,11 +462,31 @@ class TwinPenniesHybridStrategy(IStrategy):
                 )
                 return False
 
-        kind = "breakout" if side == "long" else "mean_rev"
+        tag_l = (entry_tag or "").lower()
+        if "climax" in tag_l:
+            kind = "climax_long"
+        elif "chaos" in tag_l:
+            kind = "chaos_short"
+        elif side == "long":
+            kind = "breakout"
+        else:
+            kind = "mean_rev"
         logger.info(
             "ENTRY CONFIRM %s %s (%s) tag=%s | rate=%.5f $%.2f",
             pair, side, kind, entry_tag or "?", rate, amount * rate,
         )
+        # Capture 15m ATR snapshot for climax-long chandelier sizing. We can't
+        # bind to trade.id here (id not yet assigned), so we stash by pair and
+        # the dispatcher copies it into _trade_state at first lookup.
+        if kind == "climax_long" and self.dp:
+            df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
+            if df is not None and not df.empty and "cl_entry_atr" in df.columns:
+                last_atr = df["cl_entry_atr"].iloc[-1]
+                try:
+                    last_atr = float(last_atr)
+                except Exception:
+                    last_atr = 0.0
+                self._cl_pending_atr[pair] = last_atr
         return True
 
     # ────────────────────────── Stake ──────────────────────────
@@ -394,6 +495,17 @@ class TwinPenniesHybridStrategy(IStrategy):
                             proposed_stake: float, min_stake: Optional[float],
                             max_stake: float, leverage: float, entry_tag: Optional[str],
                             side: str, **kwargs) -> float:
+        tag = (entry_tag or "").lower()
+        if "climax" in tag:
+            stake = self._cl_initial_stake
+            if min_stake and stake < min_stake:
+                stake = min_stake
+            return min(stake, max_stake * 0.3)
+        if "chaos" in tag:
+            stake = self._cs_initial_stake
+            if min_stake and stake < min_stake:
+                stake = min_stake
+            return min(stake, max_stake * 0.3)
         if side == "long":
             stake = self._bk_initial_stake
             if min_stake and stake < min_stake:
@@ -425,7 +537,12 @@ class TwinPenniesHybridStrategy(IStrategy):
                  entry_tag: Optional[str], side: str, **kwargs) -> float:
         tc = self._cfg.get("twin", {})
         default_lev = tc.get("initial_leverage", 3)
-        if side == "short":
+        tag = (entry_tag or "").lower()
+        if "climax" in tag:
+            lev = self._cl_leverage
+        elif "chaos" in tag:
+            lev = self._cs_leverage
+        elif side == "short":
             lev = tc.get("short_leverage", default_lev)
         else:
             lev = tc.get("long_leverage", default_lev)
@@ -433,7 +550,8 @@ class TwinPenniesHybridStrategy(IStrategy):
 
     # ────────────────────────── Trade state ──────────────────────────
 
-    def _get_ts(self, trade_id: int, kind: str | None = None) -> dict:
+    def _get_ts(self, trade_id: int, kind: str | None = None,
+                trade: Trade | None = None) -> dict:
         global _trade_state
         if trade_id not in _trade_state:
             _trade_state[trade_id] = {
@@ -445,15 +563,26 @@ class TwinPenniesHybridStrategy(IStrategy):
                 "last_scale_z": None,
                 "peak_profit": 0.0,
                 "peak_price": None,
+                "scaled_out": False,
+                "cl_entry_atr": None,
             }
+            # Consume pending climax-long ATR snapshot stashed at entry confirm
+            if kind == "climax_long" and trade is not None:
+                pending = self._cl_pending_atr.pop(trade.pair, None)
+                if pending:
+                    _trade_state[trade_id]["cl_entry_atr"] = pending
         elif kind and _trade_state[trade_id].get("kind") is None:
             _trade_state[trade_id]["kind"] = kind
         return _trade_state[trade_id]
 
     def _kind_for(self, trade: Trade) -> str:
         tag = (trade.enter_tag or "").lower()
+        if "long_climax" in tag or "climax" in tag:
+            return "climax_long"
         if "long_bk" in tag or "breakout" in tag:
             return "breakout"
+        if "short_chaos" in tag or "chaos" in tag:
+            return "chaos_short"
         if "short_mr" in tag or "mean" in tag:
             return "mean_rev"
         return "breakout" if not trade.is_short else "mean_rev"
@@ -467,12 +596,18 @@ class TwinPenniesHybridStrategy(IStrategy):
                               current_entry_profit: float, current_exit_profit: float,
                               **kwargs) -> Optional[float]:
         kind = self._kind_for(trade)
-        ts = self._get_ts(trade.id, kind=kind)
+        ts = self._get_ts(trade.id, kind=kind, trade=trade)
         ts["peak_profit"] = max(ts["peak_profit"], current_profit)
 
+        if kind == "climax_long":
+            return self._adjust_climax_long(trade, current_time, current_rate,
+                                            current_profit, min_stake, max_stake, ts)
         if kind == "breakout":
             return self._adjust_breakout(trade, current_time, current_rate,
                                          current_profit, min_stake, max_stake, ts)
+        if kind == "chaos_short":
+            return self._adjust_chaos_short(trade, current_time, current_rate,
+                                            current_profit, min_stake, max_stake, ts)
         return self._adjust_mean_rev(trade, current_time, current_rate,
                                      current_profit, min_stake, max_stake, ts)
 
@@ -499,6 +634,30 @@ class TwinPenniesHybridStrategy(IStrategy):
             "BK-SCALE[%d/%d] %s | rate=%.5f profit=%.2f%% | +$%.2f",
             ts["scale_count"], self._bk_max_scale_times, trade.pair,
             current_rate, current_profit * 100, add,
+        )
+        return add
+
+    def _adjust_chaos_short(self, trade: Trade, current_time, current_rate, current_profit,
+                            min_stake, max_stake, ts) -> Optional[float]:
+        # Add only on shorts that have moved further into profit (trend continuation).
+        if not trade.is_short:
+            return None
+        if ts["scale_count"] >= self._cs_max_scale_times:
+            return None
+        if current_profit < self._cs_scale_at_profit:
+            return None
+        # Require BTC mom still confirming the dump direction
+        btc_mom = self._get_btc_mom(trade.pair, current_time)
+        if btc_mom > self._cs_min_btc_mom_neg:
+            return None
+        add = min(self._cs_scale_stake, max_stake)
+        if min_stake and add < min_stake:
+            add = min_stake
+        ts["scale_count"] += 1
+        logger.info(
+            "CS-SCALE[%d/%d] %s | rate=%.5f profit=%.2f%% btc_mom=%.2f | +$%.2f",
+            ts["scale_count"], self._cs_max_scale_times, trade.pair,
+            current_rate, current_profit * 100, btc_mom, add,
         )
         return add
 
@@ -564,9 +723,11 @@ class TwinPenniesHybridStrategy(IStrategy):
                         current_rate: float, current_profit: float,
                         after_fill: bool, **kwargs) -> float | None:
         kind = self._kind_for(trade)
-        ts = self._get_ts(trade.id, kind=kind)
+        ts = self._get_ts(trade.id, kind=kind, trade=trade)
         if kind == "breakout":
             return self._bk_safety_stop
+        if kind == "chaos_short":
+            return self._cs_safety_stop
         if not ts["evaluated"]:
             return self._safety_stop
         return self._safety_stop
@@ -576,14 +737,103 @@ class TwinPenniesHybridStrategy(IStrategy):
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs) -> Optional[str]:
         kind = self._kind_for(trade)
-        ts = self._get_ts(trade.id, kind=kind)
+        ts = self._get_ts(trade.id, kind=kind, trade=trade)
         ts["peak_profit"] = max(ts["peak_profit"], current_profit)
 
+        if kind == "climax_long":
+            return self._exit_climax_long(pair, trade, current_time, current_rate,
+                                          current_profit, ts)
         if kind == "breakout":
             return self._exit_breakout(pair, trade, current_time, current_rate,
                                        current_profit, ts)
+        if kind == "chaos_short":
+            return self._exit_chaos_short(pair, trade, current_time, current_rate,
+                                          current_profit, ts)
         return self._exit_mean_rev(pair, trade, current_time, current_rate,
                                    current_profit, ts)
+
+    def _exit_climax_long(self, pair, trade, current_time, current_rate,
+                          current_profit, ts) -> Optional[str]:
+        """Exit logic for the V12 climax+retest LONG branch.
+
+        The signal is computed on 15m; to match the standalone backtest, we run
+        the slow exits (chandelier, sma_break) ONLY when current_time aligns to
+        a 15m boundary. The safety_stop fires on every 5m bar (catches gaps).
+
+        Priority order:
+          1. safety_stop  (hard floor on profit_ratio, every 5m)
+          2. chandelier   (15m: peak_high − mult*ATR_15m, after min_profit)
+          3. sma_break    (15m: close < SMA20 for N consecutive 15m candles)
+          4. time_stop    (max_candles in entry TF, ~24h on 15m)
+        """
+        # 1. safety floor — every 5m, no boundary gating
+        if current_profit <= self._cl_safety_stop:
+            return "cl_safety_stop"
+
+        # Only run the slower exits on 15m boundaries (00, 15, 30, 45 minutes)
+        if current_time.minute % 15 != 0:
+            return None
+
+        # Track peak high since entry using the 15m frame
+        df15 = self.dp.get_pair_dataframe(pair=pair, timeframe="15m") if self.dp else None
+        if df15 is None or df15.empty:
+            return None
+
+        # peak = max high seen on 15m since entry
+        df15_since = df15[df15["date"] >= trade.open_date_utc]
+        if df15_since.empty:
+            return None
+        peak = float(df15_since["high"].max())
+        last_15m = df15_since.iloc[-1]
+        close_15m = float(last_15m["close"])
+
+        atr_15m = ts.get("cl_entry_atr") or 0.0
+
+        # 2. chandelier
+        if (current_profit >= self._cl_chandelier_min_profit
+                and atr_15m and atr_15m > 0):
+            chandelier = peak - atr_15m * self._cl_chandelier_atr_mult
+            if close_15m < chandelier:
+                return "cl_chandelier"
+
+        # 3. SMA break (15m frame, N consecutive 15m closes below SMA20)
+        sma_p = self._cl_sma_break_period
+        if len(df15_since) >= sma_p + self._cl_sma_break_confirm:
+            sma15 = df15["close"].rolling(sma_p, min_periods=sma_p).mean()
+            tail_close = df15["close"].tail(self._cl_sma_break_confirm).values
+            tail_sma = sma15.tail(self._cl_sma_break_confirm).values
+            if (
+                len(tail_sma) >= self._cl_sma_break_confirm
+                and not pd.isna(tail_sma[0])
+                and (tail_close < tail_sma).all()
+            ):
+                return "cl_sma_break"
+
+        # 4. time stop — max_candles is in entry TF (15m).
+        candles_15m = (current_time - trade.open_date_utc).total_seconds() // (15 * 60)
+        if candles_15m >= self._cl_max_candles:
+            return "cl_time_stop"
+
+        return None
+
+    def _adjust_climax_long(self, trade: Trade, current_time, current_rate, current_profit,
+                            min_stake, max_stake, ts) -> Optional[float]:
+        """Scale OUT 50% at +2% profit (one-shot). Returns negative stake to reduce."""
+        if trade.is_short:
+            return None
+        if self._cl_scale_out_fraction <= 0 or self._cl_scale_out_at <= 0:
+            return None
+        if ts.get("scaled_out"):
+            return None
+        if current_profit >= self._cl_scale_out_at:
+            ts["scaled_out"] = True
+            reduce_amount = -(trade.stake_amount * self._cl_scale_out_fraction)
+            logger.info(
+                "CL-SCALEOUT %s L | rate=%.5f profit=%.2f%% | -$%.2f",
+                trade.pair, current_rate, current_profit * 100, -reduce_amount,
+            )
+            return reduce_amount
+        return None
 
     def _exit_breakout(self, pair, trade, current_time, current_rate,
                        current_profit, ts) -> Optional[str]:
@@ -630,6 +880,51 @@ class TwinPenniesHybridStrategy(IStrategy):
                 current_rate, peak, atr_pct,
                 current_profit * 100, ts.get("peak_profit", 0) * 100, btc_mom,
                 self._bk_max_candles - trade_age,
+            )
+        return None
+
+    def _exit_chaos_short(self, pair, trade, current_time, current_rate,
+                          current_profit, ts) -> Optional[str]:
+        trade_age = (current_time - trade.open_date_utc).total_seconds() / 300
+
+        if current_profit < self._cs_safety_stop:
+            return "cs_max_loss"
+
+        # Track trough price (short trailing — lowest price since entry)
+        trough = ts.get("peak_price") or trade.open_rate
+        if current_rate < trough:
+            trough = current_rate
+            ts["peak_price"] = trough
+
+        atr = self._get_atr(pair, current_time)
+
+        # Chandelier exit for short: trough + atr_mult * ATR
+        if (current_profit >= self._cs_chandelier_min_profit
+                and atr > 0):
+            chandelier = trough + atr * self._cs_chandelier_atr_mult
+            if current_rate > chandelier:
+                return "cs_chandelier"
+
+        # Momentum-flip take-profit: BTC mom recovered AND we have profit
+        if current_profit >= self._cs_mom_flip_min_profit:
+            btc_mom = self._get_btc_mom(pair, current_time)
+            if btc_mom > self._cs_mom_flip_exit_mom:
+                return "cs_mom_flip"
+
+        # Time stop
+        if trade_age >= self._cs_max_candles:
+            return "cs_time_stop"
+
+        if trade_age > 0 and trade_age % 3 < 0.2:
+            atr_pct = (atr / current_rate * 100) if current_rate > 0 else 0
+            btc_mom = self._get_btc_mom(pair, current_time)
+            logger.info(
+                "CS-HOLD %s S[CS+S%d] @%.0fc | rate=%.5f trough=%.5f atr%%=%.2f | "
+                "profit=%.2f%% peak=%.2f%% | btc_mom=%.2f | time_left=%.0fc",
+                pair, ts.get("scale_count", 0), trade_age,
+                current_rate, trough, atr_pct,
+                current_profit * 100, ts.get("peak_profit", 0) * 100, btc_mom,
+                self._cs_max_candles - trade_age,
             )
         return None
 
@@ -708,11 +1003,11 @@ class TwinPenniesHybridStrategy(IStrategy):
                            amount: float, rate: float, time_in_force: str,
                            exit_reason: str, current_time: datetime, **kwargs) -> bool:
         kind = self._kind_for(trade)
-        ts = self._get_ts(trade.id, kind=kind)
+        ts = self._get_ts(trade.id, kind=kind, trade=trade)
         profit = trade.calc_profit_ratio(rate)
         sc = ts.get("scale_count", 0)
         scaled = f"+S{sc}" if sc > 0 else ""
-        kind_tag = "BK" if kind == "breakout" else "MR"
+        kind_tag = "BK" if kind == "breakout" else ("CS" if kind == "chaos_short" else "MR")
         logger.info(
             "CLOSE %s %s-%s[%s%s] profit=%.2f%% $%.2f lev=%.0fx | %s",
             pair, "S" if trade.is_short else "L", kind_tag,
