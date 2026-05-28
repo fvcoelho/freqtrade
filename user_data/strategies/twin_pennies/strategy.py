@@ -19,7 +19,7 @@ Flow:
 """
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 CONFIG_PATH = Path(__file__).parent.parent / "twin_pennies_config.json"
 
 _trade_state: dict[int, dict] = {}
-_winner_cooldowns: dict[tuple[str, str], datetime] = {}
 
 
 class TwinPenniesStrategy(IStrategy):
@@ -85,12 +84,8 @@ class TwinPenniesStrategy(IStrategy):
         self._z_revert_min = tc.get("z_revert_min", 0.35)
         self._scale_min_profit = tc.get("scale_min_profit", 0.0003)
 
-        self._cooldown_minutes = float(tc.get("cooldown_after_winner_minutes", 0))
-        self._min_entry_notional = float(tc.get("min_entry_notional", 0))
-
-        global _trade_state, _winner_cooldowns
+        global _trade_state
         _trade_state = {}
-        _winner_cooldowns = {}
 
         logger.info(
             "TwinPennies V4 — %d pairs, z_revert=%.2f, scale=$%.0f, "
@@ -169,7 +164,7 @@ class TwinPenniesStrategy(IStrategy):
                         ts = self._get_ts(t.id)
                         lbl = "W" if ts.get("is_winner") else ("L" if ts.get("is_winner") is False else "?")
                         sc = ts.get("scale_count", 0)
-                        age = (datetime.now(timezone.utc) - t.open_date_utc).total_seconds() / 300
+                        age = (datetime.utcnow() - t.open_date_utc).total_seconds() / 300
                         parts.append(
                             f"{t.pair.split('/')[0]}({'S' if t.is_short else 'L'})[{lbl}+S{sc}] "
                             f"p={t.calc_profit_ratio(t.close_rate or t.open_rate) * 100:+.2f}% "
@@ -269,26 +264,6 @@ class TwinPenniesStrategy(IStrategy):
         if pair in {t.pair for t in open_trades}:
             logger.info("ENTRY REJECT %s %s — already open", pair, side)
             return False
-
-        if self._cooldown_minutes > 0:
-            last_exit = _winner_cooldowns.get((pair, side))
-            if last_exit is not None:
-                elapsed_min = (current_time - last_exit).total_seconds() / 60.0
-                if elapsed_min < self._cooldown_minutes:
-                    logger.info(
-                        "ENTRY REJECT %s %s — cooldown %.0f/%.0fmin since winner",
-                        pair, side, elapsed_min, self._cooldown_minutes,
-                    )
-                    return False
-
-        if self._min_entry_notional > 0:
-            notional = amount * rate
-            if notional < self._min_entry_notional:
-                logger.info(
-                    "ENTRY REJECT %s %s — notional $%.2f < min $%.2f",
-                    pair, side, notional, self._min_entry_notional,
-                )
-                return False
 
         my_z = self._get_current_z(pair, current_time)
         entry_z = self._cfg["basket"]["entry_z"]
@@ -538,9 +513,4 @@ class TwinPenniesStrategy(IStrategy):
             pair, "S" if trade.is_short else "L", label, scaled,
             profit * 100, trade.stake_amount, trade.leverage, exit_reason,
         )
-
-        if self._cooldown_minutes > 0 and exit_reason == "twin_winner_revert":
-            side = "short" if trade.is_short else "long"
-            _winner_cooldowns[(pair, side)] = current_time
-
         return True

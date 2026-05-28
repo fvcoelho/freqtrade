@@ -59,19 +59,19 @@
         "regime_corr_min": 0.4,
         "use_ewm_corr": true,
         "ewm_span": 288,
-        "consolidation_atr_z": 0.0,
-        "consolidation_spread_max": 2.5,
-        "consolidation_btc_mom_max": 1.0,
-        "trending_btc_mom": 1.5,
-        "trending_atr_z": 1.5,
+        "consolidation_atr_z": -1.0,
+        "consolidation_spread_max": 1.5,
+        "consolidation_btc_mom_max": 0.8,
+        "trending_btc_mom": 2.0,
+        "trending_atr_z": 2.0,
         "spread_vol_filter": false,
         "spread_vol_window": 144,
         "spread_vol_max_z": 2.5
     },
     "consolidation": {
-        "consol_zscore_entry": 1.8,
-        "consol_pair_z_entry": 1.0,
-        "consol_time_stop_candles": 8,
+        "consol_zscore_entry": 99.0,
+        "consol_pair_z_entry": 99.0,
+        "consol_time_stop_candles": 12,
         "loss_cooldown_hours": 0
     },
     "btc_trend": {
@@ -92,8 +92,8 @@
         "base_multiplier": 3.0,
         "signal_aggression": 1.5,
         "signal_divisor": 10.0,
-        "min": 4.0,
-        "max": 6.0,
+        "min": 5.0,
+        "max": 8.0,
         "consol_max": 3.0,
         "btc_high_vol_max": 2.0,
         "btc_pump_dump_multiplier": 0.6,
@@ -110,15 +110,15 @@
         "warmup": {
             "gap_reset_hours": 12,
             "streak_levels": [
-                4.0,
-                4.5,
                 5.0,
                 5.5,
-                6.0
+                6.0,
+                7.0,
+                8.0
             ],
             "streak_cap": 4,
             "decay_per_excess": 0.5,
-            "lev_min": 4.0
+            "lev_min": 5.0
         }
     },
     "entry_modes": {

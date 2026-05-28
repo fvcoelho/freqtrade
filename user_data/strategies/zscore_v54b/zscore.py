@@ -66,8 +66,8 @@ def _compute_pair_zscore_for(
 
     close_s = pd.Series(other_df["close"].values)
     log_price = np.log(close_s)
-    lp_mean = log_price.rolling(window=zscore_window).mean()
-    lp_std = log_price.rolling(window=zscore_window).std()
+    lp_mean = log_price.ewm(span=zscore_window, adjust=False).mean()
+    lp_std = log_price.ewm(span=zscore_window, adjust=False).std()
     z = ((log_price - lp_mean) / lp_std.replace(0, np.nan)).fillna(0.0).values
     return z[-n:] if len(z) > n else z
 
@@ -170,8 +170,8 @@ def _compute_log_spread(
         mean_b = np.concatenate([np.full(pad, np.nan), mean_b])
 
     spread = pd.Series(mean_a - mean_b, index=dataframe.index)
-    spread_mean = spread.rolling(window=zscore_window).mean()
-    spread_std = spread.rolling(window=zscore_window).std()
+    spread_mean = spread.ewm(span=zscore_window, adjust=False).mean()
+    spread_std = spread.ewm(span=zscore_window, adjust=False).std()
     return ((spread - spread_mean) / spread_std.replace(0, np.nan)).fillna(0.0)
 
 
@@ -227,8 +227,8 @@ def compute(
         dataframe["close"] / dataframe["close"].shift(1)
     )
     log_price = np.log(dataframe["close"])
-    lp_mean = log_price.rolling(window=zscore_window).mean()
-    lp_std = log_price.rolling(window=zscore_window).std()
+    lp_mean = log_price.ewm(span=zscore_window, adjust=False).mean()
+    lp_std = log_price.ewm(span=zscore_window, adjust=False).std()
     dataframe["pair_zscore"] = (
         (log_price - lp_mean) / lp_std.replace(0, np.nan)
     ).fillna(0.0)

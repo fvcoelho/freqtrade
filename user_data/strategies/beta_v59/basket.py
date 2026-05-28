@@ -273,11 +273,12 @@ def generate_basket_entries(
     bull_threshold = basket_cfg.get("bull_mom_threshold", 0.0)
     is_bear = btc_mom < bear_threshold
     is_bull = btc_mom > bull_threshold
+    is_ranging = ~is_bull & ~is_bear
 
     no_long = dataframe["enter_long"] == 0
     no_short = dataframe["enter_short"] == 0
 
-    # Bull only: LONG the lagging pair (z << 0, behind basket)
+    # Bull: LONG the lagging pair (z << 0, behind basket)
     is_lagging = dataframe["basket_z"] < -entry_z
     mask_long = is_lagging & is_bull & safe_long & no_chaos & vol & no_long
     dataframe.loc[mask_long, ["enter_long", "enter_tag"]] = (1, "basket_long")
@@ -286,6 +287,18 @@ def generate_basket_entries(
     is_leading = dataframe["basket_z"] > entry_z
     mask_short = is_leading & is_bear & safe_short & no_chaos & vol & no_short
     dataframe.loc[mask_short, ["enter_short", "enter_tag"]] = (1, "basket_short")
+
+    # Ranging: both long and short candidates (confirm_trade_entry filters by score + balance)
+    no_long2 = dataframe["enter_long"] == 0
+    no_short2 = dataframe["enter_short"] == 0
+    ranging_long = cfg.get("queue", {}).get("ranging_long_enabled", False)
+    ranging_short = cfg.get("queue", {}).get("ranging_short_enabled", False)
+    if ranging_long:
+        mask_long_r = is_lagging & is_ranging & safe_long & no_chaos & vol & no_long2
+        dataframe.loc[mask_long_r, ["enter_long", "enter_tag"]] = (1, "basket_long")
+    if ranging_short:
+        mask_short_r = is_leading & is_ranging & safe_short & no_chaos & vol & no_short2
+        dataframe.loc[mask_short_r, ["enter_short", "enter_tag"]] = (1, "basket_short")
 
     return dataframe
 

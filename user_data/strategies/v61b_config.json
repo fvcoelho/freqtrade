@@ -119,44 +119,44 @@
     "modes": {
         "allow_long": true,
         "allow_short": true,
-        "max_long": 0,
-        "max_short": 4,
+        "max_long": 1,
+        "max_short": 3,
         "pairs": {
             "BTC/USDC:USDC": {
                 "long": false,
                 "short": false
             },
             "ETH/USDC:USDC": {
-                "long": false,
-                "short": false
+                "long": true,
+                "short": true
             },
             "SOL/USDC:USDC": {
-                "long": false,
-                "short": false
+                "long": true,
+                "short": true
             },
             "XRP/USDC:USDC": {
-                "long": false,
-                "short": false
+                "long": true,
+                "short": true
             },
             "DOGE/USDC:USDC": {
                 "long": false,
                 "short": false
             },
             "SUI/USDC:USDC": {
-                "long": false,
-                "short": false
+                "long": true,
+                "short": true
             },
             "ONDO/USDC:USDC": {
                 "long": false,
-                "short": false
+                "short": true
             },
             "HYPE/USDC:USDC": {
-                "long": false,
-                "short": false
+                "long": true,
+                "short": true
             },
             "TON/USDC:USDC": {
                 "long": false,
-                "short": false
+                "short": true
             },
             "ZEC/USDC:USDC": {
                 "long": false,

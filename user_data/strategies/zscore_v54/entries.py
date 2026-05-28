@@ -181,7 +181,10 @@ def generate(
         _mom = float(btc_mom.iloc[i])
         _atr = float(btc_atr_z.iloc[i])
         _vol = int(dataframe["vol_ok"].iloc[i]) if "vol_ok" in dataframe.columns else 0
-        _reg = int(dataframe["regime_ok"].iloc[i]) if "regime_ok" in dataframe.columns else 0
+        try:
+            _reg = int(dataframe["regime_ok"].iloc[i]) if "regime_ok" in dataframe.columns else 0
+        except (ValueError, TypeError):
+            _reg = 0
         _rng = bool(is_ranging.iloc[i])
         _trd = bool(is_trending.iloc[i])
         _side = "sub1" if is_a else "sub2" if is_b else "none"

@@ -37,13 +37,14 @@
     },
     "btc_trend": {
         "timeframe": "1h",
-        "pump_threshold": 3.0,
-        "dump_threshold": -3.0,
+        "pump_threshold": 1.5,
+        "dump_threshold": -1.5,
         "high_vol_threshold": 2.0,
         "vol_ended_threshold": 1.5,
+        "vol_bounce_spread_min": 1.5,
         "mom_period": 4,
         "atr_period": 14,
-        "atr_z_window": 72
+        "atr_z_window": 144
     },
     "volume": {
         "vol_ma_window": 144,
@@ -178,11 +179,22 @@
         }
     },
     "v64_regime": {
-        "enable_v61b_trending": true,
-        "enable_v54_ranging": false,
+        "enable_v61b_trending": false,
+        "enable_v54_ranging": true,
         "bull_threshold": 0.5,
         "bear_threshold": -0.5,
+        "ranging_groups": {
+            "A": {
+                "sub1": ["XRP/USDC:USDC"],
+                "sub2": ["SOL/USDC:USDC", "LINK/USDC:USDC"]
+            },
+            "B": {
+                "sub1": ["BTC/USDC:USDC", "SOL/USDC:USDC"],
+                "sub2": ["ETH/USDC:USDC"]
+            }
+        },
         "ranging_entry_z": 2.1,
+        "ranging_pair_z": 1.2,
         "ranging_mom_max": 2.0,
         "ranging_scalp_exit": 0.2,
         "ranging_stoploss": -0.07,
@@ -194,6 +206,25 @@
             "10": 0.01,
             "20": 0.005
         },
-        "ranging_time_stop_min": 100
+        "ranging_time_stop_min": 100,
+        "ranging_max_trades": 2,
+        "ranging_leverage": 5,
+        "ranging_entry_modes": {
+            "sub1_long": true,
+            "sub1_short": false,
+            "sub2_long": true,
+            "sub2_short": true
+        },
+        "trending_btc_mom": 2.0,
+        "trending_atr_z": 2.0,
+        "regime": {
+            "regime_window": 288,
+            "regime_corr_min": 0.4,
+            "use_ewm_corr": true,
+            "ewm_span": 288,
+            "spread_vol_filter": false,
+            "spread_vol_window": 144,
+            "spread_vol_max_z": 2.5
+        }
     }
 }

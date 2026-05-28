@@ -26,6 +26,9 @@ from freqtrade.strategy import IStrategy
 from zscore_v59 import btc_trend, volume, basket, config as cfg_loader, dca, entry_queue
 from zscore_v59.stake import DynamicStake
 from zscore_v59.state import StrategyState
+from zscore_v54b import zscore as v54_zscore
+from zscore_v54b import exits as v54_exits
+from lib import regime as regime_mod
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +64,21 @@ class ZScoreV64Strategy(IStrategy):
         self._df_cache_cycle: int = 0
         self._btc_trend: dict = {}
         self._queue_signals: dict[str, tuple] = {}
+        self._pair_zscores: dict[str, DataFrame] = {}
+        self._peak_profit: dict[str, float] = {}
+        self._pending_features: dict[str, list] = {}
+        self._trade_history: list[dict] = []
+        self._ranging_cooldown: dict[str, datetime] = {}  # per-group cooldown
+
+        # Ranging groups from config
+        rg = c.get("v64_regime", {}).get("ranging_groups", {})
+        self._ranging_groups: list[dict] = []
+        for gname, gsubs in rg.items():
+            self._ranging_groups.append({
+                "name": gname,
+                "sub1": gsubs.get("sub1", []),
+                "sub2": gsubs.get("sub2", []),
+            })
 
         run_id = f"v59_{self.timeframe}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
         self._state = StrategyState(run_id)
@@ -80,6 +98,53 @@ class ZScoreV64Strategy(IStrategy):
         entry_queue.reset()
         logger.info("V59 loaded — %d pairs, always-on queue, min_score=%.2f",
                      len(self._basket_pairs), c.get("queue", {}).get("min_score", 0.45))
+
+    def _v54_exit_cfg(self) -> dict:
+        """Build V54-compatible config for exits.check_exit."""
+        return {
+            "fast_exit": {"enabled": False},
+            "consolidation": {
+                "consol_zscore_entry": 99.0,
+                "consol_pair_z_entry": 99.0,
+                "consol_time_stop_candles": 12,
+                "loss_cooldown_hours": 0,
+            },
+            "exits": {
+                "mkt_stop_loss_threshold": -0.003,
+                "mkt_stop_regime_loss": -0.008,
+                "catastrophic_loss_threshold": -0.05,
+                "dyn_roi_high_z_min": 3.0,
+                "dyn_roi_high_z_profit": 0.015,
+                "dyn_roi_high_z_minutes": 30,
+                "dyn_roi_mid_z_min": 2.7,
+                "dyn_roi_mid_z_profit": 0.013,
+                "dyn_roi_mid_z_minutes": 20,
+                "roi_gate_high_z_minutes": 20,
+                "roi_gate_high_z_profit": 0.015,
+                "roi_gate_mid_z_minutes": 15,
+                "roi_gate_mid_z_profit": 0.013,
+            },
+            "zscore": {
+                "zscore_scalp_min_profit": 0.012,
+                "zscore_scalp_exit_threshold": 0.2,
+            },
+            "no_reversion_exit": {"enabled": False},
+            "btc_fast_exit": {"enabled": False},
+            "groups": {"btc_ref": self.BTC_REF},
+        }
+
+    def _v54_regime_cfg(self) -> dict:
+        """Build V54-compatible regime config from v64_regime section."""
+        rc = self._cfg.get("v64_regime", {}).get("regime", {})
+        return {"regime": {
+            "regime_window": rc.get("regime_window", 288),
+            "regime_corr_min": rc.get("regime_corr_min", 0.4),
+            "use_ewm_corr": rc.get("use_ewm_corr", True),
+            "ewm_span": rc.get("ewm_span", 288),
+            "spread_vol_filter": rc.get("spread_vol_filter", False),
+            "spread_vol_window": rc.get("spread_vol_window", 144),
+            "spread_vol_max_z": rc.get("spread_vol_max_z", 2.5),
+        }}
 
     def _get_pair_df(self, pair: str, timeframe: str | None = None) -> DataFrame | None:
         tf = timeframe or self.timeframe
@@ -143,59 +208,38 @@ class ZScoreV64Strategy(IStrategy):
                      weights.get("cooldown", 0.1) * cd_norm)
             dataframe["queue_score"] = score
 
-        # --- Dynamic Baskets A/B for ranging mean reversion (only when V54 ranging enabled) ---
+        # --- V54 Ranging: curated group spread z-scores + safety filters ---
         regime_cfg = self._cfg.get("v64_regime", {})
-        _v54_on = regime_cfg.get("enable_v54_ranging", False)
-        # Only pairs with "ranging" in their regime participate
-        # basket_A = ranging pairs with z > 0 (expensive)
-        # basket_B = ranging pairs with z < 0 (cheap)
-        # spread_z_ab = z-score of spread between A and B
-        if "basket_z" in dataframe.columns:
-            import pandas as pd
-            dataframe["in_basket_a"] = (dataframe["basket_z"] > 0).astype(int)
-            dataframe["in_basket_b"] = (dataframe["basket_z"] <= 0).astype(int)
+        if regime_cfg.get("enable_v54_ranging", False) and self._ranging_groups:
+            # Per-pair z-score (needed for pair_z confirmation)
+            v54_cfg = self._cfg.copy()
+            # Inject V54-compatible zscore config
+            if "cum_return_window" not in v54_cfg.get("zscore", {}):
+                v54_cfg["zscore"]["cum_return_window"] = 24
+            g0 = self._ranging_groups[0]
+            v54_zscore.compute(
+                dataframe, pair, v54_cfg, self.dp,
+                self._pair_zscores, self._df_cache,
+                g0["sub1"], g0["sub2"],
+            )
 
-            # Collect log prices of ranging pairs only
-            modes = self._cfg.get("modes", {}).get("pairs", {})
-            ranging_pairs = [p for p in self._basket_pairs
-                            if p != self.BTC_REF and "ranging" in modes.get(p, {}).get("regime", "")]
+            # Per-group spread z-score
+            for g in self._ranging_groups:
+                col = f"spread_z_{g['name'].lower()}"
+                dataframe[col] = v54_zscore.compute_group_spread_z(
+                    dataframe, pair, v54_cfg, self.dp,
+                    self._df_cache, g["sub1"], g["sub2"],
+                )
 
-            if _v54_on and len(ranging_pairs) >= 3:
-                window = self._cfg["zscore"]["zscore_window"]
-                n = len(dataframe)
-                ranging_lp = {}
+            # Regime filter (rolling correlation between sub1[0] vs sub2[0])
+            regime_mod.compute(
+                dataframe, pair, self._v54_regime_cfg(), self.dp,
+                self._df_cache, self.timeframe,
+                g0["sub1"], g0["sub2"],
+            )
 
-                for p in ranging_pairs:
-                    if p == pair:
-                        ranging_lp[p] = np.log(dataframe["close"].values)
-                    else:
-                        p_df = self._get_pair_df(p, self.timeframe)
-                        if p_df is not None and len(p_df) >= window:
-                            lp = np.log(p_df["close"].values[-n:])
-                            if len(lp) < n:
-                                lp = np.concatenate([np.full(n - len(lp), np.nan), lp])
-                            ranging_lp[p] = lp
-
-                if len(ranging_lp) >= 3:
-                    # Compute basket mean of ranging pairs
-                    lp_stack = np.column_stack(list(ranging_lp.values()))
-                    ranging_basket_mean = np.nanmean(lp_stack, axis=1)
-
-                    # Each pair's spread vs ranging basket
-                    pair_lp = ranging_lp.get(pair)
-                    if pair_lp is not None:
-                        # Normalize
-                        first_valid = next((v for v in pair_lp if not np.isnan(v)), 0.0)
-                        pair_norm = pair_lp - first_valid
-                        bm_first = next((v for v in ranging_basket_mean if not np.isnan(v)), 0.0)
-                        bm_norm = ranging_basket_mean - bm_first
-
-                        spread_r = pd.Series(pair_norm - bm_norm, index=dataframe.index)
-                        spread_r_mean = spread_r.rolling(window=window).mean()
-                        spread_r_std = spread_r.rolling(window=window).std()
-                        dataframe["spread_z_ranging"] = (
-                            (spread_r - spread_r_mean) / spread_r_std.replace(0, np.nan)
-                        ).fillna(0.0)
+            # Spread volatility filter
+            regime_mod.compute_spread_vol(dataframe, self._v54_regime_cfg())
 
         return dataframe
 
@@ -221,26 +265,81 @@ class ZScoreV64Strategy(IStrategy):
             dataframe.loc[mask_long, "enter_tag"] = "queue_long"
             dataframe.loc[mask_short, "enter_tag"] = "queue_short"
 
-        # V54: ranging entries (spread_z_ranging, only in ranging regime)
-        if v54_on and "spread_z_ranging" in dataframe.columns and "btc_mom" in dataframe.columns:
+        # V54 ranging: curated groups with full V54 safety filters
+        if v54_on and "btc_mom" in dataframe.columns:
             ranging_entry_z = regime_cfg.get("ranging_entry_z", 2.1)
+            ranging_pair_z = regime_cfg.get("ranging_pair_z", 1.2)
             ranging_mom_max = regime_cfg.get("ranging_mom_max", 2.0)
+            entry_modes = regime_cfg.get("ranging_entry_modes", {})
+            rg = regime_cfg.get("ranging_groups", {})
 
-            # Check pair has "ranging" in regime
-            modes = self._cfg.get("modes", {}).get("pairs", {})
-            pm = modes.get(pair, {})
-            if "ranging" in pm.get("regime", ""):
-                is_ranging = dataframe["btc_mom"].abs() < ranging_mom_max
-                no_long = dataframe["enter_long"] == 0
-                no_short = dataframe["enter_short"] == 0
+            # Regime classification (V54 exact: 3-way split)
+            btc_mom = dataframe["btc_mom"]
+            btc_atr_z = dataframe["btc_atr_z"] if "btc_atr_z" in dataframe.columns else 0
+            trending_btc_mom = regime_cfg.get("trending_btc_mom", 2.0)
+            trending_atr_z = regime_cfg.get("trending_atr_z", 2.0)
+            is_trending = (btc_mom.abs() > trending_btc_mom) | (btc_atr_z > trending_atr_z)
+            is_ranging = ~is_trending
 
-                # Long: pair cheap vs ranging basket (spread_z << 0)
-                long_sig = (dataframe["spread_z_ranging"] < -ranging_entry_z) & is_ranging & no_long
-                dataframe.loc[long_sig, ["enter_long", "enter_tag"]] = (1, "ranging_long")
+            # Safety filters (V54 complete set)
+            vol_ok = (dataframe["vol_ok"] == 1) if "vol_ok" in dataframe.columns else True
+            regime_ok = (dataframe["regime_ok"] == 1) if "regime_ok" in dataframe.columns else True
+            spread_vol_ok = (dataframe["spread_vol_ok"] == 1) if "spread_vol_ok" in dataframe.columns else True
+            no_chaos = ~dataframe["btc_high_vol"] if "btc_high_vol" in dataframe.columns else True
+            safe_long = (~dataframe["btc_dump"] if "btc_dump" in dataframe.columns else True) & no_chaos
+            safe_short = (~dataframe["btc_pump"] if "btc_pump" in dataframe.columns else True) & no_chaos
 
-                # Short: pair expensive vs ranging basket (spread_z >> 0)
-                short_sig = (dataframe["spread_z_ranging"] > ranging_entry_z) & is_ranging & no_short
-                dataframe.loc[short_sig, ["enter_short", "enter_tag"]] = (1, "ranging_short")
+            # Per-pair z-score confirmation
+            pair_z_long = (dataframe["pair_zscore"] < -ranging_pair_z) if "pair_zscore" in dataframe.columns else True
+            pair_z_short = (dataframe["pair_zscore"] > ranging_pair_z) if "pair_zscore" in dataframe.columns else True
+
+            no_long = dataframe["enter_long"] == 0
+            no_short = dataframe["enter_short"] == 0
+
+            base = is_ranging & vol_ok & regime_ok & spread_vol_ok
+
+            # Vol bounce: relaxed entry after volatility ends (V54 feature)
+            vol_bounce_spread_min = self._cfg.get("btc_trend", {}).get("vol_bounce_spread_min", 1.5)
+
+            for gname, gsubs in rg.items():
+                col = f"spread_z_{gname.lower()}"
+                if col not in dataframe.columns:
+                    continue
+
+                is_sub1 = pair in gsubs.get("sub1", [])
+                is_sub2 = pair in gsubs.get("sub2", [])
+                if not is_sub1 and not is_sub2:
+                    continue
+
+                spread_low = dataframe[col] < -ranging_entry_z
+                spread_high = dataframe[col] > ranging_entry_z
+
+                # Vol bounce: enter on relaxed spread after BTC volatility ends
+                if "btc_vol_ended" in dataframe.columns:
+                    vol_bounce_low = dataframe["btc_vol_ended"] & (dataframe[col] < -vol_bounce_spread_min)
+                    vol_bounce_high = dataframe["btc_vol_ended"] & (dataframe[col] > vol_bounce_spread_min)
+                    spread_low = spread_low | vol_bounce_low
+                    spread_high = spread_high | vol_bounce_high
+
+                gn = gname
+
+                # Sub1 (a): long when spread low, short when spread high
+                if is_sub1:
+                    if entry_modes.get("sub1_long", True):
+                        sig = base & spread_low & safe_long & pair_z_long & no_long
+                        dataframe.loc[sig, ["enter_long", "enter_tag"]] = (1, f"mr_long_a_{gn}")
+                    if entry_modes.get("sub1_short", False):
+                        sig = base & spread_high & safe_short & pair_z_short & no_short
+                        dataframe.loc[sig, ["enter_short", "enter_tag"]] = (1, f"mr_short_a_{gn}")
+
+                # Sub2 (b): reverse direction
+                elif is_sub2:
+                    if entry_modes.get("sub2_short", True):
+                        sig = base & spread_low & safe_short & pair_z_short & no_short
+                        dataframe.loc[sig, ["enter_short", "enter_tag"]] = (1, f"mr_short_b_{gn}")
+                    if entry_modes.get("sub2_long", True):
+                        sig = base & spread_high & safe_long & pair_z_long & no_long
+                        dataframe.loc[sig, ["enter_long", "enter_tag"]] = (1, f"mr_long_b_{gn}")
 
         return dataframe
 
@@ -251,42 +350,27 @@ class ZScoreV64Strategy(IStrategy):
                     current_rate: float, current_profit: float, **kwargs) -> Optional[str]:
         tag = trade.enter_tag or ""
 
-        # V54 ranging exits: scalp on z-revert + time stop
-        if tag.startswith("ranging_"):
-            regime_cfg = self._cfg.get("v64_regime", {})
+        # V54 ranging exits: ROI + V54 exits module
+        if tag.startswith("mr_") or tag.startswith("ranging_"):
             trade_age_min = (current_time - trade.open_date_utc).total_seconds() / 60
+            regime_cfg = self._cfg.get("v64_regime", {})
 
-            # Scalp exit: spread_z_ranging reverted past 0
-            if self.dp:
-                import pandas as pd
-                df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-                if df is not None and "spread_z_ranging" in df.columns:
-                    ct = pd.Timestamp(current_time)
-                    if df["date"].dt.tz is not None:
-                        ct = ct.tz_localize("UTC") if ct.tz is None else ct.tz_convert("UTC")
-                    mask = df["date"] <= ct
-                    if mask.any():
-                        sz = float(df["spread_z_ranging"].iloc[mask.sum() - 1])
-                        scalp_th = regime_cfg.get("ranging_scalp_exit", 0.2)
-                        # Long entered at sz<0, exit when sz > scalp_th
-                        if not trade.is_short and sz > scalp_th and current_profit > 0:
-                            return "ranging_scalp_profit"
-                        # Short entered at sz>0, exit when sz < -scalp_th
-                        if trade.is_short and sz < -scalp_th and current_profit > 0:
-                            return "ranging_scalp_profit"
-
-            # ROI escalonado (V54 style): 0min→2.5%, 3min→1.5%, 10min→1%, 20min→0.5%
+            # ROI escalonado (V54 built-in ROI replicated here)
             roi = regime_cfg.get("ranging_roi", {"0": 0.025, "3": 0.015, "10": 0.01, "20": 0.005})
             for minutes_str in sorted(roi.keys(), key=lambda x: int(x), reverse=True):
                 if trade_age_min >= int(minutes_str):
                     if current_profit >= roi[minutes_str]:
-                        return "ranging_roi"
+                        return "roi"
                     break
 
-            # Time stop (100 min)
-            if trade_age_min >= regime_cfg.get("ranging_time_stop_min", 100):
-                return "ranging_time_stop"
-            return None
+            # V54 market-aware exits (mkt_stop_regime, time_stop, z-score scalp)
+            v54_cfg = self._v54_exit_cfg()
+            result = v54_exits.check_exit(
+                pair, trade, current_time, current_rate, current_profit,
+                v54_cfg, self.dp, self._btc_trend, self._peak_profit,
+                self.timeframe, self._df_cache, self._pending_features,
+            )
+            return result
 
         # V61B queue exits: basket revert + time stop
         if tag.startswith("queue_"):
@@ -311,9 +395,17 @@ class ZScoreV64Strategy(IStrategy):
                            amount: float, rate: float, time_in_force: str,
                            exit_reason: str, current_time: datetime, **kwargs) -> bool:
         profit = trade.calc_profit_ratio(rate)
+        tag = trade.enter_tag or ""
+
+        # Set per-group cooldown on ranging loss exits
+        if tag.startswith("mr_") and exit_reason in ("stop_loss", "mkt_stop_dump", "mkt_stop_pump", "mkt_stop_chaos"):
+            from datetime import timedelta
+            group_suffix = tag.split("_")[-1]
+            self._ranging_cooldown[group_suffix] = current_time + timedelta(hours=0)
+
         self._state.record_trade(
             pair=pair, profit_ratio=profit, profit_abs=profit * trade.stake_amount,
-            leverage=trade.leverage, entry_tag=trade.enter_tag or "",
+            leverage=trade.leverage, entry_tag=tag,
             exit_reason=exit_reason, open_date=trade.open_date_utc,
             close_date=current_time, open_rate=trade.open_rate,
             close_rate=rate, is_short=trade.is_short,
@@ -324,7 +416,37 @@ class ZScoreV64Strategy(IStrategy):
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float,
                             rate: float, time_in_force: str, current_time: datetime,
                             entry_tag: Optional[str], side: str, **kwargs) -> bool:
-        """Queue gate: per-pair direction + regime filtering."""
+        """Queue gate for V61B + simple gate for V54 ranging."""
+        tag = entry_tag or ""
+
+        # V54 ranging trades: per-group limit (max 1 per group, max 2 total) + cooldown
+        if tag.startswith("mr_"):
+            open_trades = Trade.get_trades_proxy(is_open=True)
+            regime_cfg = self._cfg.get("v64_regime", {})
+            max_rg = regime_cfg.get("ranging_max_trades", 2)
+
+            # Count open ranging trades
+            rg_trades = [t for t in open_trades if (t.enter_tag or "").startswith("mr_")]
+            if len(rg_trades) >= max_rg:
+                return False
+            if pair in {t.pair for t in open_trades}:
+                return False
+
+            # Per-group limit: max 1 trade per group (V54 behavior)
+            group_suffix = tag.split("_")[-1]  # "A" or "B"
+            group_open = sum(1 for t in rg_trades
+                            if (t.enter_tag or "").endswith(f"_{group_suffix}"))
+            if group_open >= 1:
+                return False
+
+            # Per-group cooldown (set after loss exits)
+            cooldown_until = self._ranging_cooldown.get(group_suffix)
+            if cooldown_until and current_time < cooldown_until:
+                return False
+
+            return True
+
+        # V61B queue trades: full queue gate below
         modes = self._cfg.get("modes", {})
         pair_modes = modes.get("pairs", {})
         pm = pair_modes.get(pair, {"long": True, "short": True, "regime": "all"})
@@ -478,7 +600,7 @@ class ZScoreV64Strategy(IStrategy):
         tag = trade.enter_tag or ""
 
         # Ranging trades: V54-style -7% stoploss + trailing
-        if tag.startswith("ranging_"):
+        if tag.startswith("mr_") or tag.startswith("ranging_"):
             regime_cfg = self._cfg.get("v64_regime", {})
             sl = regime_cfg.get("ranging_stoploss", -0.07)
             trail = regime_cfg.get("ranging_trailing", 0.006)
@@ -513,6 +635,13 @@ class ZScoreV64Strategy(IStrategy):
         Returned as an integer — Hyperliquid only accepts integer leverage,
         and floors silently otherwise, causing DB/exchange drift.
         """
+        tag = entry_tag or ""
+
+        # Ranging trades: fixed conservative leverage (V54 style)
+        if tag.startswith("mr_") or tag.startswith("ranging_"):
+            ranging_lev = self._cfg.get("v64_regime", {}).get("ranging_leverage", 5)
+            return float(max(1, min(int(ranging_lev), int(max_leverage))))
+
         lev_cfg = self._cfg.get("leverage", {})
         type_cfg = lev_cfg.get("by_type", {})
 

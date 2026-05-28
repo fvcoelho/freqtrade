@@ -475,6 +475,11 @@ class BetaV59Strategy(IStrategy):
                 t = (abs_z - t_z_min) / (t_z_max - t_z_min)
                 lev = t_min + t * (t_max - t_min)
 
+            # Ranging regime leverage cap: easier entry but lower risk
+            ranging_cap = lev_cfg.get("ranging_leverage_cap", 0)
+            if ranging_cap and btc_mom <= 0 and btc_mom > -1.0:
+                lev = min(lev, ranging_cap)
+
             final_lev = float(max(1, min(int(lev), int(max_leverage))))
             logger.info(
                 "LEV %s %s | type=%s lev=%.0fx (raw=%.1f) | abs_z=%.3f vol=%.2f vel=%.3f btc_mom=%.3f atr_z=%.2f",
