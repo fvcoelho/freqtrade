@@ -4,8 +4,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-import numpy as np
-
 logger = logging.getLogger(__name__)
 
 

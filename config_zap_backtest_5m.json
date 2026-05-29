@@ -91,7 +91,7 @@
     },
 
     "strategy": "ZAPStrategy",
-    "strategy_path": "user_data/strategies/zap/",
+    "strategy_path": "user_data/strategies/",
     "timeframe": "5m",
 
     "zap": {

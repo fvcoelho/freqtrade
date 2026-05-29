@@ -17,12 +17,12 @@ from pandas import DataFrame
 from freqtrade.persistence import Trade
 from freqtrade.strategy import IStrategy
 
-from user_data.strategies.zap.agents.entry import EntryAgent
-from user_data.strategies.zap.agents.manager import ManagerAgent
-from user_data.strategies.zap.agents.regime import RegimeAgent
-from user_data.strategies.zap.agents.scanner import ScannerAgent
-from user_data.strategies.zap.config import load_config
-from user_data.strategies.zap.queues import QueueManager
+from zap.agents.entry import EntryAgent
+from zap.agents.manager import ManagerAgent
+from zap.agents.regime import RegimeAgent
+from zap.agents.scanner import ScannerAgent
+from zap.config import load_config
+from zap.queues import QueueManager
 
 logger = logging.getLogger(__name__)
 

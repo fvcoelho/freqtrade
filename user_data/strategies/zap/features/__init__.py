@@ -21,37 +21,37 @@ def compute_all_features(
     all_pairs = all_pairs or []
 
     try:
-        from user_data.strategies.zap.features.statistical import compute as compute_statistical
+        from zap.features.statistical import compute as compute_statistical
         df = compute_statistical(df, pair, cfg, dp, all_pairs, df_cache)
     except ImportError:
         pass
 
     try:
-        from user_data.strategies.zap.features.momentum import compute as compute_momentum
+        from zap.features.momentum import compute as compute_momentum
         df = compute_momentum(df, cfg)
     except ImportError:
         pass
 
     try:
-        from user_data.strategies.zap.features.microstructure import compute as compute_microstructure
+        from zap.features.microstructure import compute as compute_microstructure
         df = compute_microstructure(df, cfg)
     except ImportError:
         pass
 
     try:
-        from user_data.strategies.zap.features.cross_pair import compute as compute_cross_pair
+        from zap.features.cross_pair import compute as compute_cross_pair
         df = compute_cross_pair(df, pair, cfg, dp, all_pairs, df_cache)
     except ImportError:
         pass
 
     try:
-        from user_data.strategies.zap.features.volatility import compute as compute_volatility
+        from zap.features.volatility import compute as compute_volatility
         df = compute_volatility(df, cfg)
     except ImportError:
         pass
 
     try:
-        from user_data.strategies.zap.features.macro import compute as compute_macro
+        from zap.features.macro import compute as compute_macro
         df = compute_macro(df, btc_df, cfg)
     except ImportError:
         pass

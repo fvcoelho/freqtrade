@@ -5,8 +5,8 @@ import logging
 
 from pandas import DataFrame
 
-from user_data.strategies.zap.agents.regime import RegimeState
-from user_data.strategies.zap.queues import QueueManager
+from zap.agents.regime import RegimeState
+from zap.queues import QueueManager
 
 logger = logging.getLogger(__name__)
 

@@ -6,8 +6,8 @@ from typing import Any
 
 from pandas import DataFrame
 
-from user_data.strategies.zap.features import compute_all_features
-from user_data.strategies.zap.queues import QueueManager
+from zap.features import compute_all_features
+from zap.queues import QueueManager
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ScannerAgent:
     def reset_cache(self):
         """Reset df cache at start of new backtest cycle."""
         self._df_cache.clear()
-        from user_data.strategies.zap.features.statistical import reset_cache
+        from zap.features.statistical import reset_cache
         reset_cache()
 
     def update(self, df, pair, all_pairs, btc_df=None, dp=None):
