@@ -62,7 +62,7 @@ class ZAPStrategy(IStrategy):
     def informative_pairs(self):
         pairs = []
         for tf in ["5m", "1h"]:
-            pairs.append(("BTC/USDT:USDT", tf))
+            pairs.append(("BTC/USDC:USDC", tf))
         return pairs
 
     # ========== FreqAI Feature Engineering ==========
@@ -91,7 +91,7 @@ class ZAPStrategy(IStrategy):
 
         btc_df = None
         if self.dp:
-            btc_df = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="5m")
+            btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
 
         dataframe = self._scanner.update(
             df=dataframe, pair=pair, all_pairs=all_pairs,
@@ -121,7 +121,7 @@ class ZAPStrategy(IStrategy):
 
     def populate_indicators(self, dataframe, metadata):
         if self.dp:
-            btc_df = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="5m")
+            btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
             self._regime.update(btc_df)
             self._btc_df = btc_df
 

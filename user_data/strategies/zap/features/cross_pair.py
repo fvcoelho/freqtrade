@@ -92,7 +92,7 @@ def compute(
     features default to 0.0.
 
     :param df: OHLCV dataframe for the pair being featurised.
-    :param pair: Pair symbol, e.g. ``"BTC/USDT:USDT"``.
+    :param pair: Pair symbol, e.g. ``"BTC/USDC:USDC"``.
     :param cfg: Config dict (uses ``cfg["scanner"]["correlation_window"]``).
     :param dp: DataProvider instance (optional); used to pull BTC/ETH candles.
     :param all_pairs: All pairs in the universe (optional).
@@ -125,8 +125,8 @@ def compute(
                 pass
         return None
 
-    BTC = "BTC/USDT:USDT"
-    ETH = "ETH/USDT:USDT"
+    BTC = "BTC/USDC:USDC"
+    ETH = "ETH/USDC:USDC"
 
     btc_df = _get_ref_df(BTC)
     eth_df = _get_ref_df(ETH)
