@@ -26,7 +26,7 @@ ZAP_CONFIG = {
 
     "entry": {
         "top_k": 3,
-        "min_predicted_return": 0.005,
+        "min_predicted_return": 0.035,
         "cooldown_candles": 36,
         "regime_multipliers": {
             "bull_long": 1.0, "bull_short": 0.3,
@@ -36,10 +36,10 @@ ZAP_CONFIG = {
     },
 
     "manager": {
-        "stoploss": -0.10,
-        "trailing_activate": 0.02,
+        "stoploss": -0.05,
+        "trailing_activate": 0.015,
         "trailing_offset": 0.005,
-        "time_stop_candles": 48,
+        "time_stop_candles": 24,
         "dca_threshold": -0.03,
         "dca_min_predicted": 0.008,
         "dca_multipliers": [1.5, 2.5],

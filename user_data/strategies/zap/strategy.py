@@ -32,12 +32,14 @@ class ZAPStrategy(IStrategy):
 
     INTERFACE_VERSION = 3
 
-    minimal_roi = {"0": 0.10, "60": 0.05, "120": 0.02}
-    stoploss = -0.10
+    minimal_roi = {"0": 0.06, "60": 0.03, "120": 0.015}
+    stoploss = -0.035
     trailing_stop = False
     use_exit_signal = True
+    use_custom_stoploss = False
+    position_adjustment_enable = False
     process_only_new_candles = True
-    can_short = True
+    can_short = False
     startup_candle_count = 300
 
     timeframe = "5m"
@@ -168,12 +170,20 @@ class ZAPStrategy(IStrategy):
         if do_pred != 1:
             return False
 
+        # Check prediction direction matches side
+        min_pred = self._cfg.get("entry", {}).get("min_predicted_return", 0.005)
+        if side == "long" and pred < min_pred:
+            return False
+        if side == "short" and pred > -min_pred:
+            return False
+
+        # Max trades gate
         open_trades = Trade.get_trades_proxy(is_open=True)
-        return self._entry.confirm_entry(
-            pair=pair, side=side, rate=rate,
-            regime=self._regime.state, candle_idx=self._candle_idx,
-            current_open_trades=len(open_trades), current_prediction=pred,
-        )
+        max_trades = self._cfg.get("max_open_trades", 6)
+        if len(open_trades) >= max_trades:
+            return False
+
+        return True
 
     def custom_exit(self, pair, trade, current_time, current_rate, current_profit, **kwargs):
         df, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
