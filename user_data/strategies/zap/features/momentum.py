@@ -13,11 +13,9 @@ def compute(df: DataFrame, cfg: dict) -> DataFrame:
     df["%-rsi"] = ta.RSI(df, timeperiod=14)
 
     # 2-3. MACD signal + histogram
-    macd, macd_signal, macd_hist = ta.MACD(
-        df, fastperiod=12, slowperiod=26, signalperiod=9
-    )
-    df["%-macd_signal"] = macd_signal
-    df["%-macd_hist"] = macd_hist
+    macd_out = ta.MACD(df, fastperiod=12, slowperiod=26, signalperiod=9)
+    df["%-macd_signal"] = macd_out["macdsignal"]
+    df["%-macd_hist"] = macd_out["macdhist"]
 
     # 4. ADX (14)
     df["%-adx"] = ta.ADX(df, timeperiod=14)
