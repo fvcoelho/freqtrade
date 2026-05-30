@@ -92,15 +92,22 @@ class ZAPStrategy(IStrategy):
         pair = metadata["pair"]
         all_pairs = self.dp.current_whitelist() if self.dp else []
 
+        # Preserve original date dtype — scanner/features may mutate it,
+        # which breaks FreqAI's merge_informative_pair (pandas 2.3+ strict typing)
+        orig_date = dataframe["date"].copy()
+
         btc_df = None
         if self.dp:
             btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
-
 
         dataframe = self._scanner.update(
             df=dataframe, pair=pair, all_pairs=all_pairs,
             btc_df=btc_df, dp=self.dp,
         )
+
+        # Restore date column to original dtype
+        dataframe["date"] = orig_date
+
         dates = pd.to_datetime(dataframe["date"], utc=True)
         dataframe["%-day_of_week"] = dates.dt.dayofweek
         dataframe["%-hour_of_day"] = dates.dt.hour
