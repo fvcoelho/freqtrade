@@ -58,7 +58,7 @@
             "indicator_periods_candles": [
                 20
             ],
-            "DI_threshold": 2.0,
+            "DI_threshold": 0,
             "weight_factor": 0.9,
             "principal_component_analysis": false,
             "plot_feature_importances": 0
