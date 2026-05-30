@@ -96,6 +96,19 @@ class ZAPStrategy(IStrategy):
         if self.dp:
             btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
 
+            # Inject funding rate if available
+            try:
+                fr_df = self.dp.get_pair_dataframe(pair=pair, timeframe="1h")
+                if fr_df is not None and "funding_rate" in fr_df.columns and not fr_df.empty:
+                    fr = fr_df[["date", "funding_rate"]].copy()
+                    fr["date"] = pd.to_datetime(fr["date"], utc=True)
+                    dates_col = pd.to_datetime(dataframe["date"], utc=True)
+                    dataframe["funding_rate"] = dates_col.map(
+                        fr.set_index("date")["funding_rate"]
+                    ).ffill().fillna(0.0).values
+            except Exception:
+                pass
+
         dataframe = self._scanner.update(
             df=dataframe, pair=pair, all_pairs=all_pairs,
             btc_df=btc_df, dp=self.dp,

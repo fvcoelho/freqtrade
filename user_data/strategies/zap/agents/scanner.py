@@ -32,7 +32,7 @@ class ScannerAgent:
         """Compute all features for a pair.
         Caches pair df, computes features via compute_all_features, returns df with %-columns.
         """
-        self._df_cache[f"{pair}__5m"] = df
+        self._df_cache[pair] = df
 
         df = compute_all_features(
             df=df, pair=pair, cfg=self.cfg,
