@@ -32,8 +32,8 @@ class ZAPStrategy(IStrategy):
 
     INTERFACE_VERSION = 3
 
-    minimal_roi = {"0": 0.06, "60": 0.03, "120": 0.015}
-    stoploss = -0.035
+    minimal_roi = {"0": 0.15}
+    stoploss = -0.05
     trailing_stop = False
     use_exit_signal = True
     use_custom_stoploss = False
@@ -122,10 +122,38 @@ class ZAPStrategy(IStrategy):
     # ========== Freqtrade Callbacks ==========
 
     def populate_indicators(self, dataframe, metadata):
+        import talib.abstract as ta
+
         if self.dp:
             btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
             self._regime.update(btc_df)
             self._btc_df = btc_df
+
+            # Compute per-candle regime from BTC data and merge into dataframe
+            if btc_df is not None and len(btc_df) > 50:
+                btc_regime = btc_df[["date"]].copy()
+                btc_adx = ta.ADX(btc_df, timeperiod=14)
+                btc_ema21 = ta.EMA(btc_df, timeperiod=21)
+                btc_mom = ta.ROC(btc_df, timeperiod=48)
+                btc_slope = (btc_ema21 - btc_ema21.shift(3)) / (btc_ema21.shift(3) + 1e-10) * 100
+
+                # Regime: bull if momentum>0 and slope>0, bear if both<0, else ranging
+                import numpy as np
+                regime_col = np.where(
+                    btc_adx < 18, 0,  # ranging
+                    np.where(
+                        (btc_mom > 0) & (btc_slope > 0), 1,  # bull
+                        np.where(
+                            (btc_mom < 0) & (btc_slope < 0), -1,  # bear
+                            0  # ranging
+                        )
+                    )
+                )
+                btc_regime["btc_regime"] = regime_col
+                dataframe = dataframe.merge(btc_regime, on="date", how="left")
+                dataframe["btc_regime"] = dataframe["btc_regime"].fillna(0).astype(int)
+            else:
+                dataframe["btc_regime"] = 0
 
         dataframe = self.freqai.start(dataframe, metadata, self)
 
@@ -176,6 +204,16 @@ class ZAPStrategy(IStrategy):
             return False
         if side == "short" and pred > -min_pred:
             return False
+
+        # Regime filter
+        btc_regime = int(last.get("btc_regime", 0))
+        if side == "long" and btc_regime == -1:  # no longs in bear
+            return False
+        # Require higher confidence in ranging regime
+        if btc_regime == 0:  # ranging
+            min_pred_ranging = min_pred * 2
+            if side == "long" and pred < min_pred_ranging:
+                return False
 
         # Max trades gate
         open_trades = Trade.get_trades_proxy(is_open=True)

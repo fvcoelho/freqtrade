@@ -26,7 +26,7 @@ ZAP_CONFIG = {
 
     "entry": {
         "top_k": 3,
-        "min_predicted_return": 0.035,
+        "min_predicted_return": 0.005,
         "cooldown_candles": 36,
         "regime_multipliers": {
             "bull_long": 1.0, "bull_short": 0.3,
