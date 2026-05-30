@@ -92,9 +92,6 @@ class ZAPStrategy(IStrategy):
         pair = metadata["pair"]
         all_pairs = self.dp.current_whitelist() if self.dp else []
 
-        # Normalize date column to datetime UTC for FreqAI merge compatibility
-        dataframe["date"] = pd.to_datetime(dataframe["date"], utc=True)
-
         btc_df = None
         if self.dp:
             btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
@@ -103,8 +100,9 @@ class ZAPStrategy(IStrategy):
             df=dataframe, pair=pair, all_pairs=all_pairs,
             btc_df=btc_df, dp=self.dp,
         )
-        dataframe["%-day_of_week"] = dataframe["date"].dt.dayofweek
-        dataframe["%-hour_of_day"] = dataframe["date"].dt.hour
+        dates = pd.to_datetime(dataframe["date"], utc=True)
+        dataframe["%-day_of_week"] = dates.dt.dayofweek
+        dataframe["%-hour_of_day"] = dates.dt.hour
         return dataframe
 
     def set_freqai_targets(self, dataframe, metadata, **kwargs):

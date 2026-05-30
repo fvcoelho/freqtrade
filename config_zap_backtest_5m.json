@@ -46,9 +46,7 @@
         "identifier": "zap_v1",
         "feature_parameters": {
             "include_timeframes": [
-                "5m",
-                "15m",
-                "1h"
+                "5m"
             ],
             "include_corr_pairlist": [
                 "BTC/USDC:USDC",
