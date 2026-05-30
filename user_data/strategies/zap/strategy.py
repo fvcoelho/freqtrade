@@ -12,6 +12,7 @@ import logging
 from functools import reduce
 from pathlib import Path
 
+import pandas as pd
 from pandas import DataFrame
 
 from freqtrade.persistence import Trade
@@ -100,6 +101,7 @@ class ZAPStrategy(IStrategy):
             btc_df=btc_df, dp=self.dp,
         )
 
+        dataframe["date"] = pd.to_datetime(dataframe["date"])
         dataframe["%-day_of_week"] = dataframe["date"].dt.dayofweek
         dataframe["%-hour_of_day"] = dataframe["date"].dt.hour
         return dataframe
