@@ -5,7 +5,7 @@
         "leverage": {"min": 1, "max": 4},
         "entry": {
             "top_k": 3,
-            "min_predicted_return": 0.007
+            "min_predicted_return": 0.002
         }
     }
 }

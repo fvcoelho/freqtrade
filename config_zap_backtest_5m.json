@@ -90,7 +90,7 @@
         },
         "entry": {
             "top_k": 3,
-            "min_predicted_return": 0.005
+            "min_predicted_return": 0.002
         }
     }
 }
