@@ -232,7 +232,8 @@ class ZAPStrategy(IStrategy):
         last = df.iloc[-1]
         pred = float(last.get("&-s_close", 0))
         do_pred = int(last.get("do_predict", 0))
-        candles_open = (current_time - trade.open_date).total_seconds() / 300
+        open_date = trade.open_date.replace(tzinfo=current_time.tzinfo) if trade.open_date.tzinfo is None else trade.open_date
+        candles_open = (current_time - open_date).total_seconds() / 300
 
         exit_tag = self._manager.check_exit(
             pair=pair, trade=trade, current_rate=current_rate,
