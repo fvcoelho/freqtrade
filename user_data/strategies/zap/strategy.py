@@ -63,9 +63,10 @@ class ZAPStrategy(IStrategy):
         logger.info("[ZAP] Strategy initialized")
 
     def informative_pairs(self):
-        pairs = []
-        for tf in ["5m", "1h"]:
-            pairs.append(("BTC/USDC:USDC", tf))
+        pairs = [("BTC/USDC:USDC", "5m")]
+        # Stock pairs for correlation features (live/dry-run only)
+        for stock in self._STOCK_PAIRS:
+            pairs.append((stock, "5m"))
         return pairs
 
     # ========== FreqAI Feature Engineering ==========
@@ -88,18 +89,78 @@ class ZAPStrategy(IStrategy):
         dataframe["%-raw_price"] = dataframe["close"]
         return dataframe
 
+    # Stock pairs to use as features (HL perps)
+    _STOCK_PAIRS = [
+        "XYZ-NVDA/USDC:USDC",
+        "XYZ-MSTR/USDC:USDC",
+        "XYZ-COIN/USDC:USDC",
+    ]
+
+    def _add_stock_features(self, dataframe, pair):
+        """Add stock price correlation/momentum features for trading pairs.
+
+        Fetches live stock data via dp and computes rolling correlation
+        and momentum features. Defaults to 0 when data is unavailable.
+        """
+        import numpy as np
+
+        pair_ret = dataframe["close"].pct_change()
+        window = 144  # 12h rolling window
+
+        for stock in self._STOCK_PAIRS:
+            tag = stock.split("/")[0].replace("XYZ-", "").lower()
+            try:
+                sdf = self.dp.get_pair_dataframe(pair=stock, timeframe="5m")
+                if sdf is not None and len(sdf) >= 50:
+                    # Align by length
+                    stock_ret = sdf["close"].pct_change()
+                    n = len(dataframe)
+                    if len(stock_ret) >= n:
+                        stock_ret = stock_ret.iloc[-n:].reset_index(drop=True)
+                    else:
+                        pad = pd.Series(0.0, index=range(n - len(stock_ret)))
+                        stock_ret = pd.concat([pad, stock_ret.reset_index(drop=True)], ignore_index=True)
+
+                    stock_ret.index = dataframe.index
+
+                    # Rolling correlation with stock
+                    dataframe[f"%-stock_corr_{tag}"] = (
+                        pair_ret.rolling(window).corr(stock_ret).fillna(0.0)
+                    )
+                    # Stock momentum (12-candle return)
+                    dataframe[f"%-stock_mom_{tag}"] = (
+                        stock_ret.rolling(12).sum().fillna(0.0)
+                    )
+                    continue
+            except Exception:
+                pass
+
+            # Fallback: no data
+            dataframe[f"%-stock_corr_{tag}"] = 0.0
+            dataframe[f"%-stock_mom_{tag}"] = 0.0
+
+        return dataframe
+
     def feature_engineering_standard(self, dataframe, metadata, **kwargs):
         pair = metadata["pair"]
-        all_pairs = self.dp.current_whitelist() if self.dp else []
+        whitelist = self.dp.current_whitelist() if self.dp else []
 
-        btc_df = None
-        if self.dp:
-            btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
+        # Only compute custom features for trading pairs, not corr pairs.
+        if pair in whitelist:
+            all_pairs = whitelist
+            btc_df = None
+            if self.dp:
+                btc_df = self.dp.get_pair_dataframe(pair="BTC/USDC:USDC", timeframe="5m")
 
-        dataframe = self._scanner.update(
-            df=dataframe, pair=pair, all_pairs=all_pairs,
-            btc_df=btc_df, dp=self.dp,
-        )
+            dataframe = self._scanner.update(
+                df=dataframe, pair=pair, all_pairs=all_pairs,
+                btc_df=btc_df, dp=self.dp,
+            )
+
+            # Add stock correlation features (live only, defaults to 0 in backtest)
+            if self.dp:
+                dataframe = self._add_stock_features(dataframe, pair)
+
         dates = pd.to_datetime(dataframe["date"], utc=True)
         dataframe["%-day_of_week"] = dates.dt.dayofweek
         dataframe["%-hour_of_day"] = dates.dt.hour
