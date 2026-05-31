@@ -1,7 +1,25 @@
-"""Feature computation dispatcher."""
+"""Feature computation dispatcher with importance-based pruning."""
 from __future__ import annotations
 
 from pandas import DataFrame
+
+# Features to KEEP based on feature importance analysis (April 2026 backtest).
+# Everything else computed by sub-modules gets dropped to reduce noise/overfitting.
+# Top features per category (consistently >2% importance across BTC/XRP/ADA/LINK):
+KEEP_FEATURES = {
+    # statistical — coint_score is #1 for all alts
+    "%-coint_score", "%-coint_score_fast", "%-coint_score_slow", "%-log_spread",
+    # momentum
+    "%-adx", "%-macd_signal", "%-ema_slope_8", "%-ema_slope_21",
+    # volatility
+    "%-atr", "%-atr_pctile", "%-vol_weighted_vol", "%-bb_width", "%-vol_ratio_sl",
+    # microstructure
+    "%-cvd", "%-vwap_dev",
+    # cross_pair
+    "%-beta_btc", "%-beta_eth", "%-spread_vel_rank", "%-corr_rank", "%-rel_strength",
+    # macro
+    "%-btc_momentum", "%-btc_adx", "%-btc_dom_delta", "%-mkt_vol_index", "%-alt_corr_btc",
+}
 
 
 def compute_all_features(
@@ -15,7 +33,7 @@ def compute_all_features(
 ) -> DataFrame:
     """Compute all features for a single pair. Adds %-prefixed columns.
 
-    Modules are imported lazily so missing future modules don't cause failures.
+    After computation, prunes low-importance features to reduce overfitting.
     """
     df_cache = df_cache or {}
     all_pairs = all_pairs or []

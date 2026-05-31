@@ -2,10 +2,20 @@
     "zap": {
         "pairs_count": 20,
         "max_open_trades": 6,
-        "leverage": {"min": 1, "max": 4},
+        "leverage": {"min": 2, "max": 8},
         "entry": {
             "top_k": 3,
-            "min_predicted_return": 0.002
+            "min_predicted_return": 0.008,
+            "cooldown_candles": 36
+        },
+        "manager": {
+            "stoploss": -0.08,
+            "trailing_activate": 0.01,
+            "trailing_offset": 0.003,
+            "time_stop_candles": 144,
+            "dca_threshold": -0.03,
+            "dca_min_predicted": 0.008,
+            "dca_multipliers": [1.5, 2.5]
         }
     }
 }

@@ -301,10 +301,20 @@ def compute(
     df["%-hurst"] = _hurst_exponent(spread)
 
     # ------------------------------------------------------------------
-    # 6. %-coint_score  (correlation of log-price levels)
+    # 6. %-coint_score  (correlation of log-price levels, multiple windows)
     # ------------------------------------------------------------------
     roll_corr = log_price_norm.rolling(window, min_periods=window // 4).corr(basket_aligned)
     df["%-coint_score"] = roll_corr.fillna(0.0)
+
+    # Fast window (half) — captures short-term mean-reversion
+    w_fast = window // 2  # 144 candles = 12h
+    roll_corr_fast = log_price_norm.rolling(w_fast, min_periods=w_fast // 4).corr(basket_aligned)
+    df["%-coint_score_fast"] = roll_corr_fast.fillna(0.0)
+
+    # Slow window (double) — captures long-term mean-reversion
+    w_slow = window * 2  # 576 candles = 48h
+    roll_corr_slow = log_price_norm.rolling(w_slow, min_periods=w_slow // 4).corr(basket_aligned)
+    df["%-coint_score_slow"] = roll_corr_slow.fillna(0.0)
 
     # ------------------------------------------------------------------
     # 7. %-zscore_ewm

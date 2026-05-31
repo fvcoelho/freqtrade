@@ -3,11 +3,7 @@
   "startup_candle_count": 900,
   "basket": {
     "pairs": [
-      "BTC/USDC:USDC",
-      "ETH/USDC:USDC",
       "SOL/USDC:USDC",
-      "XRP/USDC:USDC",
-      "DOGE/USDC:USDC",
       "SUI/USDC:USDC",
       "ONDO/USDC:USDC",
       "TON/USDC:USDC"
@@ -40,10 +36,10 @@
   },
   "twin": {
     "eval_candles": 2,
-    "max_positions": 4,
-    "initial_leverage": 7,
-    "short_leverage": 4,
-    "long_leverage": 7,
+    "max_positions": 2,
+    "initial_leverage": 15,
+    "short_leverage": 15,
+    "long_leverage": 15,
     "winner_exit_z": 0.08,
     "max_candles": 24,
     "loser_max_candles": 2,

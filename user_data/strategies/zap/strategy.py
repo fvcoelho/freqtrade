@@ -33,7 +33,7 @@ class ZAPStrategy(IStrategy):
 
     INTERFACE_VERSION = 3
 
-    minimal_roi = {"0": 0.15}
+    minimal_roi = {"0": 0.05, "30": 0.03, "60": 0.02, "120": 0.01}
     stoploss = -0.05
     trailing_stop = False
     use_exit_signal = True
@@ -220,9 +220,14 @@ class ZAPStrategy(IStrategy):
             return False
         # Require higher confidence in ranging regime
         if btc_regime == 0:  # ranging
-            min_pred_ranging = min_pred * 2
+            min_pred_ranging = min_pred * 1.3
             if side == "long" and pred < min_pred_ranging:
                 return False
+
+        # Hour filter — block entries during historically losing hours (UTC)
+        blocked_hours = self._cfg.get("entry", {}).get("blocked_hours", [8, 9, 10, 18, 19, 20, 21])
+        if current_time.hour in blocked_hours:
+            return False
 
         # Max trades gate
         open_trades = Trade.get_trades_proxy(is_open=True)
